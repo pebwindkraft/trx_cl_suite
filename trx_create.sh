@@ -187,12 +187,19 @@ get_chksum() {
 ### Check length of provided trx characters ###
 ###############################################
 chk_trx_len() {
+  if [ $VVERBOSE -eq 1 ]; then
+    printf " check length of trx (32Bytes/64chars)"
+  fi
   if [ ${#PREV_TRX} -ne 64 ] ; then
+    echo " "
     echo "*** ERROR: expecting a proper formatted Bitcoin TRANSACTION_ID."
     echo "    Please provide a 64 bytes string (aka 32 hex chars)"
     echo "    current length: ${#PREV_TRX}, PREV_TRX:"
     echo "    $PREV_TRX"
     exit 1 
+  fi
+  if [ $VVERBOSE -eq 1 ]; then
+    printf " - yes \n" 
   fi
 }
 
@@ -220,15 +227,18 @@ chk_trx_len() {
 #  
 #
 get_trx_values() {
-  echo "./trx_2txt.sh -vv -r $RAW_TRX | grep -A7 TX_OUT[$PREV_OutPoint] > $rawtx_fn"
+  vv_output "./trx_2txt.sh -vv -r $RAW_TRX | grep -A7 TX_OUT[$PREV_OutPoint] > $rawtx_fn"
   ./trx_2txt.sh -vv -r $RAW_TRX | grep -A7 TX_OUT[[]$PREV_OutPoint[]] > $rawtx_fn
   #
   # is it better to use grep / cut / tr or a simple awk ???
+  # awk is 30% faster, and uses only half the system udn usr CPU cycles
+  #
   # PREV_Amount=$( grep -m1 bitcoin $rawtx_fn | cut -d "=" -f 4 | cut -d "," -f 1 )
-  PREV_Amount=$( awk -F "=|," '/bitcoin/ { print $6 }' $rawtx_fn )
   # STEP5_SCRIPT_LEN=$( grep -A1 -B1 pk_script $rawtx_fn | head -n1 | cut -b 7,8 )
-  STEP5_SCRIPT_LEN=$( awk -F ",|=" 'NR==5 { print $2 }' $rawtx_fn )
   # STEP6_SCRIPTSIG=$( grep -A1 -B1 pk_script $rawtx_fn | tail -n1 | tr -d "[:space:]" )
+  #
+  PREV_Amount=$( awk -F "=|," '/bitcoin/ { print $6 }' $rawtx_fn )
+  STEP5_SCRIPT_LEN=$( awk -F ",|=" 'NR==5 { print $2 }' $rawtx_fn )
   STEP6_SCRIPTSIG=$( awk '/pk_script/ { getline;print $1}' $rawtx_fn )
   RAW_TRX=''
   vv_output "   PREV_Amount=$PREV_Amount"
@@ -308,7 +318,7 @@ step3to7() {
 ### Check bitcoin address hash ###
 ##################################
 chk_bc_address_hash() {
-  echo $s | awk -f trx_verify_bc_address.awk
+  echo $s | awk -f trx_verify_bc_address.awk > /dev/null
   if [ $? -eq 1 ] ; then
     echo "*** ERROR: invalid address: $s"
     echo "    exiting gracefully ..."
@@ -429,8 +439,8 @@ else
            fi
            shift 
          fi
-         if [ $# -eq 6 ] ; then
-           RETURN_Address=$6
+         if [ $# -eq 5 ] ; then
+           RETURN_Address=$5
            shift 
          fi
          shift 
@@ -460,7 +470,7 @@ else
          PREV_PKScript=$4
          CURR_Amount=$5
          TARGET_Address=$6
-         if [ $# -eq 7 ] ; then
+         if [ $# -gt 6 ] ; then
            TRXFEE_Per_Bytes=$7
            # if length of string $7 is more then 8 chars, then it is certainly a return address
            # can't imagine trx fees of more than a bitcoin...
@@ -470,8 +480,8 @@ else
            fi
            shift
          fi
-         if [ $# -eq 8 ] ; then
-           RETURN_Address=$8
+         if [ $# -eq 7 ] ; then
+           RETURN_Address=$7
            shift
          fi
          shift 
@@ -501,7 +511,7 @@ else
          PREV_OutPoint=$3
          CURR_Amount=$4
          TARGET_Address=$5
-         if [ $# -eq 6 ] ; then
+         if [ $# -gt 5 ] ; then
            TRXFEE_Per_Bytes=$6
            # if length of string $5 is more then 8 chars, then it is certainly a return address
            # can't imagine trx fees of more than a bitcoin...
@@ -511,8 +521,8 @@ else
            fi
            shift
          fi
-         if [ $# -eq 7 ] ; then
-           RETURN_Address=$7
+         if [ $# -eq 6 ] ; then
+           RETURN_Address=$6
            shift
          fi
          shift 
@@ -544,12 +554,15 @@ fi
 #############################################
 ### Display the parameters to our program ###
 #############################################
-vv_output " PARAM_COUNT      $param_count"
-vv_output " FILENAME         $filename"
-vv_output " CURR_AMOUNT      $CURR_Amount"
-vv_output " TARGET_Address   $TARGET_Address"
-vv_output " TRXFEE_Per_Bytes $TRXFEE_Per_Bytes"
-vv_output " RETURN_Address          $RETURN_Address"
+v_output " PARAM_COUNT      $param_count"
+v_output " FILENAME         $filename"
+v_output " PREV_TRX         $PREV_TRX"
+v_output " PREV_OutPoint    $PREV_OutPoint"
+v_output " PREV_PKScript    $PREV_PKScript"
+v_output " CURR_AMOUNT      $CURR_Amount"
+v_output " TARGET_Address   $TARGET_Address"
+v_output " TRXFEE_Per_Bytes $TRXFEE_Per_Bytes"
+v_output " RETURN_Address   $RETURN_Address"
 
 # verify operating system, cause 
 # Linux wants to have "--posix" for their gawk program ...
@@ -613,12 +626,10 @@ fi
 # 4.) pass everything into the variable "RAW_TRX"
 # 
 if [ "$T_PARAM_FLAG" -eq 1 ] ; then
-  echo "###############################################"
-  echo "### Check if network is required and active ###"
-  echo "###############################################"
-  v_output "working with this TRX: $PREV_TRX"
   chk_trx_len 
-  vv_output "check 'netstat -rn' default gateway, and 'ifconfig'"
+  if [ $VVERBOSE -eq 1 ]; then
+    printf " check if network is required and active (netstat and ifconfig)"
+  fi
   if [ $OS == "Linux" ] ; then
     nw_if=$( netstat -rn | awk '/^0.0.0.0/ { print $NF }' | head -n1 )
     ifstatus $nw_if | grep -q "up"
@@ -626,27 +637,34 @@ if [ "$T_PARAM_FLAG" -eq 1 ] ; then
     nw_if=$( netstat -rn | awk '/^default/ { print $NF }' | head -n1 )
     ifconfig $nw_if | grep -q " active"
   fi
-  # check if we can reach www.blockchain.info
-  vv_output "ping to www.blockchain.info... "
+  if [ $VVERBOSE -eq 1 ]; then
+    printf " - yes \n going for this TRX: $PREV_TRX\n"
+  fi
+  if [ $VVERBOSE -eq 1 ]; then
+    printf " check if we can reach www.blockchain.info (ping)" 
+  fi
   ping -c1 www.blockchain.info > /dev/zero
   if [ $? -ne 0 ] ; then
+    echo " "
     echo "*** ERROR: www.blockchain.info not reachable"
     echo "    verify your network settings, or assemble trx manually [-m]"
     echo "    exiting gracefully ... "
     exit 1
   else
-    vv_output "... network interface is active, good"
-    vv_output "trying to fetch data from blockchain.info"
+    if [ $VVERBOSE -eq 1 ]; then
+      printf " - yes \n fetch data from blockchain.info with $http_get_cmd \n"
+    fi
     RAW_TRX=$( $http_get_cmd https://blockchain.info/de/rawtx/$PREV_TRX$RAW_TRX_LINK2HEX )
     if [ $? -ne 0 ] ; then
+      echo " "
       echo "*** ERROR: fetching RAW_TRX data:"
       echo "    $http_get_cmd https://blockchain.info/de/rawtx/$PREV_TRX$RAW_TRX_LINK2HEX"
-      echo "    downoad manually, and call 'trx2txt -r ...'"
+      echo "    downoad manually, and call 'trx_2txt -r ...'"
       exit 1
     fi
     if [ ${#RAW_TRX} -eq 0 ] ; then
       echo "*** ERROR: the raw trx has a length of 0. Something failed."
-      echo "    downoad manually, and call 'trx2txt -r ...'"
+      echo "    downoad manually, and call 'trx_2txt -r ...'"
       exit 1
     fi
   fi
@@ -667,7 +685,7 @@ trx_concatenate
 v_output "###  2. TX_IN COUNT"
 STEPCODE="01"
 if [ "$F_PARAM_FLAG" -eq 1 ] ; then
-  echo "[-f] <FILENAME>: get data from file $filename"
+  vv_output "[-f] <FILENAME>: get data from file $filename"
   if [ -f "$filename" ] ; then
     STEPCODE_decimal=$( wc -l $filename | awk '{ printf "%02d", $1 }' )
     # it is better to use awk, cause cut works only with blanks, not white space.
@@ -801,7 +819,7 @@ echo " "
 ##########################################
 
 echo "###########################################################################"
-echo "### amount(trx_in) - amount(trx_out) = TRXFEEs. Double check your math! ###"
+echo "### amount(tx_in) - amount(tx_out) = TRXFEEs. *Double check YOUR MATH!* ###"
 if [ "$T_PARAM_FLAG" -eq 1 ] ; then
   printf "### amount of trx input(s) (in Satoshis):              %16d ###\n" $PREV_Amount
   if [ $PREV_Amount -lt $CURR_Amount ] ; then
@@ -853,24 +871,30 @@ esac
 printf " ###\n" $c_trxfee
 
 if [ "$F_PARAM_FLAG" -eq 1 ] ; then
-  f_trxfee=$(( $prev_total_amount - $CURR_Amount - $c_trxfee ))
-  d_trxfee=$(( $prev_total_amount - $CURR_Amount ))
-  if [ $f_trxfee -lt 0 ] ; then
-    printf "### ATTENTION: MAXIMUM REMAINING SATOSHIS FOR TRXFEE:  %16d ###\n" $d_trxfee 
-    if [ $d_trxfee -lt 0 ] ; then
-      echo "*** ERROR: input insufficient, to cover trx fees, exiting gracefully ..." 
-      echo " "
-      exit 0
-    fi
+  f_trxfee=$(( $prev_total_amount - $CURR_Amount ))
+  d_trxfee=$(( $prev_total_amount - $CURR_Amount - $c_trxfee ))
+  if [ $d_trxfee -lt 0 ] ; then
+    printf "### Achieving negative value with this trxfee:         %16d ###\n" $d_trxfee 
+    echo "*** ERROR: input insufficient, to cover trx fees, exiting gracefully ..." 
+    echo " "
+    exit 0
   else
-    printf "### possible value to return address:                  %16d ###\n" $f_trxfee 
-    printf "### without return address, trxfee will be:            %16d ###\n" $d_trxfee 
+    printf "### *** possible value to return address:              %16d ###\n" $d_trxfee 
+    printf "### *** without return address, trxfee will be:        %16d ###\n" $f_trxfee 
   fi
 fi
-if [ "$T_PARAM_FLAG" -gt 1 ] ; then
-  if [ $PREV_Amount -gt 0 ] ; then
-    d_trxfee=$(( $PREV_Amount - $CURR_Amount - $c_trxfee ))
-    printf "### remaining delta:                                   %16d ###\n" $d_trxfee 
+
+if [ "$T_PARAM_FLAG" -eq 1 ] ; then
+  f_trxfee=$(( $PREV_Amount - $CURR_Amount ))
+  d_trxfee=$(( $PREV_Amount - $CURR_Amount - $c_trxfee ))
+  if [ $d_trxfee -lt 0 ] ; then
+    printf "### Achieving negative value with this trxfee:         %16d ###\n" $d_trxfee 
+    echo "*** ERROR: input insufficient, to cover trx fees, exiting gracefully ..." 
+    echo " "
+    exit 0
+  else
+    printf "### *** possible value to return address:              %16d ###\n" $d_trxfee 
+    printf "### *** without return address, trxfee will be:        %16d ###\n" $f_trxfee 
   fi
 fi
 
@@ -886,12 +910,13 @@ fi
 echo "###########################################################################"
 echo " "
 echo "$RAW_TRX" | tr [:upper:] [:lower:] > $urtx_fn
-echo "here we have created an unsigned raw transaction into file '$urtx_fn'. Take this "
-echo "file on a clean USB stick to the cold storage (second computer), and sign it there ..."
+echo "*** DOUBLE CHECK YOUR MATH! *** "
+echo "File '$urtx_fn' contains the unsigned raw transaction. If *YOUR MATH*"
+echo "is ok, then take this file on a clean USB stick to the cold storage"
+echo "(second computer), and sign it there."
 echo " "
 echo "you may check output with:"
-echo " ./trx_2txt.sh -vv -u $RAW_TRX" | tr [:upper:] [:lower:] 
-# echo "###########################################################################"
+echo "./trx_2txt.sh -vv -u $RAW_TRX" | tr [:upper:] [:lower:] 
 echo " "
 
 ################################

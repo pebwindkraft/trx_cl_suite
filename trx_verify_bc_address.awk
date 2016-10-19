@@ -48,7 +48,8 @@ if (length($0) == "33" || length($0) == "34" || length($0) == "51" || length($0)
     }
   if ( found == 1 )
     {
-    # printf "found valid bitcoin string \n"
+    # printf "found valid bitcoin string"
+    printf "\n" 
     exit 0
     }
   else

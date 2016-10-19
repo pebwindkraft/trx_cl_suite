@@ -1,0 +1,16 @@
+# CHANGELOG 
+# all updates and changes to trx_tool suite
+#
+# help and references:
+# https://blockchain.info/de/rawtx/<trx number>?format=hex
+# https://en.bitcoin.it/wiki/Protocol_specification#tx
+#
+# 
+date    by    file                   comment
+yymmmdd
+16sep12 svn   all :-)                initial release
+16sep12 svn   all                    created a new version out of trx2txt, cause it is more
+                                     than simply trx to txt. It became a complete tool suite
+                                     "trx2txt" suite is discontinued with this release.
+
+
