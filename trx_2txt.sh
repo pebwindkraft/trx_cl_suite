@@ -94,6 +94,26 @@ vv_output() {
   fi
 }
 
+##########################################
+# procedure to check for necessary tools #
+##########################################
+check_tool() {
+  if [ $VVERBOSE -eq 1 ]; then
+    printf " %-8s" $1
+  fi
+  which $1 > /dev/null
+  if [ $? -eq 0 ]; then
+    if [ $VVERBOSE -eq 1 ]; then
+      printf " - yes \n"
+    fi
+  else
+    printf " \n"
+    echo "*** ERROR: $1 not found, please install $1."
+    echo "exiting gracefully ..."
+    exit 0
+  fi
+}
+
 #################################################
 # procedure to reverse a hex data string        #
 #################################################
@@ -174,10 +194,9 @@ decode_pkscript() {
     fi
 }
 
-echo "#################################################################"
-echo "### trx2txt.sh: script to de-serialize/decode a Bitcoin trx   ###"
-echo "#################################################################"
-echo "  "
+echo "##################################################################"
+echo "### trx_2txt.sh: script to de-serialize/decode a Bitcoin trx   ###"
+echo "##################################################################"
 
 ################################
 # command line params handling #
@@ -290,65 +309,15 @@ if [ $OS == "Linux" ] ; then
   http_get_cmd="curl -sS -L "
 fi
 
-v_output "#########################################"
-v_output "### Check if necessay tools are there ###"
-v_output "#########################################"
-vv_output "a.) awk ?"
-which awk > /dev/null
-if [ $? -eq 0 ]; then
-  vv_output "    yes" 
-else
-  echo "*** awk not found, please install awk."
-  echo "exiting gracefully ..." 
-  exit 0
-fi
-
-vv_output "b.) openssl ?" 
-which openssl > /dev/null
-if [ $? -eq 0 ]; then
-  vv_output "    yes"
-else
-  echo "openssl not found, please install openssl."
-  echo "the tool can be used, but the option '-vv' will not work."
-fi
-
-vv_output "c.) bc ?"
-which bc > /dev/null
-if [ $? -eq 0 ]; then
-  vv_output "    yes" 
-else
-  echo "*** bc not found, please install bc."
-  echo "exiting gracefully ..." 
-  exit 0
-fi
-
-vv_output "d.) tr ?"
-which tr > /dev/null
-if [ $? -eq 0 ]; then
-  vv_output "    yes" 
-else
-  echo "*** tr not found, please install tr."
-  echo "exiting gracefully ..." 
-  exit 0
-fi
-
-vv_output "e.) dc ?"
-which dc > /dev/null
-if [ $? -eq 0 ]; then
-  vv_output "    yes" 
-else
-  echo "dc not found, please install dc."
-  echo "the tool can be used, but the option '-vv' will not work."
-fi
-
-vv_output "f.) sed ?"
-which sed > /dev/null
-if [ $? -eq 0 ]; then
-  vv_output "    yes" 
-else
-  echo "sed not found, please install sed."
-  echo "the tool can be used, but the option '-vv' will not work."
-fi
+vv_output "##########################################"
+vv_output "### Check if necessary tools are there ###"
+vv_output "##########################################"
+check_tool awk
+check_tool bc
+check_tool dc
+check_tool openssl 
+check_tool sed
+check_tool tr
 
 ###############################################
 ### Check if network is required and active ###

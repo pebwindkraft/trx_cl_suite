@@ -1,0 +1,198 @@
+#####################################
+### Issues / errors in processing ###
+#####################################
+
+I9: 14jul16 svn:
+==================
+trx_create_sign.sh: base58decoding: need to extract beginning "1"s and count them...
+#maybe like this:  /^(1*)/
+
+  ########################################
+  ### Some explanations on leading zeros #
+  ########################################
+  1. Convert each leading "one" to a single byte of value 0
+  2. Convert the remaining digits from base58 to hex
+  3. The result should be exactly 25 bytes long, if not you have an invalid address.
+  4. Make sure that leading byte is either 0 or 5, if not you have an invalid address.
+  5. Remove the trailing 4 bytes, leaving you with a 21 byte hex value.
+  6. Calculate SHA256(SHA256()) on the 21 bytes.
+  7. Make sure the first 4 bytes of step 6 are equal to the 4 bytes removed in step 5,
+     if not you have an invalid address.
+  (programmatically, you may find it easier to reverse the order of the first two steps)
+  
+  Lets walk through the steps and see what happens:
+  
+  Starting with an RIPEMD-160 hash of 20 bytes that are all 0's...
+  0000000000000000000000000000000000000000
+  
+  Add a version byte in front (in the case of a P2PKH address, that would be a byte with value 0).
+  000000000000000000000000000000000000000000
+  
+  Now we have 21 bytes that are all 0's.
+  Calculate a checksum on this value:
+  SHA256(SHA256(000000000000000000000000000000000000000000)) = 
+  94a00911c4da27f9271727ffa7a14d8d5588fc0fff9964340ec4065f387e622b
+  
+  Append the first 4 bytes (8 characters) of the checksum to the RIPEMD-160 hash with version byte:
+  00000000000000000000000000000000000000000094a00911
+  
+  Temporarily ignore leading zero bytes:
+  94a00911
+  
+  Convert the value from hex to base58:
+  0x94a00911 =
+  4oLvT2 (base 58)
+  
+  Each LEADING 00 BYTE is replaced with a single 1:
+  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  
+  Concatenate 21 ones with 6 base58 digits:
+  1111111111111111111114oLvT2
+  
+  21 "ones" plus 6 base58 digits = 27 characters
+  
+  #################################################################
+  
+  Now lets try the same with 19 zeros and a bytes with value 1...
+  0000000000000000000000000000000000000001
+  
+  Add a version byte in front (in the case of a P2PKH address, that would be a byte with value 0).
+  000000000000000000000000000000000000000001
+  
+  Now we have 20 bytes that are all 0's, followed by a byte that is represented in hex as "01"
+  Calculate a checksum on this value:
+  SHA256(SHA256(000000000000000000000000000000000000000001)) = 
+  9d35b5b9d5befcf2d6b89994f7f64279b0645d5d4a5f1a6fa2dcc615bbed04ef
+  
+  Append the first 4 bytes (8 characters) of the checksum to the RIPEMD-160 hash with version byte:
+  0000000000000000000000000000000000000000019d35b5b9
+  
+  Temporarily ignore leading zero bytes:
+  019d35b5b9
+  
+  Convert the value from hex to base58:
+  0x019d35b5b9 =
+  BZbvjr (base 58)
+  
+  Each LEADING 00 BYTE is replaced with a single 1:
+  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+   1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  
+  Concatenate 20 ones with 6 base58 digits:
+  111111111111111111111BZbvjr
+  
+  20 "ones" plus 6 base58 digits = 26 characters
+  
+   notice that the number of leading 0 bytes was decreased by 1 because the last 
+   byte was now a 01, however the number of base58 digits didn't increase since 
+   both 0x94a00911 and 0x019d35b5b9 can be represented with 6 base58 digits 
+   (4oLvT2 and BZbvjr respectively).
+  
+
+I10: 18jul16 svn:
+==================
+testcases_trx2txt.sh: testcase 20 fails on OpenBSD, cause parameter buffer is only 2048 Bytes
+
+I14: 30jul16, svn:
+==================
+try cold storage with this: 1JmPRD_unspent.txt
+
+I16: 31jul16, svn:
+==================
+testcases_trx_2txt.sh: testcase 9 on OpenBSD failes this way:
+need to take care for buffering input?
+TESTCASE 9c: 
+cut: [-bcf] list: 2072 too large (max 2048)
+cut: [-bcf] list: 2080 too large (max 2048)
+cut: [-bcf] list: 2082 too large (max 2048)
+...
+
+I19: 09Oct2016, svn:
+====================
+I think the maximum size of a trx is 100 kb. How many trx does that make? 
+How can this be implemented?
+--> minimum signature is ~50 Bytes, prev trx = 32 Bytes + PKScript 20 Bytes plus, plus, plus... so a minimum trx is roughly 227 Bytes. This would limit to ~440 particular trx? And if a trx has many inputs and many outputs?
+
+I22: 12Oct2016, svn:
+====================
+trx_create.sh - testcase 6: wenn er doch ins Netz geht, und die TRX mit '-t' holt,
+kann er auch gleich checken, ob genug "input Satoshis" da sind, um den Transferbetrag und die TRXFEE zu bezahlen...
+
+I23: 13Oct2016, svn:
+====================
+trx_in_sig_script - when verifying the below signature of a multisig, then some errors appear:
+
+./trx_in_sig_script.sh 47304402200cf183787d2f7ef387e14046e7f38d9442b316d690b3116da6c60d4b8d1bb5430220301693ba31b5aad8d7542a673e6b96f4830152ec6d26f3a8bf1d3776f39de51d014830450221009cd1c1b3e1ec93cd5852b42fa56b6af706a09b00e056d1fd1313fab423bb794302201327347f6c9bc8106dca4eb84de36bd242f0970388ab7cd586e1843b84b045200147522102309d6a9d97a3e814247d471ddc2c476c046f9c07d98079d861e34479c19497ea2103c511b8fe3a5e60ad16bb14b0865f8a3f192ddb386c4f8d23f72edd24764e0e2352ae
+...
+    01: OP_SIGHASHALL:    *** This terminates the ECDSA signature (ASN1-DER structure)
+*** ERROR: script sig verification:  
+    scriptsig len (286) incorrect, expected is:
+    18 < scriptsig_len < 146
+    exiting gracefully ... 
+
+a single signed trx has length of 146, but with multisig there can be many signatures, making it longer. So need to count the amount of sigs, and multiply 146 with it, to define max_sig_length?
+
+I24: 14Oct2016, svn:
+====================
+trx_create.sh - trxfee calculation:
+# trx fees are calculated  with a trx fee per byte, which is changing...
+# currently in Sep 2016 it is roughly 50 Satoshis per Byte. Exact length can only
+# be determined during signing process, but here is a rough calc: each input
+# requires later on a signature (length=70 Bytes/140 chars), which replaces
+# the existing PKSCRIPT (length 25 Bytes, 50 chars). Each input must be signed,
+# so roughly 90 chars signature are added. Normal 1 input one output P2PKH trx are
+# roughly 227 Bytes ... THIS NEEDS FURTHER ANALYSIS !!!
+--> need to get empirical data to improve math calculation, P2PKH is min 227 bytes, but P2SH can be much longer, and when SegWit and MerkleTrees come in, even much shorter.
+--> when multi-input transactions are used, is the 50Satoshi/Bytes calc still true? What would a reasonable trxfee, if trx is 1000 Bytes?
+
+I25: 17Oct2016, svn:
+====================
+if network is "on", then get the average last trx fee as proposal in the system... 
+wget --no-check-certificate https://bitcoinfees.21.co/api/v1/fees/list
+awk 'BEGIN { RS="},{"; OFS="\n" } { print $1 }' list | grep \"minDelay\":0,\"maxDelay\":0 | head -n1
+
+or look here: https://blockchain.info/de/stats or https://api.blockchain.info/stats
+divide total trx costs by amount of trx?
+"total_fees_btc":7571592387
+"n_tx":245576
+= ~30000 Satoshis
+
+I26: 19Oct2016, svn:
+====================
+start to think about a config file, having default values like:
+min_trxfee=50
+max_trx_size=100 # kilobytes
+...
+
+I27: 19Oct2016, svn:
+====================
+trx_create.sh: when a return address is gien, then I should have to TX_OUTs. 
+But there is only one...
+
+
+
+#####################################
+### Extensions / new Requirements ###
+#####################################
+E1: Testnet
+===============
+can it be extended for usage in testnet?
+
+E2: MultiSig
+===============
+For important values: make use of a 2of3 multisig with one in cold storage
+generate 3 addresses (and 3 private keys) A, B & C... and 
+create 1 multisig address (D) using those 3 in a 2-of-3 configuration
+
+the multisig address starts with a "3", all the others (A,B & C) should be "1". 
+send funds into the multisig address D (starts with a "3")... 
+make sure all the private keys for your A, B & C addresses are all backed up/stored independently of each other. 
+to take funds out of D, create a transaction using one of A,B or C.. and then co-sign the transaction using one of the other addresses.
+
+E3: Sending
+===============
+can a signed trx be sent to the net without tools?
+--> https://bitcointalk.org/index.php?topic=1043518.0
+curl -X POST -d tx=010000000158891e8f28100642464417f53845c3953a43e31b35d061bdbf6ca3a64fffabb8000000008c493046022100a9d501a6f59c45a24e65e5030903cfd80ba33910f24d6a505961d64fa5042b4f02210089fa7cc00ab2b5fc15499fa259a057e6d0911d4e849f1720cc6bc58e941fe7e20141041a2756dd506e45a1142c7f7f03ae9d3d9954f8543f4c3ca56f025df66f1afcba6086cec8d4135cbb5f5f1d731f25ba0884fc06945c9bbf69b9b543ca91866e79ffffffff01204e0000000000001976a914d04b020dab70a7dd7055db3bbc70d27c1b25a99c88ac00000000 https://blockchain.info/pushtx
+
