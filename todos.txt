@@ -165,10 +165,8 @@ min_trxfee=50
 max_trx_size=100 # kilobytes
 ...
 
-I27: 19Oct2016, svn:
+I27: xxOct2016, svn:
 ====================
-trx_create.sh: when a return address is gien, then I should have to TX_OUTs. 
-But there is only one...
 
 
 
