@@ -44,7 +44,8 @@ typeset -i trxfee=0
 typeset -i c_trxfee=0            # calculated trx fee
 typeset -i d_trxfee=0            # delta trx fee
 typeset -i f_trxfee=0            # file trx fee
-typeset -i CURR_Amount=0
+typeset -i Amount=0
+typeset -i TRX_Amount=0
 typeset -i PREV_Amount=0
 typeset -i F_PARAM_FLAG=0
 typeset -i M_PARAM_FLAG=0
@@ -254,66 +255,6 @@ get_trx_values() {
   fi
 }
 
-step3to7() {
-  ##############################################################################
-  ### STEP 3 - TX_IN, previous transaction hash: 32hex = 64 chars            ###
-  ##############################################################################
-  v_output "###  3. TX_IN, previous transaction hash"
-  vv_output "###     org trx:  $PREV_TRX"
-  STEPCODE=$( reverse_hex $PREV_TRX )
-  vv_output "###     reversed: $STEPCODE"
-  trx_concatenate
-  
-  ##############################################################################
-  ### STEP 4 - TX_IN, the output index we want to redeem from                ###
-  ##############################################################################
-  v_output "###  4. TX_IN, the output index we want to redeem from"
-  STEPCODE=$( echo "obase=16;$PREV_OutPoint"|bc -l)
-  STEPCODE=$( zero_pad $STEPCODE 8 )
-  STEPCODE=$( reverse_hex $STEPCODE )
-  vv_output "###            convert from $PREV_OutPoint to reversed hex: $STEPCODE"
-  trx_concatenate
-  
-  ##############################################################################
-  ### STEP 5 - TX_IN, scriptsig length: first hex Byte is length (2 chars)   ###
-  ##############################################################################
-  # For the purpose of signing the transaction, this is temporarily filled 
-  # with the scriptPubKey of the output we want to redeem. 
-  v_output "###  5. TX_IN, scriptsig length"
-  if [ $T_PARAM_FLAG -eq 0 ] ; then
-    STEPCODE=${#PREV_PKScript}
-    STEPCODE=$(( $STEPCODE / 2 ))
-    STEPCODE=$( echo "obase=16;$STEPCODE"|bc ) 
-  else
-    vv_output "STEPCODE=$STEP5_SCRIPT_LEN"
-    STEPCODE=$STEP5_SCRIPT_LEN
-  fi 
-  trx_concatenate
-  
-  ##############################################################################
-  ### STEP 6 - TX_IN, signature script, uchar[] - variable length            ###
-  ##############################################################################
-  # the actual scriptSig (which is the scriptPubKey of the PREV_TRX
-  v_output "###  6. TX_IN, signature script"
-  if [ $T_PARAM_FLAG -eq 0 ] ; then
-    STEPCODE=$PREV_PKScript
-    vv_output "$STEPCODE"
-  else
-    vv_output "STEPCODE=$STEP6_SCRIPTSIG"
-    STEPCODE=$STEP6_SCRIPTSIG
-  fi 
-  trx_concatenate
-  
-  ##############################################################################
-  ### STEP 7 - TX_IN, SEQUENCE: This is currently always set to 0xffffffff   ###
-  ##############################################################################
-  # This is currently always set to 0xffffffff
-  v_output "###  7. TX_IN, concatenate sequence number (currently always 0xffffffff)"
-  STEPCODE="ffffffff"
-  trx_concatenate
-}  
-
-
 ##################################
 ### Check bitcoin address hash ###
 ##################################
@@ -374,6 +315,126 @@ chk_bc_address_hash() {
   fi
 }
 
+step3to7() {
+  ##############################################################################
+  ### STEP 3 - TX_IN, previous transaction hash: 32hex = 64 chars            ###
+  ##############################################################################
+  v_output "###  3. TX_IN, previous transaction hash"
+  vv_output "###     org trx:  $PREV_TRX"
+  STEPCODE=$( reverse_hex $PREV_TRX )
+  vv_output "###     reversed: $STEPCODE"
+  trx_concatenate
+  
+  ##############################################################################
+  ### STEP 4 - TX_IN, the output index we want to redeem from                ###
+  ##############################################################################
+  v_output "###  4. TX_IN, the output index we want to redeem from"
+  STEPCODE=$( echo "obase=16;$PREV_OutPoint"|bc -l)
+  STEPCODE=$( zero_pad $STEPCODE 8 )
+  STEPCODE=$( reverse_hex $STEPCODE )
+  vv_output "###            convert from $PREV_OutPoint to reversed hex: $STEPCODE"
+  trx_concatenate
+  
+  ##############################################################################
+  ### STEP 5 - TX_IN, scriptsig length: first hex Byte is length (2 chars)   ###
+  ##############################################################################
+  # For the purpose of signing the transaction, this is temporarily filled 
+  # with the scriptPubKey of the output we want to redeem. 
+  v_output "###  5. TX_IN, scriptsig length"
+  if [ $T_PARAM_FLAG -eq 0 ] ; then
+    STEPCODE=${#PREV_PKScript}
+    STEPCODE=$(( $STEPCODE / 2 ))
+    STEPCODE=$( echo "obase=16;$STEPCODE"|bc ) 
+  else
+    vv_output "STEPCODE=$STEP5_SCRIPT_LEN"
+    STEPCODE=$STEP5_SCRIPT_LEN
+  fi 
+  trx_concatenate
+  
+  ##############################################################################
+  ### STEP 6 - TX_IN, signature script, uchar[] - variable length            ###
+  ##############################################################################
+  # the actual scriptSig (which is the scriptPubKey of the PREV_TRX
+  v_output "###  6. TX_IN, signature script"
+  if [ $T_PARAM_FLAG -eq 0 ] ; then
+    STEPCODE=$PREV_PKScript
+    vv_output "$STEPCODE"
+  else
+    vv_output "STEPCODE=$STEP6_SCRIPTSIG"
+    STEPCODE=$STEP6_SCRIPTSIG
+  fi 
+  trx_concatenate
+  
+  ##############################################################################
+  ### STEP 7 - TX_IN, SEQUENCE: This is currently always set to 0xffffffff   ###
+  ##############################################################################
+  # This is currently always set to 0xffffffff
+  v_output "###  7. TX_IN, concatenate sequence number (currently always 0xffffffff)"
+  STEPCODE="ffffffff"
+  trx_concatenate
+}  
+
+##############################################################################
+### STEP 9 - TX_OUT, TRX_Amount: a 4 bytes hex (8 chars) for the amount   ###
+##############################################################################
+# a 8-byte reversed hex field, e.g.: 3a01000000000000"
+step9() {
+  v_output "###  9. TX_OUT, trx_out amount (in Satoshis): $Amount"
+  STEPCODE=$( echo "obase=16;$Amount"|bc -l ) 
+  STEPCODE=$( zero_pad $STEPCODE 16 )
+  STEPCODE_rev=$( reverse_hex $STEPCODE ) 
+  vv_output "                in hex=$STEPCODE, reversed=$STEPCODE_rev"
+  STEPCODE=$STEPCODE_rev
+  trx_concatenate
+}
+
+##############################################################################
+### STEP 10 - TX_OUT, LENGTH: Number of bytes in the PK script (var_int)   ###
+##############################################################################
+# pubkey script length, we use 0x19 here ...
+step10() {
+  v_output "### 10. TX_OUT, LENGTH: Number of bytes in the PK script (var_int)"
+  STEPCODE="19"
+  trx_concatenate
+}
+
+##############################################################################
+### STEP 11 - TX_OUT, PUBLIC KEY SCRIPT: the OP Codes of the PK script     ###
+##############################################################################
+# convert parameter TARGET_Address to the pubkey script.
+# the P2PKH script is preceeded with "76A914" and ends with "88AC":
+#
+# bitcoin-tools.sh has this logic, which only works in bash. I changed
+# it to be a bit more POISX compliant (also work in ksh). 
+# decodeBase58() {
+#     echo -n "$1" | sed -e's/^\(1*\).*/\1/' -e's/1/00/g' | tr -d '\n'
+#     dc -e "$dcr 16o0$(sed 's/./ 58*l&+/g' <<<$1)p" |
+#     while read n; do echo -n ${n/\\/}; done
+# }
+#
+step11() {
+  v_output "### 11. TX_OUT, PUBLIC KEY SCRIPT: the OP Codes of the PK script"
+  s=$TARGET_Address 
+  chk_bc_address_hash
+
+  STEPCODE=$h
+  STEPCODE=$( echo "76A914"$STEPCODE )
+  STEPCODE=$( echo $STEPCODE"88AC")
+  trx_concatenate
+}
+
+##############################
+### Calculate the trx fees ###
+##############################
+calc_trxfee() {
+# calc_trxfee needs to know the length of our RAW_TRX
+# we drop here, whatever we have so far ...
+echo $RAW_TRX > $urtx_fn
+trx_chars=$( wc -c $urtx_fn | awk '{ print $1 }' )
+trx_bytes=$(( $line_item * 90 + $trx_chars ))
+c_trxfee=$(( $TRXFEE_Per_Bytes * $trx_bytes ))
+}
+
 
 echo "#########################################################"
 echo "### trx_create.sh: create a raw, unsigned Bitcoin trx ###"
@@ -427,7 +488,7 @@ else
            exit 1
          fi
          filename=$2
-         CURR_Amount=$3
+         TRX_Amount=$3
          TARGET_Address=$4
          if [ $# -gt 4 ] ; then
            TRXFEE_Per_Bytes=$5
@@ -468,7 +529,7 @@ else
          PREV_TRX=$2
          PREV_OutPoint=$3
          PREV_PKScript=$4
-         CURR_Amount=$5
+         TRX_Amount=$5
          TARGET_Address=$6
          if [ $# -gt 6 ] ; then
            TRXFEE_Per_Bytes=$7
@@ -509,7 +570,7 @@ else
          fi
          PREV_TRX=$2
          PREV_OutPoint=$3
-         CURR_Amount=$4
+         TRX_Amount=$4
          TARGET_Address=$5
          if [ $# -gt 5 ] ; then
            TRXFEE_Per_Bytes=$6
@@ -559,7 +620,7 @@ v_output " FILENAME         $filename"
 v_output " PREV_TRX         $PREV_TRX"
 v_output " PREV_OutPoint    $PREV_OutPoint"
 v_output " PREV_PKScript    $PREV_PKScript"
-v_output " CURR_AMOUNT      $CURR_Amount"
+v_output " TRX_AMOUNT       $TRX_Amount"
 v_output " TARGET_Address   $TARGET_Address"
 v_output " TRXFEE_Per_Bytes $TRXFEE_Per_Bytes"
 v_output " RETURN_Address   $RETURN_Address"
@@ -606,7 +667,7 @@ if [ "$M_PARAM_FLAG" -eq 1 ] ; then
   vv_output "PREV_TRX=$PREV_TRX"
   vv_output "PREV_OutPoint=$PREV_OutPoint"
   vv_output "PREV_PKScript=$PREV_PKScript"
-  vv_output "CURR_Amount=$CURR_Amount"
+  vv_output "TRX_Amount=$TRX_Amount"
   vv_output "TARGET_Address=$TARGET_Address"
 fi
 
@@ -712,9 +773,9 @@ if [ "$F_PARAM_FLAG" -eq 1 ] ; then
 fi
 trx_concatenate
 
-#####################
-### call STEP 3-7 ### 
-#####################
+############################
+### TX_IN: call STEP 3-7 ### 
+############################
 if [ "$F_PARAM_FLAG" -eq 1 ] ; then
   # each line item is a references to the previous transaction:
   # PREV_TRX      --> the trx number
@@ -746,53 +807,44 @@ fi
 ### STEP 8 - TX_OUT, Number of Transaction outputs (var_int)               ###
 ##############################################################################
 # This is per default set to 1 
+# if we have a return address (which is between 28 and 32 chars...), 
+# then add another tx_out, otherwise miners get happy :-)
 v_output "###  8. TX_OUT, Number of Transaction outputs (var_int)"
-STEPCODE="01"
+if [ ${#RETURN_Address} -gt 28 ] ; then
+  STEPCODE="02"
+else
+  STEPCODE="01"
+fi 
 trx_concatenate
 
-##############################################################################
-### STEP 9 - TX_OUT, CURR_Amount: a 4 bytes hex (8 chars) for the amount        ###
-##############################################################################
-# a 8-byte reversed hex field, e.g.: 3a01000000000000"
+##############################
+### TX_OUT: call STEP 9-11 ### 
+##############################
+Amount=$TRX_Amount
+step9
+step10
+step11
 
-v_output "###  9. TX_OUT, total trx_out amount (in Satoshis): $CURR_Amount"
-STEPCODE=$( echo "obase=16;$CURR_Amount"|bc -l ) 
-STEPCODE=$( zero_pad $STEPCODE 16 )
-STEPCODE_rev=$( reverse_hex $STEPCODE ) 
-vv_output "                in hex=$STEPCODE, reversed=$STEPCODE_rev"
-STEPCODE=$STEPCODE_rev
-trx_concatenate
-
-##############################################################################
-### STEP 10 - TX_OUT, LENGTH: Number of bytes in the PK script (var_int)   ###
-##############################################################################
-# pubkey script length, we use 0x19 here ...
-v_output "### 10. TX_OUT, LENGTH: Number of bytes in the PK script (var_int)"
-STEPCODE="19"
-trx_concatenate
-
-##############################################################################
-### STEP 11 - TX_OUT, PUBLIC KEY SCRIPT: the OP Codes of the PK script     ###
-##############################################################################
-# convert parameter TARGET_Address to the pubkey script.
-# the P2PKH script is preceeded with "76A914" and ends with "88AC":
-#
-# bitcoin-tools.sh has this logic, which only works in bash. I changed
-# it to be a bit more POISX compliant (also work in ksh). 
-# decodeBase58() {
-#     echo -n "$1" | sed -e's/^\(1*\).*/\1/' -e's/1/00/g' | tr -d '\n'
-#     dc -e "$dcr 16o0$(sed 's/./ 58*l&+/g' <<<$1)p" |
-#     while read n; do echo -n ${n/\\/}; done
-# }
-#
-v_output "### 11. TX_OUT, PUBLIC KEY SCRIPT: the OP Codes of the PK script"
-s=$TARGET_Address 
-chk_bc_address_hash
-
-STEPCODE=$h
-STEPCODE=$( echo "76A914"$STEPCODE )
-STEPCODE=$( echo $STEPCODE"88AC")
-trx_concatenate
+############################################
+### TX_OUT: if there is a return address ###
+############################################
+# if we have a return address (which is between 28 and 32 chars...), 
+# then make sure, money gets back to us ...
+# but before, we need to calculate trxfees, and deduct the return amounts ...
+calc_trxfee
+if [ "$F_PARAM_FLAG" -eq 1 ] ; then
+  d_trxfee=$(( $prev_total_amount - $TRX_Amount - $c_trxfee ))
+fi
+if [ "$T_PARAM_FLAG" -eq 1 ] ; then
+  d_trxfee=$(( $PREV_Amount - $TRX_Amount - $c_trxfee ))
+fi
+if [ ${#RETURN_Address} -gt 28 ] ; then
+  Amount=$d_trxfee 
+  step9
+  step10
+  TARGET_Address=$RETURN_Address
+  step11
+fi 
 
 ############################################################################
 ### STEP 12 - LOCK_TIME: block nor timestamp at which this trx is locked ###
@@ -822,7 +874,7 @@ echo "##########################################################################
 echo "### amount(tx_in) - amount(tx_out) = TRXFEEs. *Double check YOUR MATH!* ###"
 if [ "$T_PARAM_FLAG" -eq 1 ] ; then
   printf "### amount of trx input(s) (in Satoshis):              %16d ###\n" $PREV_Amount
-  if [ $PREV_Amount -lt $CURR_Amount ] ; then
+  if [ $PREV_Amount -lt $TRX_Amount ] ; then
     echo "*** ERROR: input insufficient, please verify amount(s)."
     echo " "
     exit 0 
@@ -830,14 +882,14 @@ if [ "$T_PARAM_FLAG" -eq 1 ] ; then
 fi
 if [ "$F_PARAM_FLAG" -eq 1 ] ; then
   printf "### amount of trx input(s) (in Satoshis):              %16d ###\n" $prev_total_amount
-  printf "### desired amount to spend (in Satoshis):             %16d ###\n" $CURR_Amount
-  if [ $prev_total_amount -lt $CURR_Amount ] ; then
+  printf "### desired amount to spend (in Satoshis):             %16d ###\n" $TRX_Amount
+  if [ $prev_total_amount -lt $TRX_Amount ] ; then
     echo "*** ERROR: input insufficient, please verify amount(s)."
     echo " "
     exit 0 
   fi
 else
-  printf "### amount to spend (trx_output, in Satoshis):         %16d ###\n" $CURR_Amount
+  printf "### amount to spend (trx_output, in Satoshis):         %16d ###\n" $TRX_Amount
 fi
 
 #########################
@@ -850,9 +902,7 @@ fi
 # the existing PKSCRIPT (length 25 Bytes, 50 chars). Each input must be signed, 
 # so roughly 90 chars signature are added. Normal 1 input one output P2PKH trx are 
 # roughly 227 Bytes ... THIS NEEDS FURTHER ANALYSIS !!!
-trx_chars=$( wc -c $urtx_fn | awk '{ print $1 }' )
-trx_bytes=$(( $line_item * 90 + $trx_chars ))
-c_trxfee=$(( $TRXFEE_Per_Bytes * $trx_bytes ))
+calc_trxfee
 
 printf "### proposed TRXFEE (@ $TRXFEE_Per_Bytes Satoshi/Byte * $trx_bytes trx_bytes):"
 line_length=$(( ${#TRXFEE_Per_Bytes} + ${#trx_bytes} ))
@@ -871,40 +921,39 @@ esac
 printf " ###\n" $c_trxfee
 
 if [ "$F_PARAM_FLAG" -eq 1 ] ; then
-  f_trxfee=$(( $prev_total_amount - $CURR_Amount ))
-  d_trxfee=$(( $prev_total_amount - $CURR_Amount - $c_trxfee ))
+  f_trxfee=$(( $prev_total_amount - $TRX_Amount ))
+  # d_trxfee=$(( $prev_total_amount - $TRX_Amount - $c_trxfee ))
   if [ $d_trxfee -lt 0 ] ; then
     printf "### Achieving negative value with this trxfee:         %16d ###\n" $d_trxfee 
     echo "*** ERROR: input insufficient, to cover trx fees, exiting gracefully ..." 
     echo " "
     exit 0
   else
-    printf "### *** possible value to return address:              %16d ###\n" $d_trxfee 
-    printf "### *** without return address, trxfee will be:        %16d ###\n" $f_trxfee 
+    if [ ${#RETURN_Address} -gt 28 ] ; then
+      printf "### value to return address:                           %16d ###\n" $d_trxfee 
+    else
+      printf "### *** possible value to return address:              %16d ###\n" $d_trxfee 
+      printf "### *** without return address, trxfee will be:        %16d ###\n" $f_trxfee 
+    fi
   fi
 fi
 
 if [ "$T_PARAM_FLAG" -eq 1 ] ; then
-  f_trxfee=$(( $PREV_Amount - $CURR_Amount ))
-  d_trxfee=$(( $PREV_Amount - $CURR_Amount - $c_trxfee ))
+  f_trxfee=$(( $PREV_Amount - $TRX_Amount ))
+  # d_trxfee=$(( $PREV_Amount - $TRX_Amount - $c_trxfee ))
   if [ $d_trxfee -lt 0 ] ; then
     printf "### Achieving negative value with this trxfee:         %16d ###\n" $d_trxfee 
     echo "*** ERROR: input insufficient, to cover trx fees, exiting gracefully ..." 
     echo " "
     exit 0
   else
-    printf "### *** possible value to return address:              %16d ###\n" $d_trxfee 
-    printf "### *** without return address, trxfee will be:        %16d ###\n" $f_trxfee 
+    if [ ${#RETURN_Address} -gt 28 ] ; then
+      printf "### value to return address:                           %16d ###\n" $d_trxfee 
+    else
+      printf "### *** possible value to return address:              %16d ###\n" $d_trxfee 
+      printf "### *** without return address, trxfee will be:        %16d ###\n" $f_trxfee 
+    fi
   fi
-fi
-
-####################################
-### checking RETURN Address hash ###
-####################################
-
-if [ ${#RETURN_Address} -gt 0 ] ; then
-  s=$RETURN_Address
-  chk_bc_address_hash
 fi
 
 echo "###########################################################################"
