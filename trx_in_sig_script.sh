@@ -45,6 +45,7 @@
 # 
 
 typeset -i msig_offset=1
+typeset -i sig_offset=0
 typeset -i cur_opcode_dec
 offset=1
 msig_redeem_str=''
@@ -304,8 +305,9 @@ S10_SIG_S() {
 ### STATUS 11 (S11_SIG)           ###
 #####################################
 S11_SIG() {
-    sig_start=3
+    sig_start=$(( 3 + $sig_offset ))
     sig_end=$(( $to - 2 ))
+    sig_offset=$(( $sig_end + 2 ))
     sig_string=$( echo $param | cut -b $sig_start-$sig_end )
     if [ $VERBOSE -eq 1 ] ; then
       ./trx_strict_sig_verify.sh -v $sig_string
@@ -418,8 +420,9 @@ S17_SIG_S() {
 ### STATUS 18 (S18_SIG)           ###
 #####################################
 S18_SIG() {
-    sig_start=3
+    sig_start=$(( 3 + $sig_offset ))
     sig_end=$(( $to - 2 ))
+    sig_offset=$(( $sig_end + 2 ))
     sig_string=$( echo $param | cut -b $sig_start-$sig_end )
     if [ $VERBOSE -eq 1 ] ; then
       ./trx_strict_sig_verify.sh -v $sig_string
@@ -564,18 +567,18 @@ S28_SIG_X() {
 ### STATUS 30 (S30_MSIG2of2)      ###
 #####################################
 S30_MSIG2of2() {
-  vv_output "S30_MSIG2of2()"
+  vv_output "     S30_MSIG2of2()"
   S30_to=$(( $offset + msig_len ))
   if [ $S30_to -gt $opcodes_len ] ; then
     S30_to=$opcodes_len 
   fi
-  v_output "S30_MSIG2of2(), offset=$offset, S30_to=$S30_to, opcodes_len=$opcodes_len"
+  v_output "    S30_MSIG2of2(), offset=$offset, S30_to=$S30_to, opcodes_len=$opcodes_len"
   while [ $offset -le $S30_to ]  
    do
     get_next_opcode
     msig_redeem_str=$msig_redeem_str$cur_opcode
     case $cur_opcode in
-      21) echo "  $cur_opcode: OP_DATA_0x21: compressed pub key"
+      21) echo "     $cur_opcode: OP_DATA_0x21: compressed pub key"
           # msig_redeem_str=$msig_redeem_str$cur_opcode
           op_data_show
           echo "     * This is MultiSig's Public Key (X9.63 COMPRESSED form)"
@@ -583,11 +586,11 @@ S30_MSIG2of2() {
           rmd160_sha256
           ./trx_base58check_enc.sh -q $result
           msig_redeem_str=$msig_redeem_str$ret_string
-          v_output "msig_redeem_str=$msig_redeem_str"
+          v_output "     msig_redeem_str=$msig_redeem_str"
           ret_string=''
           echo " "
           ;;
-      41) echo "  $cur_opcode: OP_DATA_0x41: uncompressed pub key"
+      41) echo "    $cur_opcode: OP_DATA_0x41: uncompressed pub key"
           # msig_redeem_str=$msig_redeem_str$cur_opcode
           op_data_show
           echo "     * This is MultiSig's Public Key (X9.63 UNCOMPRESSED form)"
@@ -595,18 +598,18 @@ S30_MSIG2of2() {
           rmd160_sha256
           ./trx_base58check_enc.sh -q $result
           msig_redeem_str=$msig_redeem_str$ret_string
-          v_output "msig_redeem_str=$msig_redeem_str"
+          v_output "     msig_redeem_str=$msig_redeem_str"
           ret_string=''
           echo " "
           ;;
-      52) echo "  $cur_opcode: OP_2: push 2 Bytes onto stack"
+      52) echo "     $cur_opcode: OP_2: push 2 Bytes onto stack"
           echo "     Multisig needs 2 pubkeys ?"
           # msig_redeem_str=$msig_redeem_str$cur_opcode
           ;;
-      AE) echo "  $cur_opcode: OP_CHECKMULTISIG"
+      AE) echo "     $cur_opcode: OP_CHECKMULTISIG"
           echo "     ########## Multisignature end ###########"
           # msig_redeem_str=$msig_redeem_str$cur_opcode
-          v_output $msig_redeem_str
+          v_output "     $msig_redeem_str"
           ret_string=$msig_redeem_str
           echo "     * This terminates the MultiSig's redeem script"
           echo "     * corresponding bitcoin address is:"
@@ -616,7 +619,7 @@ S30_MSIG2of2() {
           msig_redeem_str=''
           break
           ;;
-      *)  echo "  $cur_opcode: unknown OpCode"
+      *)  echo "    $cur_opcode: unknown OpCode"
           ;;
     esac
   done
@@ -667,7 +670,7 @@ S37_OP2() {
     get_next_opcode
     msig_redeem_str=$msig_redeem_str$cur_opcode
     case $cur_opcode in
-      21) echo "  $cur_opcode: OP_DATA_0x21: compressed pub key"
+      21) echo "     $cur_opcode: OP_DATA_0x21: compressed pub key"
           # msig_redeem_str=$msig_redeem_str$cur_opcode
           op_data_show
           echo "     * This is MultiSig's Public Key (X9.63 COMPRESSED form)"
@@ -675,12 +678,12 @@ S37_OP2() {
           rmd160_sha256
           ./trx_base58check_enc.sh -q $result
           msig_redeem_str=$msig_redeem_str$ret_string
-          v_output "msig_redeem_str=$msig_redeem_str"
+          v_output "     msig_redeem_str=$msig_redeem_str"
           ret_string=''
           echo " "
   v_output "S37_OP2, offset=$offset, S37_to=$S37_to, opcodes_len=$opcodes_len"
           ;;
-      41) echo "  $cur_opcode: OP_DATA_0x41: uncompressed pub key"
+      41) echo "     $cur_opcode: OP_DATA_0x41: uncompressed pub key"
           # msig_redeem_str=$msig_redeem_str$cur_opcode
           op_data_show
           echo "     * This is MultiSig's Public Key (X9.63 UNCOMPRESSED form)"
@@ -688,16 +691,16 @@ S37_OP2() {
           rmd160_sha256
           ./trx_base58check_enc.sh -q $result
           msig_redeem_str=$msig_redeem_str$ret_string
-          v_output "msig_redeem_str=$msig_redeem_str"
+          v_output "    msig_redeem_str=$msig_redeem_str"
           ret_string=''
           echo " "
           ;;
-      53) echo "  $cur_opcode: OP_3: push 3 Bytes onto stack"
+      53) echo "     $cur_opcode: OP_3: push 3 Bytes onto stack"
           echo "     Multisig needs 3 pubkeys"
           ;;
-      AE) echo "  $cur_opcode: OP_CHECKMULTISIG"
+      AE) echo "     $cur_opcode: OP_CHECKMULTISIG"
           echo "     ########## Multisignature end ###########"
-          v_output $msig_redeem_str
+          v_output "     $msig_redeem_str"
           ret_string=$msig_redeem_str
           echo "     * This terminates the MultiSig's redeem script"
           echo "     * corresponding bitcoin address is:"
@@ -707,11 +710,11 @@ S37_OP2() {
           msig_redeem_str=''
           break
           ;;
-      *)  echo "  $cur_opcode: unknown OpCode"
+      *)  echo "     $cur_opcode: unknown OpCode"
           ;;
     esac
   done
-  vv_output "S37_OP2, offset=$offset, S37_to=$S37_to, opcodes_len=$opcodes_len"
+  vv_output "    S37_OP2, offset=$offset, S37_to=$S37_to, opcodes_len=$opcodes_len"
 }
 
 ###########################
@@ -723,9 +726,9 @@ S99_Unknown() {
   op_data_show
 }
 	  
-##########################################################################
-### AND HERE WE GO ...                                                 ###
-##########################################################################
+##########################
+### AND HERE WE GO ... ###
+##########################
 
 case "$1" in
   -q)
@@ -756,7 +759,7 @@ if [ $QUIET -eq 0 ] ; then
   echo "  ##################################################################"
   echo "  ### trx_in_sig_script.sh: decode SIG_script OPCODES from a trx ###"
   echo "  ##################################################################"
-  echo "  "
+  # echo "  "
 fi
 
 if [ $# -eq 0 ] ; then 
@@ -787,6 +790,9 @@ fi
     vv_output "  S0_INIT, opcode=$cur_opcode"
     
     case $cur_opcode in
+      00) echo "    $cur_opcode: OP_DATA_0x00:     unknown data code - ignore"
+          sig_offset=$(( $sig_offset + 2 ))
+          ;;
       21) echo "    $cur_opcode: OP_DATA_0x21:     type tag indicating LENGTH"
 	  S3_SIG_LEN_0x21
           ;;
