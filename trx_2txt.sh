@@ -177,7 +177,7 @@ decode_pkscript() {
     #   $result=65 hex bytes length (130 chars)
     # need to strip off any 2nd param (e.g. like "P2SH") for the length check
     result=$( echo "$result" | tail -n1 )
-    len=$( echo $result | cut -d " " -f 2 )
+    len=$( echo $result | cut -d " " -f 1 )
     len=${#len}
     if [ $len -eq 130 ] ; then
       echo "  and translates base58 encoded into this bitcoin address:"

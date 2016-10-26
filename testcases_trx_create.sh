@@ -55,7 +55,7 @@ echo "================================================================" | tee -a
 echo "   " | tee -a $logfile
 echo "=== TESTCASE 1a: $chksum_cmd trx_create.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-chksum_ref="c17ba8fed0d79da5829980f2e8015f2b658d6b29bb0cb13f30dce24988fcedcf" 
+chksum_ref="c34a6f50f56d8d712f70c3c4103c643b0e9d883941f36227dc4d71d113737896" 
 cp trx_create.sh tmp_trx_cfile
 chksum_prep
 
