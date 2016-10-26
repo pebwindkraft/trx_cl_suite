@@ -476,9 +476,9 @@ else
   fi
 fi
 
-vv_output "  ################################################"
-vv_output "  # end of strict verification of SCRIPTSIG      #"
-vv_output "  ################################################"
+echo "    #########################################################"
+vv_output "    ### end of strict verification of SCRIPTSIG           ###"
+vv_output "    #########################################################"
 vv_output "  "
 
 
