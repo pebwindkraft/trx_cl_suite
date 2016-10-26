@@ -1,20 +1,60 @@
-# I21: 11Oct2016, svn:
-# ====================
-# trx_create.sh - line 217: is it better to use grep / cut / tr or a simple awk ???
-# --> create a simple shell script, that goes through 100 loops, and measure the time ...
+#!/bin/sh
+# 
+# test script to verify timing (speed) of different operation(s)
 #
+# Copyright (c) 2016 Volker Nowarra
+# Complete rewrite in Nov/Dec 2016
 #
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+# SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
+# RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+# NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE
+# USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+
+
 rawtx_fn=tmp_rawtx.txt
 typeset -i i=0
 typeset -i max=100
 
-##################
-### testcase 1 ###
-##################
+
+fill_line() {
+  char_length=${#max}
+  case $char_length in
+   1) printf "                       ===" | tee -a $logfile
+      ;;
+   2) printf "                      ===" | tee -a $logfile
+      ;;
+   3) printf "                     ===" | tee -a $logfile
+      ;;
+   4) printf "                    ===" | tee -a $logfile
+      ;;
+   5) printf "                   ===" | tee -a $logfile
+      ;;
+  esac
+  printf "\n" | tee -a $logfile
+}
+  
+prepdata() {
+  echo "./trx_2txt.sh -vv -r 010000000117a14c047d5bcc8c39a5335821c4461d7f737bacb0734db289f0240113372f9f010000006a47304402200e7f6e5b0089770f3bce07c3e71cf239184dcd13b43ab8ac6639b10d6433ffdd0220034e6e45f3f2f791e716ff81761169a7f38f962670e7125ccff787a9c2afeb7d0121020d0fb39080eea3fa2223003c219a16e5e3f050933a7b36db6cbd16d728cb1fceffffffff02e0c81000000000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88aca44d2200000000001976a91447ac42e612ea7eae770bac6ff3c0157e94ca00d488ac00000000 | grep -A7 TX_OUT[0] > $rawtx_fn"
+  ./trx_2txt.sh -vv -r 010000000117a14c047d5bcc8c39a5335821c4461d7f737bacb0734db289f0240113372f9f010000006a47304402200e7f6e5b0089770f3bce07c3e71cf239184dcd13b43ab8ac6639b10d6433ffdd0220034e6e45f3f2f791e716ff81761169a7f38f962670e7125ccff787a9c2afeb7d0121020d0fb39080eea3fa2223003c219a16e5e3f050933a7b36db6cbd16d728cb1fceffffffff02e0c81000000000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88aca44d2200000000001976a91447ac42e612ea7eae770bac6ff3c0157e94ca00d488ac00000000 | grep -A7 TX_OUT[[]0[]] > $rawtx_fn
+}
+
 testcase1() {
+echo "================================================================" | tee -a $logfile
+printf "=== TESTCASE 1: loop with $max iterations" | tee -a $logfile
+fill_line
+echo "================================================================" | tee -a $logfile
 i=0
 START=`date +%s`
-echo "loop with $max iterations using grep/cut/tr, start time=$START:"
+echo "=== TESTCASE 1a: using grep/cut/tr, start time: $START   ===" | tee -a $logfile
+echo "================================================================" | tee -a $logfile
 while [ $i -lt $max ]
 do
   PREV_Amount=$( grep -m1 bitcoin $rawtx_fn | cut -d "=" -f 4 | cut -d "," -f 1 )
@@ -33,12 +73,15 @@ ELAPSED=$(( $END - $START ))
 echo "Elapsed time: $ELAPSED"
 }
 
-##################
-### testcase 2 ###
-##################
 testcase2() {
+echo "================================================================" | tee -a $logfile
+printf "=== TESTCASE 2: loop with $max iterations" | tee -a $logfile
+fill_line
+echo "================================================================" | tee -a $logfile
 i=0
 START=`date +%s`
+echo "=== TESTCASE 2a: using awk, start time: $START           ===" | tee -a $logfile
+echo "================================================================" | tee -a $logfile
 echo "loop with $max iterations using awk, start time=$START:"
 while [ $i -lt $max ]
 do
@@ -60,9 +103,6 @@ echo "Elapsed time: $ELAPSED"
 
 all_testcases() {
   testcase1 
-  echo " "
-  echo "##################################################################"
-  echo " "
   testcase2 
 }
 
@@ -70,10 +110,10 @@ all_testcases() {
 ### here we start ###
 #####################
 
-echo "./trx_2txt.sh -vv -r 010000000117a14c047d5bcc8c39a5335821c4461d7f737bacb0734db289f0240113372f9f010000006a47304402200e7f6e5b0089770f3bce07c3e71cf239184dcd13b43ab8ac6639b10d6433ffdd0220034e6e45f3f2f791e716ff81761169a7f38f962670e7125ccff787a9c2afeb7d0121020d0fb39080eea3fa2223003c219a16e5e3f050933a7b36db6cbd16d728cb1fceffffffff02e0c81000000000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88aca44d2200000000001976a91447ac42e612ea7eae770bac6ff3c0157e94ca00d488ac00000000 | grep -A7 TX_OUT[0] > $rawtx_fn"
-./trx_2txt.sh -vv -r 010000000117a14c047d5bcc8c39a5335821c4461d7f737bacb0734db289f0240113372f9f010000006a47304402200e7f6e5b0089770f3bce07c3e71cf239184dcd13b43ab8ac6639b10d6433ffdd0220034e6e45f3f2f791e716ff81761169a7f38f962670e7125ccff787a9c2afeb7d0121020d0fb39080eea3fa2223003c219a16e5e3f050933a7b36db6cbd16d728cb1fceffffffff02e0c81000000000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88aca44d2200000000001976a91447ac42e612ea7eae770bac6ff3c0157e94ca00d488ac00000000 | grep -A7 TX_OUT[[]0[]] > $rawtx_fn
+
 
 if [ $# -eq 0 ] ; then
+  prepdata
   all_testcases
 fi
 
@@ -88,6 +128,7 @@ while [ $# -ge 1 ]
      exit 0
      ;;
   1|2|3|4|5|6|7|8|9)
+     prepdata
      testcase$1 
      shift
      ;;

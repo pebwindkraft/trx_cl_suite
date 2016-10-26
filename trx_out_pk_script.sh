@@ -429,7 +429,7 @@ fi
     get_next_opcode
 
     case $cur_opcode in
-      76) echo "   $cur_opcode: OP_DUP"
+      76) echo "    $cur_opcode: OP_DUP"
 	  S1_OP_DUP
           ;;
       A9) echo "    $cur_opcode: OP_HASH160"

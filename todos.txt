@@ -165,8 +165,16 @@ min_trxfee=50
 max_trx_size=100 # kilobytes
 ...
 
+I27: 26Oct2016, svn:
+====================
+testcases_trx_2txt.sh: TESTCASE 8c does not recognize multisig address correctly.
+complains about unknown OP codes ...
+
 I27: xxOct2016, svn:
 ====================
+
+
+
 
 
 
