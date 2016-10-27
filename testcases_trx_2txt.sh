@@ -57,7 +57,7 @@ chksum_prep
  
 echo "=== TESTCASE 1b: $chksum_cmd trx_in_sig_script.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-chksum_ref="917ef15764c0aa80b369993d27b22631bd0d7cc68974a8d3203cc32a586c6bbf" 
+chksum_ref="fb074b676d5c643c80479ee8a857db61caf491e374048370154c774db44647c4" 
 cp trx_in_sig_script.sh tmpfile
 chksum_prep
 
@@ -301,7 +301,7 @@ chksum_prep
 
 echo "=== TESTCASE 8c: " | tee -a $logfile
 ./trx_2txt.sh -vv -r 0100000001b9c6777f2d8d710f1e0e3bb5fbffa7cdfd6c814a2257a7cfced9a2205448dd0601000000da0048304502210083a93c7611f5aeee6b0b4d1cbff2d31556af4cd1f951de8341c768ae03f780730220063b5e6dfb461291b1fbd93d58a8111d04fd03c7098834bac5cdf1d3c5fa90d0014730440220137c7320e03b73da66e9cf89e5f5ed0d5743ebc65e776707b8385ff93039408802202c30bc57010b3dd20507393ebc79affc653473a7baf03c5abf19c14e2136c646014752210285cb139a82dd9062b9ac1091cb1f91a01c11ab9c6a46bd09d0754dab86a38cc9210328c37f938748dcbbf15a0e5a9d1ba20f93f2c2d0ead63c7c14a5a10959b5ce8952aeffffffff0280c42b03000000001976a914d199925b52d367220b1e2a2d8815e635b571512f88ac65a7b3010000000017a9145c4dd14b9df138840b34237fdbe9159c420edbbe8700000000 > tmpfile
-chksum_ref="002a0f70842caf5b1cd0b58bee768d80e53356e85bf887413f4e69147a4bc88b"
+chksum_ref="947c1028249be6c378be2bca7c7aafae46d3e8d317a654deed58ead39ad1535d"
 chksum_prep
 echo " " | tee -a $logfile
 }
@@ -330,7 +330,7 @@ chksum_prep
 echo "=== TESTCASE 9c: " | tee -a $logfile
 echo "=============================================================" | tee -a $logfile
 ./trx_2txt.sh -vv -t 734c48124d391bfff5750bbc39bd18e6988e8ac873c418d64d31cfdc31cc64ac > tmpfile
-chksum_ref="486ebd4b77885af93b82a2a97e34600f5965e66bce3c262f53e5e60a7e639f6e"
+chksum_ref="760535ffdcf067b6cbfbfcd19b84ef1ef5a9dd28252051184f018140527b3444"
 chksum_prep
 echo " " | tee -a $logfile
 }

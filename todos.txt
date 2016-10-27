@@ -119,22 +119,6 @@ I22: 12Oct2016, svn:
 trx_create.sh - testcase 6: wenn er doch ins Netz geht, und die TRX mit '-t' holt,
 kann er auch gleich checken, ob genug "input Satoshis" da sind, um den Transferbetrag und die TRXFEE zu bezahlen...
 
-I23: 13Oct2016, svn:
-====================
-trx_in_sig_script - when verifying the below signature of a multisig, then some errors appear:
-see also TESTCASE 8c and 9c!
-
-./trx_in_sig_script.sh 47304402200cf183787d2f7ef387e14046e7f38d9442b316d690b3116da6c60d4b8d1bb5430220301693ba31b5aad8d7542a673e6b96f4830152ec6d26f3a8bf1d3776f39de51d014830450221009cd1c1b3e1ec93cd5852b42fa56b6af706a09b00e056d1fd1313fab423bb794302201327347f6c9bc8106dca4eb84de36bd242f0970388ab7cd586e1843b84b045200147522102309d6a9d97a3e814247d471ddc2c476c046f9c07d98079d861e34479c19497ea2103c511b8fe3a5e60ad16bb14b0865f8a3f192ddb386c4f8d23f72edd24764e0e2352ae
-
-    ######## we go multisig #########
-    21: OP_DATA_0x21: compressed pub key
-        This is MultiSig's Public Key (X9.63 COMPRESSED form)
-        corresponding bitcoin address is:    1HT7xU2Ngenf7D4yocz2SAcnNLW7rK8d4E
-    02: unknown OpCode
-    30: unknown OpCode
-    9D: unknown OpCode
-    ...
-
 I24: 14Oct2016, svn:
 ====================
 trx_create.sh - trxfee calculation:

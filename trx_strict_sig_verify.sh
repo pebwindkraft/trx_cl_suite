@@ -104,14 +104,19 @@ vv_output() {
 # procedure to check for necessary tools #
 ##########################################
 check_tool() {
-  vv_output "$1 ?"
+  if [ $VVERBOSE -eq 1 ]; then
+    printf " %-8s" $1
+  fi
   which $1 > /dev/null
   if [ $? -eq 0 ]; then
-    vv_output "    yes" 
+    if [ $VVERBOSE -eq 1 ]; then
+      printf " - yes \n"
+    fi
   else
-    echo "*** $1 not found, please install $1."
-    echo "    exiting gracefully ..." 
-    exit 1
+    printf " \n"
+    echo "*** ERROR: $1 not found, please install $1."
+    echo "exiting gracefully ..."
+    exit 0
   fi
 }
 
