@@ -197,7 +197,7 @@ scriptsig_len=$(( $scriptsig_len_chars / 2 ))
 ########################################
 if [ "$scriptsig_len_chars" -gt $SIG_MIN_LENGTH_CHARS ] && \
    [ "$scriptsig_len_chars" -lt $SIG_MAX_LENGTH_CHARS ] ; then
-  v_output  "    Minimum and maximum size constraints - ok"
+  v_output  "    Minimum and maximum size constraints                        - ok"
   vv_output "    Scriptsig length: $scriptsig_len_chars, good ($SIG_MIN_LENGTH_CHARS < scriptsig_len < $SIG_MAX_LENGTH_CHARS )"
 else
   echo "*** ERROR: script sig verification:  "
@@ -216,7 +216,7 @@ from=1
 to=2
 compare_string=$( echo $SCRIPTSIG | cut -b $from-$to )
 if [ "$compare_string" == "30" ] ; then
-  v_output  "    scriptsig always starts with 0x30 - ok"
+  v_output  "    scriptsig always starts with 0x30                           - ok"
   vv_output "  0x30: scriptsig always starts with 0x30"
 else
   echo "*** ERROR: script sig verification:  "
@@ -279,7 +279,7 @@ if [ $R_len_dec -le 0 ] ; then
   echo " "
   exit 1
 else
-  v_output "    length of R coordinate ($R_len_dec) >= 0 - ok"
+  v_output "    length of R coordinate ($R_len_dec) >= 0                            - ok"
 fi
 
 ########################################
@@ -334,7 +334,7 @@ if [ $S_len_dec -le 0 ] ; then
   echo " "
   exit 1
 else
-  v_output "    length of S coordinate ($S_len_dec) >= 0 - ok"
+  v_output "    length of S coordinate ($S_len_dec) >= 0                            - ok"
 fi
 
 ########################################
@@ -351,7 +351,7 @@ fi
 # Make sure the length of the S element is still inside the signature.
 value=$(( $S_len_dec + $from ))
 if [ $value -lt $scriptsig_len_chars ] ; then
-  v_output "    S-Value is within scriptsig boundaries - ok"
+  v_output "    S-Value is within scriptsig boundaries                      - ok"
 else
   echo "*** ERROR: script sig verification for S element boundaries: "
   echo "    script sig S element is outside boundaries"
@@ -380,7 +380,7 @@ vv_output "    0x$S_value_string"
 # add 8 to the length, for the header and length bytes of R and S 
 value=$(( $R_len_dec + $S_len_dec + 8 ))
 if [ $value -eq $SigRS_len_chars ] ; then
-  v_output  "    Make sure the R & S length covers the entire signature - ok"
+  v_output  "    Make sure the R & S length covers the entire signature      - ok"
   vv_output "    lenR($R_len_dec chars) + lenS($S_len_dec chars) + 8 = len signature($SigRS_len_chars chars)"
 else
   echo "*** ERROR: script sig verification for R & S length:"
@@ -411,9 +411,9 @@ Nhalf_Value_hex=7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0
 value=$( echo "obase=16;ibase=16;$S_value_string < $Nhalf_Value_hex" | bc ) 
 
 if [ $value -eq 1 ] ; then 
-  v_output  "    S-value must be smaller than N/2 - ok"
+  v_output  "    S-value must be smaller than N/2                            - ok"
   vv_output "    cool, S is smaller than N/2"
-  v_output  "    strictly check DER-encoded signature - ok"
+  v_output  "    strictly check DER-encoded signature                        - ok"
 else
   v_output "    *** S is not smaller than N/2, need new S-Value (new_s = N - s)"
   S_value=$( echo "obase=16;ibase=16;FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141 - $S_value_string" | bc )
