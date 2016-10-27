@@ -611,6 +611,7 @@ S30_MSIG2of2() {
     msig_redeem_str=$msig_redeem_str$cur_opcode
     case $cur_opcode in
       21) echo "    $cur_opcode: OP_DATA_0x21: compressed pub key"
+          op_data_show
           echo "        This is MultiSig's Public Key (X9.63 COMPRESSED form)"
           printf "        corresponding bitcoin address is: "
           rmd160_sha256
