@@ -57,7 +57,6 @@ proc_help() {
   echo " -r   examine RAW trx (requires hex data as a parameter string)"
   echo " -t   examine an existing TRX (requires TRANSACTION_ID, to fetch from blockchain.info)"
   echo " -u   examine UNSIGNED raw transaction (requires hex data as a parameter string)"
-  echo "      currently limited to 1 prev TRX_ID, with one input, and one output index"
   echo " -v   display verbose output"
   echo " -vv  display even more verbose output"
   echo "  "

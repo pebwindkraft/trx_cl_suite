@@ -195,6 +195,7 @@ chk_trx_len() {
     echo " "
     echo "*** ERROR: expecting a proper formatted Bitcoin TRANSACTION_ID."
     echo "    Please provide a 64 bytes string (aka 32 hex chars)"
+    echo "    Hint: empty lines in file are not allowed!"
     echo "    current length: ${#PREV_TRX}, PREV_TRX:"
     echo "    $PREV_TRX"
     exit 1 

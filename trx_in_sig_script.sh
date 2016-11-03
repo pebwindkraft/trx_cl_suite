@@ -342,9 +342,9 @@ S11_SIG() {
     sig_offset=$(( $sig_end + 2 ))
     sig_string=$( echo $param | cut -b $sig_start-$sig_end )
     if [ $VERBOSE -eq 1 ] ; then
-      ./trx_strict_sig_verify.sh -v $sig_string
+      ./tcls_strict_sig_verify.sh -v $sig_string
     else
-      ./trx_strict_sig_verify.sh -q $sig_string
+      ./tcls_strict_sig_verify.sh -q $sig_string
     fi
 }
 #####################################
@@ -457,9 +457,9 @@ S18_SIG() {
     sig_offset=$(( $sig_end + 2 ))
     sig_string=$( echo $param | cut -b $sig_start-$sig_end )
     if [ $VERBOSE -eq 1 ] ; then
-      ./trx_strict_sig_verify.sh -v $sig_string
+      ./tcls_strict_sig_verify.sh -v $sig_string
     else
-      ./trx_strict_sig_verify.sh -q $sig_string
+      ./tcls_strict_sig_verify.sh -q $sig_string
     fi
 }
 #####################################

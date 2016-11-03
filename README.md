@@ -189,14 +189,14 @@ translates into something like this:
 
 Hint: in this version the sign process allows for many inputs, which can alos be read from file. 
 
-#########################################
-### file testcases_trx_create_sign.sh ###
-#########################################
+####################################
+### file testcases_trx_create.sh ###
+####################################
 This shell script supports the development process, and verifies the script output(s).
 It is setup the exactly same way as 'testcases_trx_2txt.sh'. Details up there ...
 Most easily it is used like this:
 
-  ./testcases_trx_create_sign.sh 
+  ./testcases_trx_create.sh 
 
 ###########################
 ### file trx_key2pem.sh ### 

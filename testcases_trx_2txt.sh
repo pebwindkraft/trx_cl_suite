@@ -25,7 +25,7 @@ if [ "$1" == "$2" ] ; then
   echo "ok"
 else
   echo $1 | tee -a $logfile
-  echo "********************   checksum  mismatch:  ********************"  | tee -a $logfile
+  echo "*************** checksum  mismatch, ref is: ********************" | tee -a $logfile
   echo $2 | tee -a $logfile
   echo " " | tee -a $logfile
 fi
@@ -231,6 +231,10 @@ testcase6() {
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 6: this trx has 1 input, and 4 outputs          ===" | tee -a $logfile
 echo "===  trx-in sequence = feffffff - what does this mean?       ===" | tee -a $logfile
+echo "=== bitcoin.org: setting all sequence numbers to 0xffffffff  ===" | tee -a $logfile
+echo "=== (the default in Bitcoin Core) can still disable the time ===" | tee -a $logfile
+echo "=== lock, so if you want to use locktime, at least one input ===" | tee -a $logfile
+echo "=== must have a sequence number below the the maximum.       ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "https://blockchain.info/de/rawtx/7264f8ba4a85a4780c549bf04a98e8de4c9cb1120cb1dfe8ab85ff6832eff864" | tee -a $logfile
 

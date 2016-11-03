@@ -34,6 +34,36 @@
 # NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE 
 # USE OR PERFORMANCE OF THIS SOFTWARE. 
 # 
+# http://bitcoin.stackexchange.com/questions/46455/\
+# verifying-a-bitcoin-trx-on-the-unix-cmd-line-with-openssl?noredirect=1
+# 
+# $ cat pizza.inphex
+# 01000000018dd4f5fbd5e980fc02f35c6ce145935b11e284605bf599a13c6d41
+# 5db55d07a1000000001976a91446af3fb481837fadbb421727f9959c2d32a368
+# 2988acffffffff0200719a81860000001976a914df1bd49a6c9e34dfa8631f2c
+# 54cf39986027501b88ac009f0a5362000000434104cd5e9726e6afeae357b180
+# 6be25a4c3d3811775835d235417ea746b7db9eeab33cf01674b944c64561ce33
+# 88fa1abd0fa88b06c44ce81e2234aa70fe578d455dac0000000001000000
+# $ cat pizza.sighex
+# 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41 \
+# 328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e
+# $ cat pizza.keyhex
+# 3056301006072a8648ce3d020106052b8104000a034200
+# 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426 \
+# 529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb
+#
+# $ xxd -r -p <pizza.inphex >pizza.inpraw
+# $ xxd -r -p <pizza.sighex >pizza.sigraw
+# $ xxd -r -p <pizza.keyhex | openssl pkey -pubin -inform der >pizza.keypem
+# 
+# $ openssl sha256 <pizza.inpraw -binary >pizza.hash1
+# $ openssl sha256 <pizza.hash1 -verify pizza.keypem -signature pizza.sigraw
+# Verified OK
+# 
+# $ openssl sha256 <pizza.hash1 -binary >pizza.hash2
+# $ openssl pkeyutl <pizza.hash2 -verify -pubin -inkey pizza.keypem -sigfile pizza.sigraw
+# Signature Verified Successfully
+# 
 
 ###########################
 # Some variables ...      #
