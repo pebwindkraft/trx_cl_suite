@@ -2,94 +2,6 @@
 ### Issues / errors in processing ###
 #####################################
 
-I9: 14jul16 svn:
-==================
-trx_create_sign.sh: base58decoding: need to extract beginning "1"s and count them...
-#maybe like this:  /^(1*)/
-
-  ########################################
-  ### Some explanations on leading zeros #
-  ########################################
-  1. Convert each leading "one" to a single byte of value 0
-  2. Convert the remaining digits from base58 to hex
-  3. The result should be exactly 25 bytes long, if not you have an invalid address.
-  4. Make sure that leading byte is either 0 or 5, if not you have an invalid address.
-  5. Remove the trailing 4 bytes, leaving you with a 21 byte hex value.
-  6. Calculate SHA256(SHA256()) on the 21 bytes.
-  7. Make sure the first 4 bytes of step 6 are equal to the 4 bytes removed in step 5,
-     if not you have an invalid address.
-  (programmatically, you may find it easier to reverse the order of the first two steps)
-  
-  Lets walk through the steps and see what happens:
-  
-  Starting with an RIPEMD-160 hash of 20 bytes that are all 0's...
-  0000000000000000000000000000000000000000
-  
-  Add a version byte in front (in the case of a P2PKH address, that would be a byte with value 0).
-  000000000000000000000000000000000000000000
-  
-  Now we have 21 bytes that are all 0's.
-  Calculate a checksum on this value:
-  SHA256(SHA256(000000000000000000000000000000000000000000)) = 
-  94a00911c4da27f9271727ffa7a14d8d5588fc0fff9964340ec4065f387e622b
-  
-  Append the first 4 bytes (8 characters) of the checksum to the RIPEMD-160 hash with version byte:
-  00000000000000000000000000000000000000000094a00911
-  
-  Temporarily ignore leading zero bytes:
-  94a00911
-  
-  Convert the value from hex to base58:
-  0x94a00911 =
-  4oLvT2 (base 58)
-  
-  Each LEADING 00 BYTE is replaced with a single 1:
-  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-   1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
-  
-  Concatenate 21 ones with 6 base58 digits:
-  1111111111111111111114oLvT2
-  
-  21 "ones" plus 6 base58 digits = 27 characters
-  
-  #################################################################
-  
-  Now lets try the same with 19 zeros and a bytes with value 1...
-  0000000000000000000000000000000000000001
-  
-  Add a version byte in front (in the case of a P2PKH address, that would be a byte with value 0).
-  000000000000000000000000000000000000000001
-  
-  Now we have 20 bytes that are all 0's, followed by a byte that is represented in hex as "01"
-  Calculate a checksum on this value:
-  SHA256(SHA256(000000000000000000000000000000000000000001)) = 
-  9d35b5b9d5befcf2d6b89994f7f64279b0645d5d4a5f1a6fa2dcc615bbed04ef
-  
-  Append the first 4 bytes (8 characters) of the checksum to the RIPEMD-160 hash with version byte:
-  0000000000000000000000000000000000000000019d35b5b9
-  
-  Temporarily ignore leading zero bytes:
-  019d35b5b9
-  
-  Convert the value from hex to base58:
-  0x019d35b5b9 =
-  BZbvjr (base 58)
-  
-  Each LEADING 00 BYTE is replaced with a single 1:
-  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-   1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
-  
-  Concatenate 20 ones with 6 base58 digits:
-  111111111111111111111BZbvjr
-  
-  20 "ones" plus 6 base58 digits = 26 characters
-  
-   notice that the number of leading 0 bytes was decreased by 1 because the last 
-   byte was now a 01, however the number of base58 digits didn't increase since 
-   both 0x94a00911 and 0x019d35b5b9 can be represented with 6 base58 digits 
-   (4oLvT2 and BZbvjr respectively).
-  
-
 I10: 18jul16 svn:
 ==================
 testcases_trx2txt.sh: testcase 20 fails on OpenBSD, cause parameter buffer is only 2048 Bytes
@@ -149,13 +61,38 @@ I26: 19Oct2016, svn:
 start to think about a config file, having default values like:
 min_trxfee=50
 max_trx_size=100 # kilobytes
+SIG_MIN_LENGTH_CHARS=18
+SIG_MAX_LENGTH_CHARS=146
 ...
 
 I27: xxOct2016, svn:
 ====================
+trx_sign.sh: 
+STEP 8:  need to do a var_int check here ...
+STEP 17: when there is a trx with multiple output, need to create a loop
 
 
+I27: xxOct2016, svn:
+====================
+need to analyze 4input trx from address 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM 
+looks like the signature does not validate. Write small shell script like key2pem.sh?
+from compressed key:
+ADDRHEX=03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0
+HASHHEX=48d2c9c76dc282eb7075a0fce543b9d615c0c2d5b78b41603c2d6cf46e2e77b0
+SIGHEX=304402202acf376226c4f287ba82eb1e43f14192f0ea7e731f9d472a8510d9b09b9fcabe0220786b482911495e094e514bf706ff680ccf2ea183adf66e9c3699559f9f748f4e012103cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0
 
+
+I27: xxOct2016, svn:
+====================
+when tmp_urtx.txt file is missing, then wrong reply by sign script:
+./tcls_sign.sh -f tmp_urtx.txt -w XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0
+######################################################
+### trx_sign.sh: sign an unsigned, raw Bitcoin trx ###
+######################################################
+cat: tmp_urtx.txt: No such file or directory
+*** Error: unsigned raw transaction normally begins with Version '01000000'
+           here we have . Please adjust, and try again. 
+           Exiting gracefully
 
 
 

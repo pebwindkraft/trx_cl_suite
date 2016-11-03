@@ -172,9 +172,9 @@ check_tool() {
   fi
 }
 
-echo "######################################################"
-echo "### trx_sign.sh: sign an unsigned, raw Bitcoin trx ###"
-echo "######################################################"
+echo "#######################################################"
+echo "### tcls_sign.sh: sign an unsigned, raw Bitcoin trx ###"
+echo "#######################################################"
 
 ################################
 # command line params handling #
@@ -562,13 +562,13 @@ while [ $j -le $TX_IN_Count ]
  
   # the strict DER checking puts the SCRIPTSIG into file "tmp_trx.sig"
   if [ $VERBOSE -eq 1 ] ; then
-    ./trx_strict_sig_verify.sh -v $SCRIPTSIG
+    ./tcls_strict_sig_verify.sh -v $SCRIPTSIG
     if [ $? -eq 1 ] ; then 
       echo "*** ERROR in ScriptSig verification, exiting gracefully ..."
       exit 1
     fi
   else 
-    ./trx_strict_sig_verify.sh -q $SCRIPTSIG
+    ./tcls_strict_sig_verify.sh -q $SCRIPTSIG
     if [ $? -eq 1 ] ; then 
       echo "*** ERROR in ScriptSig verification, exiting gracefully ..."
       exit 1
