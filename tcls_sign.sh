@@ -40,11 +40,11 @@ QUIET=0
 VERBOSE=0
 VVERBOSE=0
 
-typeset -r srtx_fn=tmp_srtx.txt
-typeset -r urtx_fn=tmp_urtx.txt
-typeset -r urtx_raw_fn=tmp_urtx.raw
-typeset -r urtx_sha256_raw_fn=tmp_urtx_sha256.raw 
-typeset -r urtx_dsha256_raw_fn=tmp_urtx_dsha256.raw
+typeset -r stx_fn=tmp_srtx.txt      # signed trx file after the end of this script
+typeset -r urtx_fn=tmp_urtx.txt     # unsigned raw trx files during signing process
+typeset -r urtx_tmp_fn=tmp_urtx.hex # temp file name to assemble data for hashing
+typeset -r urtx_sha256_fn=tmp_urtx_sha256.hex 
+typeset -r urtx_dsha256_fn=tmp_urtx_dsha256.hex
 
 typeset -r Version=01000000
 typeset -r TX_IN_Sequence=ffffffff
@@ -302,6 +302,10 @@ check_tool tr
 ### so let's go ###
 ###################
 
+if [ $QUIET -ne 1 ] ; then
+  echo "let's go ..."
+fi
+
 if [ $F_PARAM_FLAG -eq 1 ] ; then
   vv_output "reading data from file $filename"
   UR_TRX=$( cat $filename )
@@ -483,9 +487,6 @@ v_output "#####################################"
 ##############################################################################
 v_output "13. create the unsigned raw tx(s), hash it(14), sign it(15), check it(16)"
 
-# if [ -f $urtx_fn ] ; then 
-#   rm $urtx_fn
-# fi
 i=1
 j=1
 while [ $j -le $TX_IN_Count ] 
@@ -520,18 +521,20 @@ while [ $j -le $TX_IN_Count ]
   v_output "14. TX_IN[$j]: double hash the raw unsigned TX"
   
   # Bitcoin never does sha256 with the hex chars, so need to convert it to hex codes first
-  cat $urtx_fn | tr [:upper:] [:lower:] > $urtx_raw_fn
-  result=$( cat $urtx_raw_fn | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
-  printf $result > $urtx_raw_fn
+  cat $urtx_fn | tr [:upper:] [:lower:] > $urtx_tmp_fn
+  result=$( cat $urtx_tmp_fn | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
+  printf $result > $urtx_tmp_fn
 
-  openssl dgst -binary -sha256 >$urtx_sha256_raw_fn  <$urtx_raw_fn 
-  openssl dgst -binary -sha256 >$urtx_dsha256_raw_fn <$urtx_sha256_raw_fn 
+  openssl dgst -binary -sha256 >$urtx_sha256_fn  <$urtx_tmp_fn 
+  openssl dgst -binary -sha256 >$urtx_dsha256_fn <$urtx_sha256_fn 
   
   if [ "$VVERBOSE" -eq 1 ] ; then 
-    echo "    the unsigned raw trx, sha256'd ($urtx_sha256_raw_fn):"
-    hexdump -C $urtx_sha256_raw_fn | sed -e 's/^/    /'
-    echo "    the unsigned raw trx, double sha256'd ($urtx_dsha256_raw_fn):"
-    hexdump -C $urtx_dsha256_raw_fn | sed -e 's/^/    /'
+    echo "    the unsigned raw trx, sha256'd ($urtx_sha256_fn):"
+    hexdump -C $urtx_sha256_fn | sed -e 's/^/    /'
+    echo "    the unsigned raw trx, double sha256'd ($urtx_dsha256_fn):"
+  fi
+  if [ "$VERBOSE" -eq 1 ] ; then 
+    od -An -t x1 tmp_urtx_dsha256.hex | tr -d [:blank:] | tr -d "\n" | sed -e 's/^/    /'
   fi
   
   ##############################################################################
@@ -543,36 +546,35 @@ while [ $j -le $TX_IN_Count ]
   v_output "15. TX_IN[$j]: sign the hash from step 14 with the private key"
   # verify keys are working correctly ...
   if [ "$hex_privkey" ] ; then 
-    ./trx_key2pem.sh -q -x $hex_privkey -p $pubkey 
+    ./tcls_key2pem.sh -q -x $hex_privkey -p $pubkey 
     if [ $? -eq 1 ] ; then 
       echo "*** error in key handling, exiting gracefully ..."
       exit 1
     fi
   else
-    ./trx_key2pem.sh -q -w $wif_privkey -p $pubkey 
+    ./tcls_key2pem.sh -q -w $wif_privkey -p $pubkey 
     if [ $? -eq 1 ] ; then 
       echo "*** error in key handling, exiting gracefully ..."
       exit 1
     fi
   fi
-  v_output "     -->openssl dgst -sha256 -sign privkey.pem -out tmp_trx.sig $urtx_dsha256_raw_fn"
-  openssl dgst -sha256 -sign privkey.pem -out tmp_trx.sig $urtx_dsha256_raw_fn
+  v_output "     -->openssl dgst -sha256 -sign privkey.pem \\"
+  v_output "                     -out tmp_trx.sig $urtx_dsha256_fn"
+  openssl dgst -sha256 -sign privkey.pem -out tmp_trx.sig $urtx_dsha256_fn
   SCRIPTSIG=$( od -An -t x1 tmp_trx.sig | tr -d [:blank:] | tr -d "\n" )
   vv_output "    $SCRIPTSIG"
  
   # the strict DER checking puts the SCRIPTSIG into file "tmp_trx.sig"
-  if [ $VERBOSE -eq 1 ] ; then
+  if [ $VVERBOSE -eq 1 ] ; then
     ./tcls_strict_sig_verify.sh -v $SCRIPTSIG
-    if [ $? -eq 1 ] ; then 
-      echo "*** ERROR in ScriptSig verification, exiting gracefully ..."
-      exit 1
-    fi
-  else 
+  elif [ $VERBOSE -eq 1 ] ; then 
+    ./tcls_strict_sig_verify.sh $SCRIPTSIG
+  else
     ./tcls_strict_sig_verify.sh -q $SCRIPTSIG
-    if [ $? -eq 1 ] ; then 
-      echo "*** ERROR in ScriptSig verification, exiting gracefully ..."
-      exit 1
-    fi
+  fi
+  if [ $? -eq 1 ] ; then 
+    echo "*** ERROR in ScriptSig verification, exiting gracefully ..."
+    exit 1
   fi
 
   ##############################################################################
@@ -687,9 +689,10 @@ while [ $j -le $TX_IN_Count ]
   trx_concatenate
 # done
 
-echo $SIGNED_TRX > tmp_srtx.txt
+echo $SIGNED_TRX > $stx_fn
 vv_output $SIGNED_TRX
 vv_output " "
+echo "the signed trx is in file $stx_fn"
 
 ################################
 ### and here we are done :-) ### 

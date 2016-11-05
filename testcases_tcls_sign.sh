@@ -53,22 +53,22 @@ echo "================================================================" | tee -a
 echo "   " | tee -a $logfile
 echo "=== TESTCASE 1a: $chksum_cmd tcls_sign.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-chksum_ref="0e0822891ef2a64a2a9e4bb1050343d604c4bffcc5464150587fcbb9c587d79a" 
 cp tcls_sign.sh tmp_trx_cfile
+chksum_ref="0e0822891ef2a64a2a9e4bb1050343d604c4bffcc5464150587fcbb9c587d79a" 
 chksum_prep
 
 echo "   " | tee -a $logfile
 echo "=== TESTCASE 1b: $chksum_cmd trx_key2pem.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-chksum_ref="1a0f3d18013acf5a3c9c272f5ee86c0684d947cf46de4686d95657aaa5926e62" 
 cp trx_key2pem.sh tmp_trx_cfile
+chksum_ref="1a0f3d18013acf5a3c9c272f5ee86c0684d947cf46de4686d95657aaa5926e62" 
 chksum_prep
 
 echo "   " | tee -a $logfile
 echo "=== TESTCASE 1c: $chksum_cmd trx_strict_sig_verify.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-chksum_ref="1a0f3d18013acf5a3c9c272f5ee86c0684d947cf46de4686d95657aaa5926e62" 
 cp trx_strict_sig_verify.sh tmp_trx_cfile
+chksum_ref="1a0f3d18013acf5a3c9c272f5ee86c0684d947cf46de4686d95657aaa5926e62" 
 chksum_prep
 
 echo " " | tee -a $logfile

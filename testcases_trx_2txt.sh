@@ -391,20 +391,26 @@ echo " " | tee -a $logfile
 }
 
 testcase12() {
-echo "=== TESTCASE 11a: " | tee -a $logfile
-chksum_ref="df9fe79f8380e40d083766f7f0e754d5eb9af5ea910fc33e7ff1597f543263a7"
-./trx_2txt.sh > tmpfile
+echo "=============================================================" | tee -a $logfile
+echo "=== TESTCASE 12: some special trx ...                     ===" | tee -a $logfile
+echo "=============================================================" | tee -a $logfile
+echo "=== TESTCASE 12a: the pizza transaction:" | tee -a $logfile
+echo "=============================================================" | tee -a $logfile
+echo "https://blockchain.info/tx/cca7507897abc89628f450e8b1e0c6fca4ec3f7b34cccf55f3f531c659ff4d79"
+echo "http://bitcoin.stackexchange.com/questions/32305/how-does-the-ecdsa-verification-algorithm-work-during-transaction/32308#32308"
+echo "./trx_2txt.sh -vv -r 01000000018dd4f5fbd5e980fc02f35c6ce145935b11e284605bf599a13c6d415db55d07a1000000008b4830450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e0141042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabbffffffff0200719a81860000001976a914df1bd49a6c9e34dfa8631f2c54cf39986027501b88ac009f0a5362000000434104cd5e9726e6afeae357b1806be25a4c3d3811775835d235417ea746b7db9eeab33cf01674b944c64561ce3388fa1abd0fa88b06c44ce81e2234aa70fe578d455dac00000000" >> $logfile
+./trx_2txt.sh -vv -r 01000000018dd4f5fbd5e980fc02f35c6ce145935b11e284605bf599a13c6d415db55d07a1000000008b4830450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e0141042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabbffffffff0200719a81860000001976a914df1bd49a6c9e34dfa8631f2c54cf39986027501b88ac009f0a5362000000434104cd5e9726e6afeae357b1806be25a4c3d3811775835d235417ea746b7db9eeab33cf01674b944c64561ce3388fa1abd0fa88b06c44ce81e2234aa70fe578d455dac00000000 > tmpfile
+chksum_ref="6b5704c3b0890f82fdff5488aa146cf7afcb5c64b73b63d80eec4242bfde3f1c"
 chksum_prep
 
-echo "=== TESTCASE 12b: " | tee -a $logfile
-chksum_ref="df9fe79f8380e40d083766f7f0e754d5eb9af5ea910fc33e7ff1597f543263a7"
-./trx_2txt.sh -v > tmpfile
+echo "=== TESTCASE 12b: nice tx_out script:" | tee -a $logfile
+echo "=============================================================" | tee -a $logfile
+echo "http://bitcoin.stackexchange.com/questions/48673/confused-about-this-particular-multisig-transaction-with-a-maybe-invalid-scrip"  | tee -a $logfile
+echo "./trx_2txt.sh -vv -t c49b3c445c89d832289de0fd3b0281efdcce418333dacd028061e8de9f0a6f10" >> $logfile
+./trx_2txt.sh -vv -t c49b3c445c89d832289de0fd3b0281efdcce418333dacd028061e8de9f0a6f10 > tmpfile
+chksum_ref="6b5704c3b0890f82fdff5488aa146cf7afcb5c64b73b63d80eec4242bfde3f1c"
 chksum_prep
 
-echo "=== TESTCASE 12c: " | tee -a $logfile
-chksum_ref="df9fe79f8380e40d083766f7f0e754d5eb9af5ea910fc33e7ff1597f543263a7"
-./trx_2txt.sh -vv > tmpfile
-chksum_prep
 echo " " | tee -a $logfile
 }
 
@@ -449,6 +455,7 @@ all_testcases() {
   testcase9 
   testcase10
   testcase11
+  testcase12
 }
 
 #####################
@@ -497,7 +504,7 @@ while [ $# -ge 1 ]
        all_testcases
      fi
      ;;
-  1|2|3|4|5|6|7|8|9|10|11)
+  1|2|3|4|5|6|7|8|9|10|11|12)
      testcase$1 
      shift
      ;;

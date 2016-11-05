@@ -26,6 +26,30 @@ I think the maximum size of a trx is 100 kb. How many trx does that make?
 How can this be implemented?
 --> minimum signature is ~50 Bytes, prev trx = 32 Bytes + PKScript 20 Bytes plus, plus, plus... so a minimum trx is roughly 227 Bytes. This would limit to ~440 particular trx? And if a trx has many inputs and many outputs?
 
+trx validation:
+https://en.bitcoin.it/wiki/Protocol_rules#.22tx.22_messages
+    Check syntactic correctness
+    Make sure neither in or out lists are empty
+    Size in bytes <= MAX_BLOCK_SIZE (or as above, 100k max?)
+    Each output value, as well as the total, must be in legal money range
+    Make sure none of the inputs have hash=0, n=-1 (coinbase transactions)
+    Check that nLockTime <= INT_MAX[1], size in bytes >= 100[2], and sig opcount <= 2[3]
+    Reject "nonstandard" transactions: scriptSig doing anything other than pushing numbers on the stack, or scriptPubkey not matching the two usual forms[4]
+    Reject if we already have matching tx in the pool, or in a block in the main branch
+    For each input, if the referenced output exists in any other tx in the pool, reject this transaction.[5]
+    For each input, look in the main branch and the transaction pool to find the referenced output transaction. If the output transaction is missing for any input, this will be an orphan transaction. Add to the orphan transactions, if a matching transaction is not in there already.
+    For each input, if the referenced output transaction is coinbase (i.e. only 1 input, with hash=0, n=-1), it must have at least COINBASE_MATURITY (100) confirmations; else reject this transaction
+    For each input, if the referenced output does not exist (e.g. never existed or has already been spent), reject this transaction[6]
+    Using the referenced output transactions to get input values, check that each input value, as well as the sum, are in legal money range
+    Reject if the sum of input values < sum of output values
+    Reject if transaction fee (defined as sum of input values minus sum of output values) would be too low to get into an empty block
+    Verify the scriptPubKey accepts for each input; reject if any are bad
+    Add to transaction pool[7]
+    "Add to wallet if mine"
+    Relay transaction to peers
+    For each orphan transaction that uses this one as one of its inputs, run all these steps (including this one) recursively on that orphan
+
+
 I22: 12Oct2016, svn:
 ====================
 trx_create.sh - testcase 6: wenn er doch ins Netz geht, und die TRX mit '-t' holt,
@@ -65,14 +89,14 @@ SIG_MIN_LENGTH_CHARS=18
 SIG_MAX_LENGTH_CHARS=146
 ...
 
-I27: xxOct2016, svn:
+I27: 25Oct2016, svn:
 ====================
 trx_sign.sh: 
 STEP 8:  need to do a var_int check here ...
 STEP 17: when there is a trx with multiple output, need to create a loop
 
 
-I27: xxOct2016, svn:
+I27: 27Oct2016, svn:
 ====================
 need to analyze 4input trx from address 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM 
 looks like the signature does not validate. Write small shell script like key2pem.sh?
@@ -80,9 +104,9 @@ from compressed key:
 ADDRHEX=03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0
 HASHHEX=48d2c9c76dc282eb7075a0fce543b9d615c0c2d5b78b41603c2d6cf46e2e77b0
 SIGHEX=304402202acf376226c4f287ba82eb1e43f14192f0ea7e731f9d472a8510d9b09b9fcabe0220786b482911495e094e514bf706ff680ccf2ea183adf66e9c3699559f9f748f4e012103cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0
+--> need to run tcls_sign.sh with one input, then more inputs ...
 
-
-I27: xxOct2016, svn:
+I28: 02Nov2016, svn:
 ====================
 when tmp_urtx.txt file is missing, then wrong reply by sign script:
 ./tcls_sign.sh -f tmp_urtx.txt -w XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0
@@ -93,6 +117,67 @@ cat: tmp_urtx.txt: No such file or directory
 *** Error: unsigned raw transaction normally begins with Version '01000000'
            here we have . Please adjust, and try again. 
            Exiting gracefully
+
+
+I29: 02Nov2016, svn:
+====================
+naming convention(s): 
+Bitcoin talks about (unsigned) raw transactions. This word raw is often used (e.g. in the pizza tranasaction) as an indicator for files (pizza.raw), which contain only hex data. So this file cannot be printed easily, you need to use 'xxd' or 'hexdump'. So effectivly the file is a hexadecimal file, not a raw file...
+NAMING CONVENTION:
+--> 1: files, which need 'xxd' or 'hexdump' need to end with ".hex" (not raw)
+--> 2: files that can be displayed with 'cat' shall have the extension ".txt"
+--> 3: avoid usage of extension ".raw"
+this needs to be inmplemented into tcls_create.sh, tcls_sign.sh and tcls_verify_sig.sh
+(and later into all other files)
+
+
+I30: 04Nov2016, svn:
+====================
+Integrate the PIZZA Transaction into all testcases:
+https://blockchain.info/rawtx/cca7507897abc89628f450e8b1e0c6fca4ec3f7b34cccf55f3f531c659ff4d79
+http://bitcoin.stackexchange.com/questions/32305/how-does-the-ecdsa-verification-algorithm-work-during-transaction/32308#32308
+
+testcases_trx_2txt.sh
+? testcases_tcls_create.sh - it has two outputs, not yet ready ...
+? testcases_tcls_sign.sh   - I don't have the priv keys, how to?
+testcases_tcls_verify_sig.sh	
+
+
+I31: 05Nov2016, svn:
+====================
+trx_2txt.sh does not recognize output script correctly, see testcase 12b
+
+I32: 05Nov2016, svn:
+====================
+is this missing in sign.sh or key2pem.sh?
+https://github.com/KittehOrg/KittehIRCClientLib/issues/45
+compressed/uncompressed pubkeys (begin with 0x02 or 0x03):
+Example 1, an uncompressed pubkey (0x04):
+  04:d5:a7:69:89:89:7e:e6:72:fd:4a:2f:20:88:c7:
+  78:0d:a1:9d:76:77:2f:a6:d3:4b:52:b9:dd:7d:fe:
+  b1:0c:a3:1b:22:b9:f5:8a:8c:2d:24:08:5b:47:aa:
+  b5:c6:c8:06:2d:52:de:ee:b4:1f:b2:37:1d:fa:e0:
+  41:ba:3e:21:6d
+Find last byte from Y co-ordinate, LSB is set:
+0x6D (to binary) => 0b1101101 (extracting LSB) => 0b00000011 
+Compressed form of above needs to start with 0x03:
+  03:3d:b3:20:74:a1:91:b2:d7:e7:cc:8e:5d:b3:2c:
+  78:0d:a1:9d:76:77:2f:a6:d3:4b:52:b9:dd:7d:fe:
+  b1:0c:a3
+
+Example 2, an uncompressed pubkey (0x04):
+  04:d5:a7:69:89:89:7e:e6:72:fd:4a:2f:20:88:c7:
+  a2:fd:ab:eb:a4:79:01:e5:48:b4:74:cb:0a:df:af:
+  06:46:51:1b:22:b9:f5:8a:8c:2d:24:08:5b:47:27:
+  b5:c6:c8:06:2d:52:de:ee:b4:1f:b2:37:1d:fa:e2:
+  f1:ba:2b:31:a6
+Find last byte from Y co-ordinate, LSB is not set:
+0xA6 => 0b10100110 => 0b00000010 
+Compressed form of above needs to start with 0x02:
+  02:d5:a7:69:89:89:7e:e6:72:fd:4a:2f:20:88:c7:
+  a2:fd:ab:eb:a4:79:01:e5:48:b4:74:cb:0a:df:af:
+  06:46:51
+
 
 
 
