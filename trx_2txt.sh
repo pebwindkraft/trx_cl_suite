@@ -180,7 +180,6 @@ decode_pkscript() {
     len=${#len}
     if [ $len -eq 130 ] ; then
       echo "  and translates base58 encoded into this bitcoin address:"
-      echo "sh ./trx_base58check_enc.sh -q -p1 $result"
       sh ./trx_base58check_enc.sh -q -p1 $result
     fi
     if [ $len -eq 66 ] ; then

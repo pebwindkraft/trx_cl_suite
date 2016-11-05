@@ -88,21 +88,22 @@ testcase3() {
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 3: the pizza transaction ...                    ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-echo "=== TESTCASE 3a: quiet operation..."                              | tee -a $logfile
+echo "=== TESTCASE 3a: pizza, quiet operation..."                       | tee -a $logfile
 echo "================================================================" | tee -a $logfile
+echo "http://bitcoin.stackexchange.com/questions/32305/how-does-the-ecdsa-verification-algorithm-work-during-transaction/32308#32308"
 echo "./tcls_verify_sig.sh -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e" >> $logfile
 ./tcls_verify_sig.sh -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669  -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e > tmp_trx_cfile
 chksum_ref="0bd65ea014d3210c1b9a7d7d5af78bc4e4b4384b4f3f7f5674e8d6447e4112c3"
 chksum_prep
 
-echo "=== TESTCASE 3b: be a bit more verbose..." | tee -a $logfile
+echo "=== TESTCASE 3b: pizza, be a bit more verbose..." | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "./tcls_verify_sig.sh -v -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e" >> $logfile
 ./tcls_verify_sig.sh -v -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669  -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e > tmp_trx_cfile 
 chksum_ref="89fda5b2d0d818c65b39f9790af4076235ee62b58282a6e704750ac63d9809d7" 
 chksum_prep
 
-echo "=== TESTCASE 3c: be very verbose..." | tee -a $logfile
+echo "=== TESTCASE 3c: pizza, be very verbose..." | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "./tcls_verify_sig.sh -vv -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e" >> $logfile
 ./tcls_verify_sig.sh -vv -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669  -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e > tmp_trx_cfile 
@@ -111,6 +112,21 @@ chksum_prep
 
 echo " " | tee -a $logfile
 }
+
+testcase4() {
+echo "================================================================" | tee -a $logfile
+echo "=== TESTCASE 4: the 4inputs trransaction ...                 ===" | tee -a $logfile
+echo "================================================================" | tee -a $logfile
+echo "=== TESTCASE 4a: quiet operation..."                              | tee -a $logfile
+echo "================================================================" | tee -a $logfile
+echo "./tcls_verify_sig.sh -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0 -s 3045022100f7efb33524d389dbecae54ba0d6555503eaeb5d6b0e6b4e20b5fcbaa92e8edd202203d6867c0fcf8586c6f3837d3ef0016318a3776792d132e6ac3e8874f58dcc2da -d 22d7437e4646e67ec050d59128a5eb713bca8b4d6d2d7bdfbab43f6140e2360b" >> $logfile
+./tcls_verify_sig.sh -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0 -s 3045022100f7efb33524d389dbecae54ba0d6555503eaeb5d6b0e6b4e20b5fcbaa92e8edd202203d6867c0fcf8586c6f3837d3ef0016318a3776792d132e6ac3e8874f58dcc2da -d 22d7437e4646e67ec050d59128a5eb713bca8b4d6d2d7bdfbab43f6140e2360b > tmp_trx_cfile
+chksum_ref="1c7b9b16cd50e9a66f69fadb455273e7a361a370b21eff99bccb96b80b7c2818" 
+chksum_prep
+
+echo " " | tee -a $logfile
+}
+
 
 
 all_testcases() {
