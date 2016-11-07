@@ -51,13 +51,13 @@ echo "=== TESTCASE 1: checksums of all necessary files             ===" | tee -a
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 1a: $chksum_cmd trx_2txt.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-chksum_ref="0222c3f386876643f74d322650efce7e9bf8f244c8a6ab03559e834aecf0a22c"
+chksum_ref="3767954c1330fc400706dec9c65bc1cca000fbf664b7335aa0a5e6a26522d3ce"
 cp trx_2txt.sh tmpfile
 chksum_prep
  
 echo "=== TESTCASE 1b: $chksum_cmd trx_in_sig_script.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-chksum_ref="fb074b676d5c643c80479ee8a857db61caf491e374048370154c774db44647c4" 
+chksum_ref="8b8882737173a54958b1803cfea402301eb0f3b422a7f7054975ad09da7a648c" 
 cp trx_in_sig_script.sh tmpfile
 chksum_prep
 
@@ -87,7 +87,7 @@ echo "================================================================" | tee -a
 echo "=== TESTCASE 2a: wrong parameter: ./trx_2txt.sh xyz" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./trx_2txt.sh xyz > tmpfile
-chksum_ref="8f9d3b18dff5afd430a8dc43c0da7944850f0b340b5fbb89aec5089685dd2f44" 
+chksum_ref="6c4261aa593a03b9f34941d8c4b99b31d8b4e8232e2bc53bc268967fc6bf6815" 
 chksum_prep
 
 echo "=== TESTCASE 2b: wrong parameter: ./trx_2txt.sh -r" | tee -a $logfile
@@ -117,13 +117,13 @@ chksum_prep
 echo "=== TESTCASE 2f: wrong parameter: ./trx_2txt.sh -v abc" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./trx_2txt.sh -v abc > tmpfile
-chksum_ref="edbda2f2fdc8479a4c119b2c02031bed01f9e5b85ee2a53e9e2364d73e6a4503" 
+chksum_ref="97bb736bad1cd027952b23b233ecfc9e5c6480acbd5f0ee377c1de540f04e873" 
 chksum_prep
  
 echo "=== TESTCASE 2g: show help: ./trx_2txt.sh -h" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./trx_2txt.sh -h > tmpfile
-chksum_ref="1b062ba10cc27e9910f7b4e13111007a8d8274532e710bebd01e0ab192ea648b" 
+chksum_ref="658b9fb23b61559abf0bba7383f9a7c13b452ffdae3dc1edcc2fd0b4822084e8" 
 chksum_prep
 
 echo "=== TESTCASE 2h: show default: ./trx_2txt.sh" | tee -a $logfile
@@ -400,15 +400,16 @@ echo "https://blockchain.info/tx/cca7507897abc89628f450e8b1e0c6fca4ec3f7b34cccf5
 echo "http://bitcoin.stackexchange.com/questions/32305/how-does-the-ecdsa-verification-algorithm-work-during-transaction/32308#32308"
 echo "./trx_2txt.sh -vv -r 01000000018dd4f5fbd5e980fc02f35c6ce145935b11e284605bf599a13c6d415db55d07a1000000008b4830450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e0141042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabbffffffff0200719a81860000001976a914df1bd49a6c9e34dfa8631f2c54cf39986027501b88ac009f0a5362000000434104cd5e9726e6afeae357b1806be25a4c3d3811775835d235417ea746b7db9eeab33cf01674b944c64561ce3388fa1abd0fa88b06c44ce81e2234aa70fe578d455dac00000000" >> $logfile
 ./trx_2txt.sh -vv -r 01000000018dd4f5fbd5e980fc02f35c6ce145935b11e284605bf599a13c6d415db55d07a1000000008b4830450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e0141042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabbffffffff0200719a81860000001976a914df1bd49a6c9e34dfa8631f2c54cf39986027501b88ac009f0a5362000000434104cd5e9726e6afeae357b1806be25a4c3d3811775835d235417ea746b7db9eeab33cf01674b944c64561ce3388fa1abd0fa88b06c44ce81e2234aa70fe578d455dac00000000 > tmpfile
-chksum_ref="6b5704c3b0890f82fdff5488aa146cf7afcb5c64b73b63d80eec4242bfde3f1c"
+chksum_ref="74eefa8081276ab2af6699867be54d485e47e83c74a582759786f394f07c4c19"
 chksum_prep
 
+echo " " | tee -a $logfile
 echo "=== TESTCASE 12b: nice tx_out script:" | tee -a $logfile
 echo "=============================================================" | tee -a $logfile
 echo "http://bitcoin.stackexchange.com/questions/48673/confused-about-this-particular-multisig-transaction-with-a-maybe-invalid-scrip"  | tee -a $logfile
 echo "./trx_2txt.sh -vv -t c49b3c445c89d832289de0fd3b0281efdcce418333dacd028061e8de9f0a6f10" >> $logfile
 ./trx_2txt.sh -vv -t c49b3c445c89d832289de0fd3b0281efdcce418333dacd028061e8de9f0a6f10 > tmpfile
-chksum_ref="6b5704c3b0890f82fdff5488aa146cf7afcb5c64b73b63d80eec4242bfde3f1c"
+chksum_ref="295ff93b09a7010b62d12dc64041c964916f7a6fdf93740ed818411a07a7006f"
 chksum_prep
 
 echo " " | tee -a $logfile

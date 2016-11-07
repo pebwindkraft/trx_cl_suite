@@ -54,37 +54,51 @@ echo "   " | tee -a $logfile
 echo "=== TESTCASE 1a: $chksum_cmd tcls_sign.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 cp tcls_sign.sh tmp_trx_cfile
-chksum_ref="0e0822891ef2a64a2a9e4bb1050343d604c4bffcc5464150587fcbb9c587d79a" 
+chksum_ref="5174557792fd704e273d1010f27d578a955060bb846d633c1f22e78751ceb445" 
 chksum_prep
 
 echo "   " | tee -a $logfile
-echo "=== TESTCASE 1b: $chksum_cmd trx_key2pem.sh" | tee -a $logfile
+echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-cp trx_key2pem.sh tmp_trx_cfile
-chksum_ref="1a0f3d18013acf5a3c9c272f5ee86c0684d947cf46de4686d95657aaa5926e62" 
+cp tcls_key2pem.sh tmp_trx_cfile
+chksum_ref="8dca870afad8078744bd22e8dfa73ff79009b03960bf2a756ee45b580c03f2a6" 
 chksum_prep
 
 echo "   " | tee -a $logfile
-echo "=== TESTCASE 1c: $chksum_cmd trx_strict_sig_verify.sh" | tee -a $logfile
+echo "=== TESTCASE 1c: $chksum_cmd tcls_strict_sig_verify.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-cp trx_strict_sig_verify.sh tmp_trx_cfile
-chksum_ref="1a0f3d18013acf5a3c9c272f5ee86c0684d947cf46de4686d95657aaa5926e62" 
+cp tcls_strict_sig_verify.sh tmp_trx_cfile
+chksum_ref="78126a731aa727bf9a3b9168d686192ed9e8561a511586bfbc9518e04439ce1b" 
 chksum_prep
 
 echo " " | tee -a $logfile
 }
 
 testcase2() {
+
+###
+### the script sigs are changing on every call, need to filter result!!
+###
+
 echo "================================================================" | tee -a $logfile
-echo "=== TESTCASE 2: parameters testing ...                       ===" | tee -a $logfile
+echo "=== TESTCASE 2: sign a trx, prepared from tcls_create.sh     ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-echo "=== TESTCASE 2a: manually create a simple unsigned, raw trx" | tee -a $logfile
+echo "=== TESTCASE 2a: use a single input trx ..."                      | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-echo "./tcls_sign.sh -m F2B3EB2DEB76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
-./tcls_sign.sh -m F2B3EB2DEB76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_trx_cfile
-chksum_ref="05d45dc08167a9a2d90b24c3dc99ebd9289cb74ccb8de357e657881d351a6316" 
+echo "./tcls_sign.sh -v -f tmp_c_urtx.txt -w KyP5KEp6DCmF222YM5EB9yGeMFxdVK1QWgtGvWnLRnDmiCtQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0" >> $logfile
+printf "010000000174fb6858c31a292d20c9744187032bddb7ddea02a3aa3ef523c8524a21481881010000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88acffffffff01b08f0600000000001976a91418ec49b27624086a2b6f35f263d951d25dbe24b688ac0000000001000000" > tmp_c_urtx.txt
+./tcls_sign.sh -v -f tmp_c_urtx.txt -w KyP5KEp6DCmF222YM5EB9yGeMFxdVK1QWgtGvWnLRnDmiCtQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0 > tmp_trx_cfile
+chksum_ref="58690464c27fe8df02bf6f3197f472644abc29c5a71ac0615fcb7fea9b765d0e" 
 chksum_prep
 
+echo " " | tee -a $logfile
+echo "=== TESTCASE 2b: use four inputs trx" | tee -a $logfile
+echo "================================================================" | tee -a $logfile
+echo "./tcls_sign.sh -v -f tmp_c_urtx.txt -w KyP5KEp6DCmF222YM5EB9yGeMFxdVK1QWgtGvWnLRnDmiCtQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0" >> $logfile
+printf "0100000004b0772e6ef46c2d3c60418bb7d5c2c015d6b943e5fca07570eb82c26dc7c9d248010000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88acffffffff74fb6858c31a292d20c9744187032bddb7ddea02a3aa3ef523c8524a21481881010000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88acffffffffcc21e36eedb509c660681c1e949dd294bd4c11692439221004c2235d565b74bb000000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88acffffffffea919487e04ed509d6cb9c7297c277b9be3a68f3836c7d86df378714a75949e8000000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88acffffffff01b08f0600000000001976a91418ec49b27624086a2b6f35f263d951d25dbe24b688ac0000000001000000" > tmp_c_urtx.txt
+./tcls_sign.sh -v -f tmp_c_urtx.txt -w KyP5KEp6DCmF222YM5EB9yGeMFxdVK1QWgtGvWnLRnDmiCtQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0 > tmp_trx_cfile
+chksum_ref="7a04bf9babef57c1529ef91271c8ce553b6129c99bde1c69c491a94373084f67" 
+chksum_prep
 
 echo " " | tee -a $logfile
 }

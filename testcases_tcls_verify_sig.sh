@@ -54,21 +54,21 @@ echo "   " | tee -a $logfile
 echo "=== TESTCASE 1a: $chksum_cmd tcls_verify_sig.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 cp tcls_verify_sig.sh tmp_trx_cfile
-chksum_ref="c34a6f50f56d8d712f70c3c4103c643b0e9d883941f36227dc4d71d113737896" 
+chksum_ref="9471debb4d64d3b62a8d0baf72c53a9ad5e256b63f7765dfeacd513171a9911c" 
 chksum_prep
 
 echo "   " | tee -a $logfile
 echo "=== TESTCASE 1b: $chksum_cmd trx_key2pem.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-cp trx_key2pem.sh tmp_trx_cfile
-chksum_ref="ed600c2acb39c75eac530cd2c1f7687ccb341eb05fc459ce5164ec454044b63b" 
+cp tcls_key2pem.sh tmp_trx_cfile
+chksum_ref="8dca870afad8078744bd22e8dfa73ff79009b03960bf2a756ee45b580c03f2a6" 
 chksum_prep
 
 echo "   " | tee -a $logfile
 echo "=== TESTCASE 1c: $chksum_cmd trx_strict_sig_verify.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-cp trx_strict_sig_verify.sh tmp_trx_cfile
-chksum_ref="ed600c2acb39c75eac530cd2c1f7687ccb341eb05fc459ce5164ec454044b63b"
+cp tcls_strict_sig_verify.sh tmp_trx_cfile
+chksum_ref="78126a731aa727bf9a3b9168d686192ed9e8561a511586bfbc9518e04439ce1b"
 chksum_prep
 
 echo " " | tee -a $logfile
@@ -107,7 +107,7 @@ echo "=== TESTCASE 3c: pizza, be very verbose..." | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "./tcls_verify_sig.sh -vv -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e" >> $logfile
 ./tcls_verify_sig.sh -vv -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669  -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e > tmp_trx_cfile 
-chksum_ref="331c305ac2269bb865b68b7ec6a01765beb916ec8a1da5f20d65d58c81d0bd40" 
+chksum_ref="a5db7b8376f7f5d341d11545f7958ab6f24e560765a03b5d124d785665fad745" 
 chksum_prep
 
 echo " " | tee -a $logfile
@@ -115,7 +115,7 @@ echo " " | tee -a $logfile
 
 testcase4() {
 echo "================================================================" | tee -a $logfile
-echo "=== TESTCASE 4: the 4inputs trransaction ...                 ===" | tee -a $logfile
+echo "=== TESTCASE 4: the 4inputs transaction ...                  ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 4a: quiet operation..."                              | tee -a $logfile
 echo "================================================================" | tee -a $logfile

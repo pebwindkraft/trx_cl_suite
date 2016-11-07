@@ -45,37 +45,16 @@
 ###########################
 VERBOSE=0
 VVERBOSE=0
+
+tmp_sig_fn=tmp_sig.hex
+tmp_dsha256_fn=tmp_dsah256.hex
+
 pre_string=''
 mid_string=''
 pubkey_1stchar=''
-# PUBKEY pre-String:
-#   30  <-- declares the start of an ASN.1 sequence
-#   56  <-- length of following sequence (dez 86)
-#   30  <-- length declaration is following  
-#   10  <-- length of integer in bytes (dez 16)
-#   06  <-- declares the start of an "octet string"
-#   07  <-- length of integer in bytes (dez 7)
-#   2a 86 48 ce 3d 02 01 <-- Object Identifier: 1.2.840.10045.2.1
-#                            = ecPublicKey, ANSI X9.62 public key type
-#   06  <-- declares the start of an "octet string"
-#   05  <-- length of integer in bytes (dez 5)
-#   2b 81 04 00 0a <-- Object Identifier: 1.3.132.0.10 
-#                      = secp256k1, SECG (Certicom) named eliptic curve
-#   03  <-- declares the start of an "octet string"  
-#   42  <-- length of bit string to follow (66 bytes)
-#   00  <-- ??
-#
-#
-# hier stimmt noch was nicht...
-# Linux/OpenBSD/MacOSX: je 3 verschieden compressed und uncompressed strings?
-# 
-pre_pubstr_uc=$( echo "3056301006072a8648ce3d020106052b8104000a034200" )
-# MacOSX (openssl 1.0.2a) wants this:
-pre_pubstr_c=$( echo "3042301006072a8648ce3d020106052b8104000a032200" )
-# OpenBSD (libressl 2.3.2) wants this:
-pre_pubstr_c=$( echo "3036301006072a8648ce3d020106052b8104000a032200" )
-
-# pre_pubstr_c=$( echo "300000000000000000ce3d020106052b8104000a032200" )
+# for a detailed explanation of these pre pubkey strings, look at the file tcls_sign.sh.
+pre_pubstr_uc=3056301006072a8648ce3d020106052b8104000a034200
+pre_pubstr_c=3036301006072a8648ce3d020106052b8104000a032200
 
 dsha256hash="9302bda273a887cb40c13e02a50b4071a31fd3aae3ae04021b0b843dd61ad18e"
 
@@ -358,11 +337,11 @@ if [ $VERBOSE -eq 1 ] ; then
 fi 
 # convert the hex strings to raw data (dump with "hexdump -C <filename>")
 result=$( echo $dsha256hash | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
-printf $result > tmp_dsha256.raw
+printf $result > $tmp_dsha256_fn
 result=$( echo $signature | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
-printf $result > tmp_sig.raw
-vv_output "openssl pkeyutl -verify -pubin -inkey pubkey.pem -sigfile tmp_sig.raw -in tmp_dsha256.raw"
-openssl pkeyutl -verify -pubin -inkey pubkey.pem -sigfile tmp_sig.raw -in tmp_dsha256.raw
+printf $result > $tmp_sig_fn
+vv_output "openssl pkeyutl -verify -pubin -inkey pubkey.pem -sigfile $tmp_sig_fn -in $tmp_dsha256_fn"
+openssl pkeyutl -verify -pubin -inkey pubkey.pem -sigfile $tmp_sig_fn -in $tmp_dsha256_fn
 
 exit 0
 

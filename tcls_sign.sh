@@ -32,7 +32,19 @@
 # approximately 25%, 50% and 25% respectively, although sizes even smaller than that
 # are possible with exponentially decreasing probability.
 #
-#
+# the signing process in short:
+#  prepare keys:
+#   openssl ecparam -genkey -name secp256k1 -noout -out privkey.pem
+#   openssl ec -in privkey.pem -pubout -out pubkey.pem
+#   openssl ec -in privkey.pem -pubout -out pubkey.pem -conv_form compressed
+#  sign:
+#   openssl dgst -sign privkey.pem  -sha256 -hex tmp_c_urtx.txt
+#   openssl dgst -sign privkey.pem  -sha256 tmp_c_urtx.txt > tmp_sig.hex
+#  verify:
+#   openssl dgst -verify pubkey.pem -sha256 -signature tmp_sig.hex tmp_c_urtx.txt
+# 
+# echo "MDYwEAYHKo...BASE64_PART_OF_PEM...3txRPk8bqOWhIkprA=" | base64 -D - | hexdump -C
+# 
 ###########################
 # Some variables ...      #
 ###########################
@@ -41,14 +53,16 @@ VERBOSE=0
 VVERBOSE=0
 
 typeset -r stx_fn=tmp_srtx.txt      # signed trx file after the end of this script
-typeset -r urtx_fn=tmp_urtx.txt     # unsigned raw trx files during signing process
-typeset -r urtx_tmp_fn=tmp_urtx.hex # temp file name to assemble data for hashing
+typeset -r sig_tmp_fn=tmp_sig.hex   # for each tx input, store the signature 
+typeset -r urtx_fn=tmp_urtx.txt     # the assembled, unsigned, raw tx to be signed
+typeset -r urtx_tmp_fn=tmp_urtx.hex # convert unsigned tx to hex, to do hashing then
 typeset -r urtx_sha256_fn=tmp_urtx_sha256.hex 
 typeset -r urtx_dsha256_fn=tmp_urtx_dsha256.hex
 
 typeset -r Version=01000000
 typeset -r TX_IN_Sequence=ffffffff
 typeset -r LockTime=00000000
+typeset -r SIGHASH_ALL=01000000
 
 typeset -i TX_IN_Count=0
 typeset -i TX_OUT_Count=0
@@ -483,9 +497,9 @@ v_output "### create signed raw transaction ###"
 v_output "#####################################"
 
 ##############################################################################
-### STEP 13 - create the unsigned, raw trx for each input                  ###
+### STEP 13 - serialize the unsigned raw tx and add 01000000 (SIGHASH_ALL) ###
 ##############################################################################
-v_output "13. create the unsigned raw tx(s), hash it(14), sign it(15), check it(16)"
+v_output "13. serialize the unsigned raw tx and add 01000000 (SIGHASH_ALL)"
 
 i=1
 j=1
@@ -514,9 +528,10 @@ while [ $j -le $TX_IN_Count ]
   printf $TX_OUT_PKScriptBytes_hex >> $urtx_fn
   printf $TX_OUT_PKScript >> $urtx_fn
   printf $LockTime >> $urtx_fn
+  # printf $SIGHASH_ALL >> $urtx_fn
 
   ##############################################################################
-  ### STEP 14 - HASH the raw unsigned trx                                    ###
+  ### STEP 14 - double sha256 that structure from 13                         ###
   ##############################################################################
   v_output "14. TX_IN[$j]: double hash the raw unsigned TX"
   
@@ -538,11 +553,12 @@ while [ $j -le $TX_IN_Count ]
   fi
   
   ##############################################################################
-  ### STEP 15 - OpenSSL sign the hash from step 14 with the private key      ###
+  ### STEP 15 - prepare signature and pubkey string with OpenSSL             ###
   ##############################################################################
-  # 15. We then create a public/private key pair out of the provided private key. 
-  #     We sign the hash from step 14 with the private key. 
-  #     and add the one byte hash code "01" to it's end.
+  # 15: prepare signature and pubkey string
+  #     sign structure from 14 (with openssl, DER-encoded)
+  #     add 01 (the one byte hash code terminates signature) to signature
+  #     add pubkey (hex chars)
   v_output "15. TX_IN[$j]: sign the hash from step 14 with the private key"
   # verify keys are working correctly ...
   if [ "$hex_privkey" ] ; then 
@@ -558,13 +574,20 @@ while [ $j -le $TX_IN_Count ]
       exit 1
     fi
   fi
-  v_output "     -->openssl dgst -sha256 -sign privkey.pem \\"
-  v_output "                     -out tmp_trx.sig $urtx_dsha256_fn"
-  openssl dgst -sha256 -sign privkey.pem -out tmp_trx.sig $urtx_dsha256_fn
-  SCRIPTSIG=$( od -An -t x1 tmp_trx.sig | tr -d [:blank:] | tr -d "\n" )
-  vv_output "    $SCRIPTSIG"
- 
-  # the strict DER checking puts the SCRIPTSIG into file "tmp_trx.sig"
+  v_output "     openssl dgst -sign privkey.pem -sha256 \\"
+  v_output "             -out $sig_tmp_fn $urtx_dsha256_fn"
+  openssl dgst -sign privkey.pem -sha256 -out $sig_tmp_fn $urtx_dsha256_fn
+  SCRIPTSIG=$( od -An -t x1 $sig_tmp_fn | tr -d [:blank:] | tr -d "\n" )
+  v_output "    $SCRIPTSIG"
+
+
+  v_output "     openssl pkeyutl -sign -in $urtx_dsha256_fn \\"
+  v_output "             -inkey privkey.pem -keyform PEM > $sig_tmp_fn"
+  openssl pkeyutl -sign -in $urtx_dsha256_fn -inkey privkey.pem -keyform PEM > $sig_tmp_fn
+  SCRIPTSIG=$( od -An -t x1 $sig_tmp_fn | tr -d [:blank:] | tr -d "\n" )
+  v_output "    $SCRIPTSIG"
+
+  # the strict DER checking reads the SCRIPTSIG from file "$sig_tmp_fn"
   if [ $VVERBOSE -eq 1 ] ; then
     ./tcls_strict_sig_verify.sh -v $SCRIPTSIG
   elif [ $VERBOSE -eq 1 ] ; then 
@@ -580,31 +603,34 @@ while [ $j -le $TX_IN_Count ]
   ##############################################################################
   ### STEP 16 - construct the final scriptSig                                ###
   ##############################################################################
-  # 16. We construct the final scriptSig by concatenating: 
+  #     calculate length of DER-sgnature from 15 plus 1, and concatenate:
+  #     - one byte script OPCODE 
+  #     - the actual DER-encoded signature plus the one-byte hash code type
+  #     - one byte script OPCODE containing the length of the public key
+  #     - the actual public key
   v_output "16. TX_IN[$j]: construct the final scriptSig[$j]"
-  # a: <One-byte script OPCODE containing the length of the DER-encoded signature plus 1>
-  #       (for the one byte len code itself)
-  STEPCODE=$( wc -c < "tmp_trx.sig" )
+  
+  vv_output "    the one byte script length OPCODE"
+  STEPCODE=$( wc -c < "$sig_tmp_fn" )
   STEPCODE=$( echo "obase=16;$STEPCODE + 1" | bc )
   SCRIPTSIG[$j]=$STEPCODE
 
-  # b: <we add the the actual DER-encoded signature, and a '01' as hex code>
-  vv_output "    Add a '01' as end identifier to sig"
-  # Strict DER checking had it's output in file "tmp_trx.sig" 
+  vv_output "    the actual DER-encoded signature plus the one-byte hash code type"
+  # Strict DER checking (in step 15) had it's output in file "$sig_tmp_fn" 
   #  - need to convert file to a string first:
-  STEPCODE=$( od -An -t x1 tmp_trx.sig | tr -d [[:blank:]] | tr -d "\n" )
+  STEPCODE=$( od -An -t x1 $sig_tmp_fn | tr -d [[:blank:]] | tr -d "\n" )
   SCRIPTSIG[$j]=${SCRIPTSIG[$j]}$STEPCODE
   STEPCODE=01
   SCRIPTSIG[$j]=${SCRIPTSIG[$j]}$STEPCODE
   vv_output "    ${SCRIPTSIG[$j]}"
 
-  # c: <One-byte script OPCODE containing the length of the public key>
+  vv_output "    one byte script OPCODE containing the length of the public key"
   STEPCODE=${#pubkey}
   STEPCODE=$( echo "obase=16;$STEPCODE / 2" | bc )
   vv_output "    len pubkey in hex=$STEPCODE (Bytes)"
   SCRIPTSIG[$j]=${SCRIPTSIG[$j]}$STEPCODE
 
-  # d: <The actual public key>
+  vv_output "    the actual public key"
   SCRIPTSIG[$j]=${SCRIPTSIG[$j]}$pubkey
   vv_output "    ${SCRIPTSIG[$j]}"
   vv_output " "
