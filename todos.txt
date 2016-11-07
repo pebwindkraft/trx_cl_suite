@@ -92,6 +92,7 @@ SIG_MAX_LENGTH_CHARS=146
 I27: 25Oct2016, svn:
 ====================
 trx_sign.sh: 
+STEP 5:  need to do a var_int check here ...
 STEP 8:  need to do a var_int check here ...
 STEP 17: when there is a trx with multiple output, need to create a loop
 
@@ -145,7 +146,36 @@ testcases_tcls_verify_sig.sh
 
 I31: 05Nov2016, svn:
 ====================
-trx_2txt.sh does not recognize output script correctly, see testcase 12b
+remove the word "raw" from trx_2txt.sh. A raw transaction is simply an unsigned, text readable set of hexchars? see also I29. See also in this help text line:
+usage: ./trx_2txt.sh [-h|-r|-t|-u|-v|-vv] [[raw]trx][...]
+need to search and replace in whole file.
+
+
+I32: 05Nov2016, svn:
+====================
+trx_2txt.sh does not recognize output script correctly, see testcase 12b:
+TX_OUT COUNT, hex=01, decimal=1
+TX_OUT[0]
+ TX_OUT[0] Value (uint64_t)
+  hex=A0BB0D0000000000, reversed_hex=00000000000DBBA0, dec=900000, bitcoin=0.00900000
+ TX_OUT[0] PK_Script Length (var_int)
+  hex=0119, dec=281
+ TX_OUT[0] pk_script (uchar[])
+  514C78FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF4C78FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF2102323C909B017748294C1D1FB82648B2C2905CD941D9A863E036B3157E8AA85DD353AE
+     51: OP_1, OP_TRUE
+    4C: unknown opcode 
+    21: OP_Data33
+        02323C909B017748:294C1D1FB82648B2
+        C2905CD941D9A863:E036B3157E8AA85D
+        D3
+    53: unknown opcode 
+   02323C909B017748294C1D1FB82648B2C2905CD941D9A863E036B3157E8AA85DD3
+  and translates base58 encoded into this bitcoin address:
+   15GcaaL7edMsqQnKEviqqmmsb4ibskZUjkSsCNf3mmku8PCdvsb
+ 
+ LOCK_TIME
+00000000
+
 
 I32: 05Nov2016, svn:
 ====================

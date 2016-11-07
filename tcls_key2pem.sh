@@ -37,33 +37,20 @@
 # http://bitcoin.stackexchange.com/questions/46455/\
 # verifying-a-bitcoin-trx-on-the-unix-cmd-line-with-openssl?noredirect=1
 # 
-# $ cat pizza.inphex
-# 01000000018dd4f5fbd5e980fc02f35c6ce145935b11e284605bf599a13c6d41
-# 5db55d07a1000000001976a91446af3fb481837fadbb421727f9959c2d32a368
-# 2988acffffffff0200719a81860000001976a914df1bd49a6c9e34dfa8631f2c
-# 54cf39986027501b88ac009f0a5362000000434104cd5e9726e6afeae357b180
-# 6be25a4c3d3811775835d235417ea746b7db9eeab33cf01674b944c64561ce33
-# 88fa1abd0fa88b06c44ce81e2234aa70fe578d455dac0000000001000000
-# $ cat pizza.sighex
-# 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41 \
-# 328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e
-# $ cat pizza.keyhex
-# 3056301006072a8648ce3d020106052b8104000a034200
-# 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426 \
-# 529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb
+# the signing process in short:
+#  prepare keys:
+#   openssl ecparam -genkey -name secp256k1 -noout -out privkey.pem
+#   openssl ec -in privkey.pem -pubout -out pubkey.pem
+#   openssl ec -in privkey.pem -pubout -out pubkey.pem -conv_form compressed
+#  sign:
+#   openssl dgst -sign privkey.pem  -sha256 -hex tmp_c_urtx.txt
+#   openssl dgst -sign privkey.pem  -sha256 tmp_c_urtx.txt > tmp_sig.hex
+#  verify:
+#   openssl dgst -verify pubkey.pem -sha256 -signature tmp_sig.hex tmp_c_urtx.txt
+#  
+# echo "MDYwEAYHKo...BASE64_PART_OF_PEM...3txRPk8bqOWhIkprA=" | base64 -D - | hexdump -C
 #
-# $ xxd -r -p <pizza.inphex >pizza.inpraw
-# $ xxd -r -p <pizza.sighex >pizza.sigraw
-# $ xxd -r -p <pizza.keyhex | openssl pkey -pubin -inform der >pizza.keypem
-# 
-# $ openssl sha256 <pizza.inpraw -binary >pizza.hash1
-# $ openssl sha256 <pizza.hash1 -verify pizza.keypem -signature pizza.sigraw
-# Verified OK
-# 
-# $ openssl sha256 <pizza.hash1 -binary >pizza.hash2
-# $ openssl pkeyutl <pizza.hash2 -verify -pubin -inkey pizza.keypem -sigfile pizza.sigraw
-# Signature Verified Successfully
-# 
+
 
 ###########################
 # Some variables ...      #
@@ -174,12 +161,6 @@ pre_pubstr_c=3036301006072a8648ce3d020106052b8104000a032200
 #   42  <-- length of bit string to follow (66 bytes)
 #   00  <-- ??
 #
-pre_pubstr_uc=$( echo "3056301006072a8648ce3d020106052b8104000a034200" )
-# MacOSX (openssl 1.0.2a) wants this:
-pre_pubstr_c=$( echo "3042301006072a8648ce3d020106052b8104000a032200" )
-# OpenBSD (libressl 2.3.2) wants this:
-pre_pubstr_c=$( echo "3036301006072a8648ce3d020106052b8104000a032200" )
-
 
 # base58=({1..9} {A..H} {J..N} {P..Z} {a..k} {m..z})
 # base58="123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
@@ -537,7 +518,7 @@ if [ "$pubkey_char" == "04" ] ; then
 else
   v_output "  the pubkey   : $pubkey"
 fi
-echo $pre_string$hex_privkey$mid_string$pubkey > privkey.hex
+echo $pre_string$hex_privkey$mid_string$pubkey > privkey_hex.txt
 result=$( echo $pre_string$hex_privkey$mid_string$pubkey | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
 printf "$result" > tmp_key2pem
 
@@ -581,34 +562,34 @@ fi
 ######################################
 if [ $VVERBOSE -eq 1 ] ; then
   echo " "
-  echo "### use pre defined ASN.1 strings to concatenate pubkey1.hex"
+  echo "### use pre defined ASN.1 strings to concatenate pubkey_m_hex.txt"
   if [ "$pubkey_char" == "04" ] ; then
     echo   "  a pre_pubstr: $pre_pubstr_uc" 
     echo   "  the pubkey  : $pubkey"
-    echo $pre_pubstr_uc$pubkey > pubkey1.hex
-    result=$( cat pubkey1.hex | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
+    echo $pre_pubstr_uc$pubkey > pubkey_m_hex.txt
+    result=$( cat pubkey_m_hex.txt | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
     printf "$result" > tmp_key2pem
   else
     echo   "  a pre_pubstr: $pre_pubstr_c" 
     echo   "  the pubkey  : $pubkey"
-    echo $pre_pubstr_c$pubkey > pubkey1.hex
-    result=$( cat pubkey1.hex | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
+    echo $pre_pubstr_c$pubkey > pubkey_m_hex.txt
+    result=$( cat pubkey_m_hex.txt | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
     printf "$result" > tmp_key2pem
   fi
   vv_output " "
-  vv_output "### base64 pubkey1.hex file and put some nice surroundings"
+  vv_output "### base64 pubkey_m_hex.txt file and put some nice surroundings"
   vv_output "openssl enc -base64 -in tmp_key2pem"
-  echo "-----BEGIN PUBLIC KEY-----"   >  pubkey1.pem
-  openssl enc -base64 -in tmp_key2pem >> pubkey1.pem
-  echo "-----END PUBLIC KEY-----"     >> pubkey1.pem
+  echo "-----BEGIN PUBLIC KEY-----"   >  pubkey_m.pem
+  openssl enc -base64 -in tmp_key2pem >> pubkey_m.pem
+  echo "-----END PUBLIC KEY-----"     >> pubkey_m.pem
   rm tmp_key2pem
-  cat pubkey1.pem
+  cat pubkey_m.pem
   echo " "
   echo "openssl asn1parse -in pubkey.pem"
   openssl asn1parse -in pubkey.pem 
   echo " "
-  echo "openssl asn1parse -in pubkey1.pem"
-  openssl asn1parse -in pubkey1.pem 
+  echo "openssl asn1parse -in pubkey_m.pem"
+  openssl asn1parse -in pubkey_m.pem 
 fi
 
 ###################################################
@@ -625,28 +606,28 @@ if [ $VERBOSE -eq 1 ] ; then
   printf $result > tmp_urtx.sha
 
   echo "sign with privkey (openssl pkeyutl ... )"
-  vv_output "  -sign -in tmp_urtx.sha -inkey privkey.pem -keyform PEM > tmp_srtx.sig"
-  openssl pkeyutl -sign -in tmp_urtx.sha -inkey privkey.pem -keyform PEM > tmp_srtx.sig
+  vv_output "  -sign -in tmp_urtx.sha -inkey privkey.pem -keyform PEM > tmp_pkeyutl_sig.hex"
+  openssl pkeyutl -sign -in tmp_urtx.sha -inkey privkey.pem -keyform PEM > tmp_pkeyutl_sig.hex
   echo "verify with pubkey:"
-  vv_output "  -verify -pubin -inkey pubkey.pem -sigfile tmp_srtx.sig -in tmp_urtx.sha"
-  openssl pkeyutl -verify -pubin -inkey pubkey.pem -sigfile tmp_srtx.sig -in tmp_urtx.sha
+  vv_output "  -verify -pubin -inkey pubkey.pem -sigfile tmp_pkeyutl_sig.hex -in tmp_urtx.sha"
+  openssl pkeyutl -verify -pubin -inkey pubkey.pem -sigfile tmp_pkeyutl_sig.hex -in tmp_urtx.sha
   if [ $VVERBOSE -eq 1 ] ; then
-    echo "verify with (pre defined ASN.1 strings) assembled pubkey1.pem:"
-    vv_output "  -verify -pubin -inkey pubkey1.pem -sigfile tmp_srtx.sig -in tmp_urtx.sha"
-    openssl pkeyutl -verify -pubin -inkey pubkey1.pem -sigfile tmp_srtx.sig -in tmp_urtx.sha
+    echo "verify with (pre defined ASN.1 strings) assembled pubkey_m.pem:"
+    vv_output "  -verify -pubin -inkey pubkey_m.pem -sigfile tmp_pkeyutl_sig.hex -in tmp_urtx.sha"
+    openssl pkeyutl -verify -pubin -inkey pubkey_m.pem -sigfile tmp_pkeyutl_sig.hex -in tmp_urtx.sha
   fi
 
   echo " "
   echo "sign with privkey (openssl dgst -sha256 ... )"
-  vv_output "  -sign privkey.pem -out tmp_srtx_dgst256.sig tmp_urtx.sha"
-  openssl dgst -sha256 -sign privkey.pem -out tmp_srtx_dgst256.sig tmp_urtx.sha
+  vv_output "  -sign privkey.pem -out tmp_dgst256_sig.hex tmp_urtx.sha"
+  openssl dgst -sha256 -sign privkey.pem -out tmp_dgst256_sig.hex tmp_urtx.sha
   echo "verify with pubkey:"
-  vv_output "  -verify pubkey.pem -signature tmp_srtx_dgst256.sig tmp_urtx.sha"
-  openssl dgst -sha256 -verify pubkey.pem -signature tmp_srtx_dgst256.sig tmp_urtx.sha
+  vv_output "  -verify pubkey.pem -signature tmp_dgst256_sig.hex tmp_urtx.sha"
+  openssl dgst -sha256 -verify pubkey.pem -signature tmp_dgst256_sig.hex tmp_urtx.sha
   if [ $VVERBOSE -eq 1 ] ; then
-    echo "verify with (pre defined ASN.1 strings) assembled pubkey1.pem:"
-    vv_output "  -verify pubkey1.pem -signature tmp_srtx_dgst256.sig tmp_urtx.sha"
-    openssl dgst -sha256 -verify pubkey1.pem -signature tmp_srtx_dgst256.sig tmp_urtx.sha
+    echo "verify with (pre defined ASN.1 strings) assembled pubkey_m.pem:"
+    vv_output "  -verify pubkey_m.pem -signature tmp_dgst256_sig.hex tmp_urtx.sha"
+    openssl dgst -sha256 -verify pubkey_m.pem -signature tmp_dgst256_sig.hex tmp_urtx.sha
   fi
 fi
 

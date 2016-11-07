@@ -471,12 +471,12 @@ else
     SCRIPTSIG=$( echo "$SCRIPTSIG$S_value" )
 
     # and bring it into a tmp file, eventually required in other scripts
-    if [ -f tmp_trx.sig ] ; then 
-      cp tmp_trx.sig tmp_trx_sig.old
+    if [ -f tmp_trx_sig.hex ] ; then 
+      cp tmp_trx_sig.hex tmp_trx_sig_old.hex
     fi
     v_output "    new scriptsig=$SCRIPTSIG" 
     SCRIPTSIG=$( echo $SCRIPTSIG | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
-    printf "$SCRIPTSIG" > tmp_trx.sig
+    printf "$SCRIPTSIG" > tmp_trx_sig.hex
 
   fi
 fi

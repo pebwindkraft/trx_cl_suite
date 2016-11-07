@@ -152,7 +152,7 @@ echo "             with '-vv' given, openssl creates new priv/pub key   "    | t
 echo "             pairs. So we only checksum the first 60 lines of output." | tee -a $logfile
 echo "=====================================================================" | tee -a $logfile
 ./tcls_key2pem.sh -vv -x 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725 -p 0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352 | head -n60 > tmp_trx_cfile 
-chksum_ref="cd7763ef111450f1eecefb553480c1398f9f7e7fc2e34bae9534a362274b17a9"
+chksum_ref="33cade63795fc8b305942d46f761de9583361ca805b5b3b0fed749e27ca6edd6"
 chksum_prep
 
 echo " " | tee -a $logfile
