@@ -210,7 +210,7 @@ chk_trx_len() {
 ### GET_TRX_VALUES() - fetch required trx values ###
 ####################################################
 #  if param "-t" or "-f" is given, then this shall be executed:
-#    ./trx_2txt.sh -vv -r $RAW_TRX | grep -A7 TX_OUT[$PREV_OutPoint] > $prawtx_fn
+#    ./tcls_tx2txt.sh -vv -r $RAW_TRX | grep -A7 TX_OUT[$PREV_OutPoint] > $prawtx_fn
 #  It would come back with this data, where we can grep / fetch:
 #  
 #  1--> ### TX_OUT[1]
@@ -230,8 +230,8 @@ chk_trx_len() {
 #  
 #
 get_trx_values() {
-  vv_output "./trx_2txt.sh -vv -r $RAW_TRX | grep -A7 TX_OUT[$PREV_OutPoint] > $prawtx_fn"
-  ./trx_2txt.sh -vv -r $RAW_TRX | grep -A7 TX_OUT[[]$PREV_OutPoint[]] > $prawtx_fn
+  vv_output "./tcls_tx2txt.sh -vv -r $RAW_TRX | grep -A7 TX_OUT[$PREV_OutPoint] > $prawtx_fn"
+  ./tcls_tx2txt.sh -vv -r $RAW_TRX | grep -A7 TX_OUT[[]$PREV_OutPoint[]] > $prawtx_fn
   #
   # is it better to use grep / cut / tr or a simple awk ???
   # awk is 30% faster, and uses only half the system udn usr CPU cycles
@@ -967,7 +967,7 @@ echo "is ok, then take this file on a clean USB stick to the cold storage"
 echo "(second computer), and sign it there."
 echo " "
 echo "you may check output with:"
-echo "./trx_2txt.sh -vv -u $RAW_TRX" | tr [:upper:] [:lower:] 
+echo "./tcls_tx2txt.sh -vv -u $RAW_TRX" | tr [:upper:] [:lower:] 
 echo " "
 
 ################################
