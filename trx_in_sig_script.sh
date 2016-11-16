@@ -472,7 +472,7 @@ S19_PK() {
     echo "    * This terminates the Public Key (X9.63 COMPRESSED form)"
     echo "    * corresponding bitcoin address is:"
     rmd160_sha256
-    ./trx_base58check_enc.sh -q $result
+    ./tcls_base58check_enc.sh -q -pkh $result
     ret_string=''
 }
 #####################################
@@ -485,7 +485,7 @@ S20_PK() {
     echo "    * This terminates the Public Key (X9.63 UNCOMPRESSED form)"
     echo "    * corresponding bitcoin address is:"
     rmd160_sha256
-    ./trx_base58check_enc.sh -q $result
+    ./tcls_base58check_enc.sh -q -pkh $result
     ret_string=''
 }
 #####################################
@@ -615,7 +615,7 @@ S30_MSIG2of2() {
           echo "        This is MultiSig's Public Key (X9.63 COMPRESSED form)"
           printf "        corresponding bitcoin address is: "
           rmd160_sha256
-          ./trx_base58check_enc.sh -q $result
+          ./tcls_base58check_enc.sh -q -pkh $result
           msig_redeem_str=$msig_redeem_str$ret_string
           vv_output "       msig_redeem_str=$msig_redeem_str"
           ret_string=''
@@ -625,7 +625,7 @@ S30_MSIG2of2() {
           echo "        This is MultiSig's Public Key (X9.63 UNCOMPRESSED form)"
           printf "        corresponding bitcoin address is: "
           rmd160_sha256
-          ./trx_base58check_enc.sh -q $result
+          ./tcls_base58check_enc.sh -q -pkh $result
           msig_redeem_str=$msig_redeem_str$ret_string
           vv_output "       msig_redeem_str=$msig_redeem_str"
           ret_string=''
@@ -640,7 +640,7 @@ S30_MSIG2of2() {
           ret_string=$msig_redeem_str
           printf "        corresponding bitcoin address is: "
           rmd160_sha256
-          ./trx_base58check_enc.sh -q $result -P2SH
+          ./tcls_base58check_enc.sh -q $result -P2SH
           ret_string=''
           msig_redeem_str=''
           break
@@ -701,7 +701,7 @@ S37_OP2() {
           echo "        This is MultiSig's Public Key (X9.63 COMPRESSED form)"
           printf "        corresponding bitcoin address is: "
           rmd160_sha256
-          ./trx_base58check_enc.sh -q $result
+          ./tcls_base58check_enc.sh -q -pkh $result
           msig_redeem_str=$msig_redeem_str$ret_string
           vv_output "        msig_redeem_str=$msig_redeem_str"
           ret_string=''
@@ -711,7 +711,7 @@ S37_OP2() {
           echo "        This is MultiSig's Public Key (X9.63 UNCOMPRESSED form)"
           printf "        corresponding bitcoin address is: "
           rmd160_sha256
-          ./trx_base58check_enc.sh -q $result
+          ./tcls_base58check_enc.sh -q -pkh $result
           msig_redeem_str=$msig_redeem_str$ret_string
           vv_output "       msig_redeem_str=$msig_redeem_str"
           ret_string=''
@@ -726,7 +726,7 @@ S37_OP2() {
           ret_string=$msig_redeem_str
           printf "        corresponding bitcoin address is: "
           rmd160_sha256
-          ./trx_base58check_enc.sh -q $result -P2SH
+          ./tcls_base58check_enc.sh -q $result -P2SH
           ret_string=''
           msig_redeem_str=''
           break

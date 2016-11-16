@@ -52,12 +52,15 @@ QUIET=0
 VERBOSE=0
 VVERBOSE=0
 
-typeset -r stx_fn=tmp_srtx.txt      # signed trx file after the end of this script
-typeset -r sig_tmp_fn=tmp_sig.hex   # for each tx input, store the signature 
-typeset -r urtx_fn=tmp_urtx.txt     # the assembled, unsigned, raw tx to be signed
-typeset -r urtx_tmp_fn=tmp_urtx.hex # convert unsigned tx to hex, to do hashing then
-typeset -r urtx_sha256_fn=tmp_urtx_sha256.hex 
-typeset -r urtx_dsha256_fn=tmp_urtx_dsha256.hex
+typeset -r stx_fn=tmp_stx.txt                  # signed trx file after the end of this script
+typeset -r utxhex_tmp_fn=tmp_utx.txt           # the txt assembled, unsigned tx per tx input
+typeset -r utxtxt_tmp_fn=tmp_utx.hex           # the hex assembled, unsigned tx per tx input
+typeset -r sighex_tmp_fn=tmp_sig.hex           # openssl's signature per tx input in hex
+typeset -r sigtxt_tmp_if=tmp_tssv_in.txt       # txt input file for tcls_strict_sig_verify
+typeset -r sigtxt_tmp_of=tmp_tssv_out.txt      # txt output file for tcls_strict_sig_verify
+typeset -r utx_sha256_fn=tmp_utx_sha256.hex    # the sha256 hashed tx 
+typeset -r utx_dsha256_fn=tmp_utx_dsha256.hex  # the double sha256 hashed tx
+typeset -r tmp_vfy_fn=tmp_vfy.txt              # for all tx inputs, put sig, hash and pubkey here
 
 typeset -r Version=01000000
 typeset -r TX_IN_Sequence=ffffffff
@@ -90,6 +93,9 @@ wif_privkey=''
 STEPCODE=''
 SCRIPTSIG=''
 
+script_key2pem=tcls_key2pem.sh
+script_ssvfy=tcls_strict_sig_verify.sh
+
 #################################
 # procedure to display helptext #
 #################################
@@ -115,19 +121,33 @@ proc_help() {
 indent_data() {
   output=''
   indent_string="    "
-  if [ ${#1} -gt 150 ] ; then
-    echo "$1" | cut -b 1-75
-    output=$( echo "$1" | cut -b 76-146 )
+  offset=75
+  ifrom=1
+  ito=$offset
+
+  # echo "ifrom=$ifrom, ito=$ito"
+  echo "$1" | cut -b $ifrom-$ito
+  while [ $ito -le ${#1} ] 
+   do
+    ifrom=$(( $ito + 1 ))
+    ito=$(( $ifrom + $offset ))
+    output=$( echo "$1" | cut -b $ifrom-$ito )
     echo "$indent_string$output"
-    output=$( echo "$1" | cut -b 147- )
-    echo "$indent_string$output"
-  elif [ ${#1} -gt 75 ] ; then
-    echo "$1" | cut -b 1-75
-    output=$( echo "$1" | cut -b 76- )
-    echo "$indent_string$output"
-  else
-    echo "$1"
-  fi
+  done
+
+# if [ ${#1} -gt 150 ] ; then
+#   echo "$1" | cut -b 1-75
+#   output=$( echo "$1" | cut -b 76-146 )
+#   echo "$indent_string$output"
+#   output=$( echo "$1" | cut -b 147- )
+#   echo "$indent_string$output"
+# elif [ ${#1} -gt 75 ] ; then
+#   echo "$1" | cut -b 1-75
+#   output=$( echo "$1" | cut -b 76- )
+#   echo "$indent_string$output"
+# else
+#   echo "$1"
+# fi
 }
 
 #######################################
@@ -503,53 +523,81 @@ v_output "13. serialize the unsigned raw tx and add 01000000 (SIGHASH_ALL)"
 
 i=1
 j=1
+echo "##############################################" > $tmp_vfy_fn
+echo "### Bitcoin prep file to verify signatures ###" >> $tmp_vfy_fn
+echo "##############################################" >> $tmp_vfy_fn
+if [ "$VERBOSE" -eq 1 ] ; then 
+  echo "# Bitcoin (and so here openssl) works only on binary files. TX hash files" >> $tmp_vfy_fn
+  echo "# must be double sha256'd. For each input, need to convert to binary." >> $tmp_vfy_fn
+  echo "# The pubkey is: $pubkey " >> $tmp_vfy_fn
+  echo "# The pubkey.pem file is provided from here: $script_key2pem" >> $tmp_vfy_fn
+  echo "# If you need YOUR OWN pubkey, you need to convert it first:" >> $tmp_vfy_fn
+  echo "# UNCOMPRESSED pubkey:" >> $tmp_vfy_fn
+  echo "#   echo 3056301006072a8648ce3d020106052b8104000a034200 > pubkey.txt" >> $tmp_vfy_fn
+  echo "#   echo 04...your PUBKEY with 130 hexchars... > pubkey.txt" >> $tmp_vfy_fn
+  echo "# COMPRESSED pubkey:" >> $tmp_vfy_fn
+  echo "#   echo 3036301006072a8648ce3d020106052b8104000a032200 > pubkey.txt" >> $tmp_vfy_fn
+  echo "#   echo 03...your PUBKEY with 66 hexchars... > pubkey.txt" >> $tmp_vfy_fn
+  echo "# And then:" >> $tmp_vfy_fn
+  echo "#   xxd -r -p <pubkey.txt | openssl pkey -pubin -inform der >pubkey.pem" >> $tmp_vfy_fn
+  echo "#  " >> $tmp_vfy_fn
+fi
+
 while [ $j -le $TX_IN_Count ] 
  do
-  printf $Version > $urtx_fn
+  printf $Version > $utxhex_tmp_fn
   # need to do a var_int check here ...
-  printf $TX_IN_Count_hex >> $urtx_fn
+  printf $TX_IN_Count_hex >> $utxhex_tmp_fn
 
   # manage all the TX_INs
   while [ $i -le $TX_IN_Count ] 
    do
-    printf ${TX_IN_PrevOutput_Hash[$i]} >> $urtx_fn
-    printf ${TX_IN_PrevOutput_Index[$i]} >> $urtx_fn
+    printf ${TX_IN_PrevOutput_Hash[$i]} >> $utxhex_tmp_fn
+    printf ${TX_IN_PrevOutput_Index[$i]} >> $utxhex_tmp_fn
     if [ $i -eq $j ] ; then
-      printf ${TX_IN_ScriptBytes_hex[$i]} >> $urtx_fn
-      printf ${TX_IN_Sig_Script[$i]} >> $urtx_fn
+      printf ${TX_IN_ScriptBytes_hex[$i]} >> $utxhex_tmp_fn
+      printf ${TX_IN_Sig_Script[$i]} >> $utxhex_tmp_fn
     fi
-    printf $TX_IN_Sequence >> $urtx_fn
+    printf $TX_IN_Sequence >> $utxhex_tmp_fn
     i=$(( i + 1 ))
   done
 
   # manage all the TX_OUTs
-  printf $TX_OUT_Count_hex >> $urtx_fn
-  printf $TX_OUT_Value >> $urtx_fn
-  printf $TX_OUT_PKScriptBytes_hex >> $urtx_fn
-  printf $TX_OUT_PKScript >> $urtx_fn
-  printf $LockTime >> $urtx_fn
-  # printf $SIGHASH_ALL >> $urtx_fn
+  printf $TX_OUT_Count_hex >> $utxhex_tmp_fn
+  printf $TX_OUT_Value >> $utxhex_tmp_fn
+  printf $TX_OUT_PKScriptBytes_hex >> $utxhex_tmp_fn
+  printf $TX_OUT_PKScript >> $utxhex_tmp_fn
+  printf $LockTime >> $utxhex_tmp_fn
+  printf $SIGHASH_ALL >> $utxhex_tmp_fn
 
   ##############################################################################
   ### STEP 14 - double sha256 that structure from 13                         ###
   ##############################################################################
   v_output "14. TX_IN[$j]: double hash the raw unsigned TX"
   
-  # Bitcoin never does sha256 with the hex chars, so need to convert it to hex codes first
-  cat $urtx_fn | tr [:upper:] [:lower:] > $urtx_tmp_fn
-  result=$( cat $urtx_tmp_fn | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
-  printf $result > $urtx_tmp_fn
-
-  openssl dgst -binary -sha256 >$urtx_sha256_fn  <$urtx_tmp_fn 
-  openssl dgst -binary -sha256 >$urtx_dsha256_fn <$urtx_sha256_fn 
-  
   if [ "$VVERBOSE" -eq 1 ] ; then 
-    echo "    the unsigned raw trx, sha256'd ($urtx_sha256_fn):"
-    hexdump -C $urtx_sha256_fn | sed -e 's/^/    /'
-    echo "    the unsigned raw trx, double sha256'd ($urtx_dsha256_fn):"
+    echo "TX_IN[$j], the unsigned raw tx:" >> $tmp_vfy_fn
+    result=$( cat $utxhex_tmp_fn )
+    indent_data "    $result" >> $tmp_vfy_fn
   fi
+
+  # Bitcoin never does sha256 with the hex chars, so need to convert it to hex codes first
+  cat $utxhex_tmp_fn | tr [:upper:] [:lower:] > $utxtxt_tmp_fn
+  result=$( cat $utxtxt_tmp_fn | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
+  printf $result > $utxtxt_tmp_fn
+
+  openssl dgst -binary -sha256 >$utx_sha256_fn  <$utxtxt_tmp_fn 
+  openssl dgst -binary -sha256 >$utx_dsha256_fn <$utx_sha256_fn 
+ 
+  if [ "$VVERBOSE" -eq 1 ] ; then 
+    od -An -t x1 $utx_sha256_fn | tr -d [:blank:] | tr -d "\n" | sed -e 's/^/    /'
+  fi
+  # echo "#!/bin/sh" >> $tmp_vfy_fn
+  echo "# TX_IN[$j], double sha256 and signature:" >> $tmp_vfy_fn
+  result=$( od -An -t x1 $utx_dsha256_fn | tr -d [:blank:] | tr -d "\n" )
+  echo "echo $result > tx_hash.txt" >> $tmp_vfy_fn 
   if [ "$VERBOSE" -eq 1 ] ; then 
-    od -An -t x1 tmp_urtx_dsha256.hex | tr -d [:blank:] | tr -d "\n" | sed -e 's/^/    /'
+    echo $result | sed -e 's/^/    /'
   fi
   
   ##############################################################################
@@ -562,63 +610,67 @@ while [ $j -le $TX_IN_Count ]
   v_output "15. TX_IN[$j]: sign the hash from step 14 with the private key"
   # verify keys are working correctly ...
   if [ "$hex_privkey" ] ; then 
-    ./tcls_key2pem.sh -q -x $hex_privkey -p $pubkey 
+    ./$script_key2pem -q -x $hex_privkey -p $pubkey 
     if [ $? -eq 1 ] ; then 
       echo "*** error in key handling, exiting gracefully ..."
       exit 1
     fi
   else
-    ./tcls_key2pem.sh -q -w $wif_privkey -p $pubkey 
+    ./$script_key2pem -q -w $wif_privkey -p $pubkey 
     if [ $? -eq 1 ] ; then 
       echo "*** error in key handling, exiting gracefully ..."
       exit 1
     fi
   fi
-  v_output "     openssl dgst -sign privkey.pem -sha256 \\"
-  v_output "             -out $sig_tmp_fn $urtx_dsha256_fn"
-  openssl dgst -sign privkey.pem -sha256 -out $sig_tmp_fn $urtx_dsha256_fn
-  SCRIPTSIG=$( od -An -t x1 $sig_tmp_fn | tr -d [:blank:] | tr -d "\n" )
+  # v_output "     openssl dgst -sign privkey.pem -sha256 \\"
+  # v_output "             -out $sighex_tmp_fn $utx_dsha256_fn"
+  # openssl dgst -sign privkey.pem -sha256 -out $sighex_tmp_fn $utx_dsha256_fn
+  # SCRIPTSIG=$( od -An -t x1 $sighex_tmp_fn | tr -d [:blank:] | tr -d "\n" )
+  # v_output "    $SCRIPTSIG"
+
+  v_output "     openssl pkeyutl -sign -in $utx_dsha256_fn \\"
+  v_output "             -inkey privkey.pem -keyform PEM > $sighex_tmp_fn"
+  openssl pkeyutl -sign -in $utx_dsha256_fn -inkey privkey.pem -keyform PEM > $sighex_tmp_fn
+  SCRIPTSIG=$( od -An -t x1 $sighex_tmp_fn | tr -d [:blank:] | tr -d "\n" )
   v_output "    $SCRIPTSIG"
-
-
-  v_output "     openssl pkeyutl -sign -in $urtx_dsha256_fn \\"
-  v_output "             -inkey privkey.pem -keyform PEM > $sig_tmp_fn"
-  openssl pkeyutl -sign -in $urtx_dsha256_fn -inkey privkey.pem -keyform PEM > $sig_tmp_fn
-  SCRIPTSIG=$( od -An -t x1 $sig_tmp_fn | tr -d [:blank:] | tr -d "\n" )
-  v_output "    $SCRIPTSIG"
-
-  # the strict DER checking reads the SCRIPTSIG from file "$sig_tmp_fn"
+  printf $SCRIPTSIG > $sigtxt_tmp_if
   if [ $VVERBOSE -eq 1 ] ; then
-    ./tcls_strict_sig_verify.sh -v $SCRIPTSIG
+    ./$script_ssvfy -v -f $sigtxt_tmp_if -o $sigtxt_tmp_of
   elif [ $VERBOSE -eq 1 ] ; then 
-    ./tcls_strict_sig_verify.sh $SCRIPTSIG
+    ./$script_ssvfy -f $sigtxt_tmp_if -o $sigtxt_tmp_of
   else
-    ./tcls_strict_sig_verify.sh -q $SCRIPTSIG
+    ./$script_ssvfy -q -f $sigtxt_tmp_if -o $sigtxt_tmp_of
   fi
   if [ $? -eq 1 ] ; then 
     echo "*** ERROR in ScriptSig verification, exiting gracefully ..."
     exit 1
   fi
 
+  echo "echo $SCRIPTSIG > tx_sig.txt" >> $tmp_vfy_fn
+  result=$( cat $sigtxt_tmp_of | tr [:upper:] [:lower:] )
+  if [ "$SCRIPTSIG" != "$result" ] ; then 
+    echo "# *** signature replaced after strict DER sig verification with:" >> $tmp_vfy_fn
+    echo "echo $result > tx_sig.txt" >> $tmp_vfy_fn
+  fi
+
   ##############################################################################
   ### STEP 16 - construct the final scriptSig                                ###
   ##############################################################################
-  #     calculate length of DER-sgnature from 15 plus 1, and concatenate:
+  #     calculate length of DER-sgnature from step 15, and concatenate:
   #     - one byte script OPCODE 
   #     - the actual DER-encoded signature plus the one-byte hash code type
   #     - one byte script OPCODE containing the length of the public key
   #     - the actual public key
   v_output "16. TX_IN[$j]: construct the final scriptSig[$j]"
   
+  # Strict DER checking (in step 15) had it's output in file "$sigtxt_tmp_of" 
   vv_output "    the one byte script length OPCODE"
-  STEPCODE=$( wc -c < "$sig_tmp_fn" )
-  STEPCODE=$( echo "obase=16;$STEPCODE + 1" | bc )
+  STEPCODE=$( wc -c < "$sigtxt_tmp_of" )
+  STEPCODE=$( echo "obase=16;($STEPCODE + 2) / 2" | bc )
   SCRIPTSIG[$j]=$STEPCODE
 
   vv_output "    the actual DER-encoded signature plus the one-byte hash code type"
-  # Strict DER checking (in step 15) had it's output in file "$sig_tmp_fn" 
-  #  - need to convert file to a string first:
-  STEPCODE=$( od -An -t x1 $sig_tmp_fn | tr -d [[:blank:]] | tr -d "\n" )
+  STEPCODE=$( cat $sigtxt_tmp_of ) 
   SCRIPTSIG[$j]=${SCRIPTSIG[$j]}$STEPCODE
   STEPCODE=01
   SCRIPTSIG[$j]=${SCRIPTSIG[$j]}$STEPCODE
@@ -634,10 +686,16 @@ while [ $j -le $TX_IN_Count ]
   SCRIPTSIG[$j]=${SCRIPTSIG[$j]}$pubkey
   vv_output "    ${SCRIPTSIG[$j]}"
   vv_output " "
-    
+
+  if [ $VERBOSE -eq 1 ] ; then 
+    echo "xxd -r -p <tx_hash.txt >tx_hash.hex" >> $tmp_vfy_fn
+    echo "xxd -r -p <tx_sig.txt >tx_sig.hex" >> $tmp_vfy_fn
+    echo "openssl pkeyutl <tx_hash.hex -verify -pubin -inkey pubkey.pem -sigfile tx_sig.hex" >> $tmp_vfy_fn
+    echo " " >> $tmp_vfy_fn
+  fi
+
   i=1
   j=$(( j + 1 ))
-
 done
 
 ##############################################################################

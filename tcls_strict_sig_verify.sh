@@ -25,15 +25,17 @@
 ###########################
 # Some variables ...      #
 ###########################
-QUIET=0
-VERBOSE=0
-VVERBOSE=0
+typeset -i QUIET=0
+typeset -i VERBOSE=0
+typeset -i VVERBOSE=0
 
 typeset -i SIG_MIN_LENGTH_CHARS=18
 typeset -i SIG_MAX_LENGTH_CHARS=146
 
-Q_PARAM_FLAG=0
-V_PARAM_FLAG=0
+typeset -i F_PARAM_FLAG=0
+typeset -i O_PARAM_FLAG=0
+infile=''
+outfile=''
 SCRIPTSIG=''
 
 #################################
@@ -41,14 +43,14 @@ SCRIPTSIG=''
 #################################
 proc_help() {
   echo "  "
-  echo "usage: $0 [-h|-q|-v|-vv] <scriptsig>"
+  echo "usage: $0 [-h|-q|-v|-vv] [-f filename] [-o filename] [signature]"
   echo "  "
+  echo " -f  load a signature from a txt file"
   echo " -h  show this HELP text"
+  echo " -o  write the signature to a txt file"
   echo " -q  real QUIET mode, don't display anything"
   echo " -v  display VERBOSE output"
   echo " -vv display VERY VERBOSE output"
-  echo " "
-  echo " <scriptsig> is the hex string from an existing, signed raw trx"
   echo " "
 }
 
@@ -58,19 +60,33 @@ proc_help() {
 indent_data() {
   output=''
   indent_string="    "
-  if [ ${#1} -gt 150 ] ; then
-    echo "$1" | cut -b 1-75 
-    output=$( echo "$1" | cut -b 76-146 )
+  offset=75
+  ifrom=1
+  ito=$offset
+
+  # echo "ifrom=$ifrom, ito=$ito"
+  echo "$1" | cut -b $ifrom-$ito
+  while [ $ito -le ${#1} ] 
+   do
+    ifrom=$(( $ito + 1 ))
+    ito=$(( $ifrom + $offset ))
+    output=$( echo "$1" | cut -b $ifrom-$ito )
     echo "$indent_string$output"
-    output=$( echo "$1" | cut -b 147- )
-    echo "$indent_string$output"
-  elif [ ${#1} -gt 75 ] ; then
-    echo "$1" | cut -b 1-75 
-    output=$( echo "$1" | cut -b 76- )
-    echo "$indent_string$output"
-  else
-    echo "$1"
-  fi
+  done
+
+# if [ ${#1} -gt 150 ] ; then
+#   echo "$1" | cut -b 1-75 
+#   output=$( echo "$1" | cut -b 76-146 )
+#   echo "$indent_string$output"
+#   output=$( echo "$1" | cut -b 147- )
+#   echo "$indent_string$output"
+# elif [ ${#1} -gt 75 ] ; then
+#   echo "$1" | cut -b 1-75 
+#   output=$( echo "$1" | cut -b 76- )
+#   echo "$indent_string$output"
+# else
+#   echo "$1"
+# fi
 }
 
 ###########################################################
@@ -138,6 +154,39 @@ else
   while [ $# -ge 1 ] 
    do
     case "$1" in
+      -f)
+         F_PARAM_FLAG=1
+         if [ "$2" == "" ] ; then
+           echo "*** you must provide a FILENAME to the -f parameter!"
+           exit 1
+         fi
+         infile=$2
+         SCRIPTSIG=$( cat $infile )
+         if [ $O_PARAM_FLAG -eq 1 ] ; then
+           if [ "$infile" == "$outfile"  ] ; then
+             echo "*** you must provide different FILENAMEs when using -f and -o together"
+             exit 1
+           fi
+         fi
+         shift
+         shift
+         ;;
+      -o)
+         O_PARAM_FLAG=1
+         if [ "$2" == "" ] ; then
+           echo "*** you must provide a FILENAME to the -o parameter!"
+           exit 1
+         fi
+         outfile=$2
+         if [ $F_PARAM_FLAG -eq 1 ] ; then
+           if [ "$infile" == "$outfile"  ] ; then
+             echo "*** you must provide different FILENAMEs when using -f and -o together"
+             exit 1
+           fi
+         fi
+         shift
+         shift
+         ;;
       -q)
          if [ $VERBOSE -eq 1 ] ; then
            echo "\nwhat? you want verbose and quiet at the same time? think!"
@@ -419,8 +468,11 @@ if [ $value -eq 1 ] ; then
   v_output  "    S-value must be smaller than N/2                            - ok"
   vv_output "    cool, S is smaller than N/2"
   v_output  "    strictly check DER-encoded signature                        - ok"
+  if [ $O_PARAM_FLAG -eq 1 ] ; then
+    printf "$SCRIPTSIG" > $outfile
+  fi
 else
-  v_output "    *** S is not smaller than N/2, need new S-Value (new_s = N - s)"
+  v_output "    --> S is not smaller than N/2, need new S-Value (new_s = N - s)"
   S_value=$( echo "obase=16;ibase=16;FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141 - $S_value_string" | bc )
 
   if [ ${#S_value} -ne 64 ] ; then 
@@ -440,7 +492,7 @@ else
     echo " "
     exit 1
   else
-    v_output "    new S_value=$S_value"
+    v_output "    new S=$S_value"
     # we are good to assemble a new sig, by concatenating values into $SCRIPTSIG
     # we begin with code '0x30' (sequence identfier)
     SCRIPTSIG=$( echo "30" )
@@ -469,21 +521,21 @@ else
     
     # and concatenate the new S-Value 
     SCRIPTSIG=$( echo "$SCRIPTSIG$S_value" )
+    if [ $O_PARAM_FLAG -eq 1 ] ; then
+      printf "$SCRIPTSIG" > $outfile
+    fi
 
     # and bring it into a tmp file, eventually required in other scripts
     if [ -f tmp_trx_sig.hex ] ; then 
       cp tmp_trx_sig.hex tmp_trx_sig_old.hex
     fi
-    v_output "    new scriptsig=$SCRIPTSIG" 
+    v_output "    new signature=$SCRIPTSIG" 
     SCRIPTSIG=$( echo $SCRIPTSIG | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
     printf "$SCRIPTSIG" > tmp_trx_sig.hex
 
   fi
 fi
 
-# if [ $QUIET -eq 0 ] ; then
-#   echo "    #########################################################"
-# fi
  v_output "    #########################################################"
 vv_output "    ### end of strict verification of SCRIPTSIG           ###"
 vv_output "    #########################################################"

@@ -33,10 +33,18 @@
 # http://bitcoin.stackexchange.com/questions/46455/ \
 #        verifying-a-bitcoin-trx-on-the-unix-cmd-line-with-openssl
 # 
-# pizza.keyhex needs some preparatios first. Then we can go like this:
+# Bitcoin works only with binary (hexadecimal) files, so convert to binary first!
+# Also the hash txt file must contain the double sha256 of the trx
+#   $ xxd -r -p <tx_sig.txt >tx_sig.hex  
+#   $ xxd -r -p <tx_pubkey.txt | openssl pkey -pubin -inform der >tx_pubkey.pem
+#   $ xxd -r -p <tx_hash.txt >tx_hash.hex  
+#   $ openssl pkeyutl <tx_hash.hex -verify -pubin -inkey tx_pubkey.pem -sigfile tx_sig.hex
+#
+# For the pizza trx, as mentioned in the web link:
 #   $ xxd -r -p <pizza.sighex >pizza.sigraw
 #   $ xxd -r -p <pizza.keyhex | openssl pkey -pubin -inform der >pizza.keypem
 #   $ openssl pkeyutl <pizza.hash2 -verify -pubin -inkey pizza.keypem -sigfile pizza.sigraw
+#
 # which results in a "Signatre Verified Successfully" (or not ...)
 # 
 

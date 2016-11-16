@@ -74,16 +74,31 @@ chksum_prep
 echo " " | tee -a $logfile
 }
 
-testcase2() {
 
+testcase2() {
+echo "================================================================" | tee -a $logfile
+echo "=== TESTCASE 2: parameters testing                           ===" | tee -a $logfile
+echo "=== do several testcases with parameters set incorrectly     ===" | tee -a $logfile
+echo "================================================================" | tee -a $logfile
+
+echo "=== TESTCASE 2a: param file is missing, show correct hint ..."    | tee -a $logfile
+echo "================================================================" | tee -a $logfile
+echo "./tcls_sign.sh -f tmp_urtx.txt -w XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0" >> $logfile
+./tcls_sign.sh -f tmp_urtx.txt -w XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0 > tmp_c_urtx.txt
+chksum_ref="58690464c27fe8df02bf6f3197f472644abc29c5a71ac0615fcb7fea9b765d0e" 
+chksum_prep
+echo " " | tee -a $logfile
+}
+ 
+
+testcase3() {
 ###
 ### the script sigs are changing on every call, need to filter result!!
 ###
-
 echo "================================================================" | tee -a $logfile
-echo "=== TESTCASE 2: sign a trx, prepared from tcls_create.sh     ===" | tee -a $logfile
+echo "=== TESTCASE 3: sign a trx, prepared from tcls_create.sh     ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-echo "=== TESTCASE 2a: use a single input trx ..."                      | tee -a $logfile
+echo "=== TESTCASE 3a: use a single input trx ..."                      | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "./tcls_sign.sh -v -f tmp_c_urtx.txt -w KyP5KEp6DCmF222YM5EB9yGeMFxdVK1QWgtGvWnLRnDmiCtQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0" >> $logfile
 printf "010000000174fb6858c31a292d20c9744187032bddb7ddea02a3aa3ef523c8524a21481881010000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88acffffffff01b08f0600000000001976a91418ec49b27624086a2b6f35f263d951d25dbe24b688ac0000000001000000" > tmp_c_urtx.txt
@@ -92,7 +107,7 @@ chksum_ref="58690464c27fe8df02bf6f3197f472644abc29c5a71ac0615fcb7fea9b765d0e"
 chksum_prep
 
 echo " " | tee -a $logfile
-echo "=== TESTCASE 2b: use four inputs trx" | tee -a $logfile
+echo "=== TESTCASE 3b: use four inputs trx" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "./tcls_sign.sh -v -f tmp_c_urtx.txt -w KyP5KEp6DCmF222YM5EB9yGeMFxdVK1QWgtGvWnLRnDmiCtQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0" >> $logfile
 printf "0100000004b0772e6ef46c2d3c60418bb7d5c2c015d6b943e5fca07570eb82c26dc7c9d248010000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88acffffffff74fb6858c31a292d20c9744187032bddb7ddea02a3aa3ef523c8524a21481881010000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88acffffffffcc21e36eedb509c660681c1e949dd294bd4c11692439221004c2235d565b74bb000000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88acffffffffea919487e04ed509d6cb9c7297c277b9be3a68f3836c7d86df378714a75949e8000000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88acffffffff01b08f0600000000001976a91418ec49b27624086a2b6f35f263d951d25dbe24b688ac0000000001000000" > tmp_c_urtx.txt

@@ -114,12 +114,12 @@ This shell script tries to decode the TRX-OUT public key script via it's interna
 
 The string of the 20 bytes at the end of this output is the hexadecimal representation of the Bitcoin address. To show the "human readable" chars, a third script is used:
 
-###################################
-### file trx_base58check_enc.sh ###
-###################################
+####################################
+### file tcls_base58check_enc.sh ###
+####################################
 This shell script tries to decode the addresses in BITCOIN SCRIPTs. It reads the hex codes, does a base58 conversion, and displays the bitcoin address. At anytime the file can be used "stand alone". Without parameters, it displays as per below, alternativly just provide a sig script as parameter (or as usual, use '-h').
 
-./trx_base58check_enc.sh
+./tcls_base58check_enc.sh
 using 010966776006953D5567439E5E39F86A0D273BEE
  
 4: add 0x00 or 0x05 [P2SH] at the beginning
