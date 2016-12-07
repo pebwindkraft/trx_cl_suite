@@ -51,25 +51,25 @@ echo "=== TESTCASE 1: checksums of all necessary files             ===" | tee -a
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 1a: $chksum_cmd tcls_tx2txt.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-chksum_ref="3767954c1330fc400706dec9c65bc1cca000fbf664b7335aa0a5e6a26522d3ce"
+chksum_ref="98ae6629db4c1cb5c56546d2803f21e47365c41b002bdf7bc92fbc8bacd3aa0a"
 cp tcls_tx2txt.sh tmpfile
 chksum_prep
  
 echo "=== TESTCASE 1b: $chksum_cmd trx_in_sig_script.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-chksum_ref="8b8882737173a54958b1803cfea402301eb0f3b422a7f7054975ad09da7a648c" 
-cp trx_in_sig_script.sh tmpfile
+chksum_ref="8ab7ce9f625e9b880f1840ca746e0a8b1eb27d25b971bef787d9e7e33f5eb9a2" 
+cp tcls_in_sig_script.sh tmpfile
 chksum_prep
 
 echo "=== TESTCASE 1c: $chksum_cmd trx_out_pk_script.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-chksum_ref="acd1c748b67dcccd0e22f0c5ec4a010a4852ff5b1e17a772a2916284051e8ecf" 
-cp trx_out_pk_script.sh tmpfile
+chksum_ref="1e1e3c8464324c5d03280776b5c7efe6cab0933ef2e0e244d14c9f4e77532480" 
+cp tcls_out_pk_script.sh tmpfile
 chksum_prep
 
 echo "=== TESTCASE 1d: $chksum_cmd tcls_base58check_enc.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
-chksum_ref="81c105c548b02b9f808e887c3af09d4106b30450b0d7fc31292e76f1b1b722e1" 
+chksum_ref="746615511af0567da9c213a774f5afead4a51b8f60550287c47e4eeb21b8dfca" 
 cp tcls_base58check_enc.sh tmpfile
 chksum_prep
 echo " " | tee -a $logfile
@@ -87,61 +87,61 @@ echo "================================================================" | tee -a
 echo "=== TESTCASE 2a: wrong parameter: ./tcls_tx2txt.sh xyz" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh xyz > tmpfile
-chksum_ref="6c4261aa593a03b9f34941d8c4b99b31d8b4e8232e2bc53bc268967fc6bf6815" 
+chksum_ref="9d8a8a82d080bb7db07caef751e2d97db171c1e00ae03391c0d3d67ef42a0813" 
 chksum_prep
 
 echo "=== TESTCASE 2b: wrong parameter: ./tcls_tx2txt.sh -r" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -r > tmpfile
-chksum_ref="1721533bfee0e85be0466297b6fed058a627f32ced833b4f399295ccb72fe3c3" 
+chksum_ref="6242596d0136fef2101d9566fc02dfa5ea9e63076af020742cd47038e5782945" 
 chksum_prep
 
 echo "=== TESTCASE 2c: wrong parameter: ./tcls_tx2txt.sh -t" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -t > tmpfile
-chksum_ref="e74a2df6df2e49962dcc4783d9baf4cae81fb150a175dc4d3b9d7827e104336c" 
+chksum_ref="a548231d5bc61eea18f548d8b63ac4587b0384bc76405784bf9eb1b2c0437c71" 
 chksum_prep
 
 echo "=== TESTCASE 2d: wrong parameter: ./tcls_tx2txt.sh -r abc -t def" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -r abc -t def > tmpfile
-chksum_ref="47a0407ae190461ba05c725bb4cce836dfeb21b4029394ea27fd6560b42d8be3" 
+chksum_ref="7bec4d7ac4510c39e6845b18188f163718d279f69f832612a864dcfb167abc9c" 
 chksum_prep
 
 echo "=== TESTCASE 2e: wrong parameter: ./tcls_tx2txt.sh -t abc" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -t abc > tmpfile
-chksum_ref="1aeba053570d87694751cfadea5c4728d723afc635ffc3241210634de2ac8952"
+chksum_ref="a44863f60841dd5dcde406c6de79e83b7aa21ff902bfabe6e7f0f2391d2ef10c"
 chksum_prep
 
 echo "=== TESTCASE 2f: wrong parameter: ./tcls_tx2txt.sh -v abc" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -v abc > tmpfile
-chksum_ref="97bb736bad1cd027952b23b233ecfc9e5c6480acbd5f0ee377c1de540f04e873" 
+chksum_ref="fdb502a1781dba998239f22e2c7c2bad2445ecd8170d3a451ae2884340345f38" 
 chksum_prep
  
 echo "=== TESTCASE 2g: show help: ./tcls_tx2txt.sh -h" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -h > tmpfile
-chksum_ref="658b9fb23b61559abf0bba7383f9a7c13b452ffdae3dc1edcc2fd0b4822084e8" 
+chksum_ref="35b93c340b080518a0ba42469195483ce1bf3a0b6e173385321de89f06e2831b" 
 chksum_prep
 
 echo "=== TESTCASE 2h: show default: ./tcls_tx2txt.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh > tmpfile
-chksum_ref="1bbc6403fb61c7ceccb845eed5bae8ea75e68ec7c73e343b7cda1daf647c08cf" 
+chksum_ref="78241272d4657c65966eae49b8f245a20ba2a720ea5cf6c7238cda5b9067d7dd" 
 chksum_prep
 
 echo "=== TESTCASE 2i: show default: ./tcls_tx2txt.sh -v" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -v > tmpfile
-chksum_ref="5351ae139948737d28d997230ce808f7c2819719c8361ecb59f4946222b4542f" 
+chksum_ref="7d03bb39c4fa8fae31b4a59ab77f40ce92214ac3e90012096d3c9854a4bceba4" 
 chksum_prep
 
 echo "=== TESTCASE 2j: show default: ./tcls_tx2txt.sh -vv" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -vv > tmpfile
-chksum_ref="c5de9b468e9ea04a3f24159fa232c963d4b073418c41198d9eb1822483a3a125" 
+chksum_ref="e007f8fa3a2ef358f5b9bca377a9f927e488f73ed5851bb220f71547b1920013" 
 chksum_prep
 echo " " | tee -a $logfile
 }
@@ -157,19 +157,19 @@ echo "https://blockchain.info/de/rawtx/30375f40adcf361f5b2a5074b615ca75e5696909e
 echo "=== TESTCASE 3a: ./tcls_tx2txt.sh -t 30375f40ad... " | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -t 30375f40adcf361f5b2a5074b615ca75e5696909e8bc2f8e553c69631826fcf6 > tmpfile
-chksum_ref="59b6b4771fd931bc5668d55984e2cab47d33fa35cfd0b14e04d342fa99ecd3bf" 
+chksum_ref="c2f1b08e5fe9b18cd769083f5bc0236de5a0a5d31be1c9c4cc27b0b2b1eb25a4" 
 chksum_prep
 
 echo "=== TESTCASE 3b: ./tcls_tx2txt.sh -v -t 30375f40ad... " | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -v -t 30375f40adcf361f5b2a5074b615ca75e5696909e8bc2f8e553c69631826fcf6 > tmpfile
-chksum_ref="c4f5af62662148d9b12fe39582143299bdc851e17ddfebbf82c83df3d2ce4d08" 
+chksum_ref="923b00442a52845241015845e6edda3334305fbba46a34502d370fcc93fc1fb1" 
 chksum_prep
 
 echo "=== TESTCASE 3c: ./tcls_tx2txt.sh -v -t 30375f40ad... " | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -vv -t 30375f40adcf361f5b2a5074b615ca75e5696909e8bc2f8e553c69631826fcf6 > tmpfile
-chksum_ref="ee0986eeb03cd1423f2b901acd854cc1a3eae2e3951f577d0828e569ff1698d1" 
+chksum_ref="3176aff236f7944ef7af518928826964777250c7e14f1fb74f58facda8c045d7" 
 chksum_prep
 echo " " | tee -a $logfile
 }
@@ -184,19 +184,19 @@ echo "https://blockchain.info/de/rawtx/91c91f31b7586b807d0ddc7a1670d10cc34bdef32
 echo "=== TESTCASE 4a: ./tcls_tx2txt.sh -r 010000000117f83..." | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -r 010000000117f83daeec34cca28b90390b691d278f658b85b20fae29983acda10273cc7d32010000006b483045022100b95be9ab9148d85d47d51d069923272ad5131505b40b8e27211475305c546c6e02202ae8f2386e0d7afa6ab0acfafa78b0e23e669972d6e656b345b69c6d268aecbd0121020b2b582ca9333957cf8457a4a1b46e5337471cc98582fdf37c58a201dba50dd2feffffff0210201600000000001976a91407ddfbe06b04f3867cae654448174ea2f9a173ea88acda924700000000001976a9143940dcd0bfb7ad9bff322405954949c450742cd588accd3d0600 > tmpfile
-chksum_ref="aa81629808f058edbff6a79651ce365b5184cfc9c39dbed8617c9e3a7218e6b5"
+chksum_ref="593defc3655a74744c7f0231ce1e219240b7179c054b3576993e4b6e128da46e"
 chksum_prep
 
 echo "=== TESTCASE 4b: ./tcls_tx2txt.sh -v -r 010000000117f83..." | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -v -r 010000000117f83daeec34cca28b90390b691d278f658b85b20fae29983acda10273cc7d32010000006b483045022100b95be9ab9148d85d47d51d069923272ad5131505b40b8e27211475305c546c6e02202ae8f2386e0d7afa6ab0acfafa78b0e23e669972d6e656b345b69c6d268aecbd0121020b2b582ca9333957cf8457a4a1b46e5337471cc98582fdf37c58a201dba50dd2feffffff0210201600000000001976a91407ddfbe06b04f3867cae654448174ea2f9a173ea88acda924700000000001976a9143940dcd0bfb7ad9bff322405954949c450742cd588accd3d0600 > tmpfile
-chksum_ref="18836084afa8b327ec17c09671e660ce2702884930a08fc9ec73dc9bca19b3d5"
+chksum_ref="5387f499a681f1db82c61d4a0bb5c02340e2942bbe81995fe22d0df895d18290"
 chksum_prep
 
 echo "=== TESTCASE 4c:./tcls_tx2txt.sh -vv -r 010000000117f83..." | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -vv -r 010000000117f83daeec34cca28b90390b691d278f658b85b20fae29983acda10273cc7d32010000006b483045022100b95be9ab9148d85d47d51d069923272ad5131505b40b8e27211475305c546c6e02202ae8f2386e0d7afa6ab0acfafa78b0e23e669972d6e656b345b69c6d268aecbd0121020b2b582ca9333957cf8457a4a1b46e5337471cc98582fdf37c58a201dba50dd2feffffff0210201600000000001976a91407ddfbe06b04f3867cae654448174ea2f9a173ea88acda924700000000001976a9143940dcd0bfb7ad9bff322405954949c450742cd588accd3d0600 > tmpfile
-chksum_ref="b8763f58af011300c693b6b16f98ec1e36cfd7179e4460ebc3bc26ab06fdb6e4"
+chksum_ref="7b54694c8edac6ce8cfff7c7d03c770948f22ec545f054fe65ddd4d8d337d354"
 chksum_prep
 echo " " | tee -a $logfile
 }
@@ -210,19 +210,19 @@ echo "https://blockchain.info/de/rawtx/4f292aeff2ad2da37b5d5719bf34846938cf96ea7
 echo "=== TESTCASE 5a: ./tcls_tx2txt.sh -r 010000000301de569ae..." | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -r 010000000301de569ae0b3d49dff80f79f7953f87f17f61ca1f6d523e815a58e2b8863d098000000006a47304402203930d1ba339c9692367ae37836b1f21c1431ecb4522e7ce0caa356b9813722dc02204086f7ad81d5d656ab1b6d0fd4709b5759c22c44a0aeb1969c1cdb7c463912fa012103f6bfdba31cf7e059e19a2b0e60670864d24d7dfe0d7f11045756991271dda237ffffffff97e60e0bec78cf5114238678f0b5eab617ca770752796b4c795c9d3ada772da5000000006a473044022046412e2b3f820f846a5e8f1cc92529cb694cf0d09d35cf0b5128cc7b9bf32a0802207f736b322727babd41793aeedfad41cc0541c0a1693e88b2a620bcd664da8551012103f6bfdba31cf7e059e19a2b0e60670864d24d7dfe0d7f11045756991271dda237ffffffffce559734242e6a6e0608caa07ee1178d5b9e53e0814d61f002930d78422e8402000000006b4830450221009fab428713fa76057e1bd87381614abc270089ddb23c345b0a56114db0fb8fd30220187a80bedfbb6b23bcf4eaf25017be2efdd64f02a732be9f4846142ad3408798012103f6bfdba31cf7e059e19a2b0e60670864d24d7dfe0d7f11045756991271dda237ffffffff011005d0010000000017a91469545b58fd41a120da3f606be313e061ea818edf8700000000 > tmpfile
-chksum_ref="5d30679968d2215cdb519a77b5d84a3474e2455a6abffe286f7488405b0da398"
+chksum_ref="cc903e35b79e8d62bda8249557f1bffbb10ec5a1e490d45801d8a5b5d8e7dd02"
 chksum_prep
 
 echo "=== TESTCASE 5b: ./tcls_tx2txt.sh -v -r 010000000301de569ae..." | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -v -r 010000000301de569ae0b3d49dff80f79f7953f87f17f61ca1f6d523e815a58e2b8863d098000000006a47304402203930d1ba339c9692367ae37836b1f21c1431ecb4522e7ce0caa356b9813722dc02204086f7ad81d5d656ab1b6d0fd4709b5759c22c44a0aeb1969c1cdb7c463912fa012103f6bfdba31cf7e059e19a2b0e60670864d24d7dfe0d7f11045756991271dda237ffffffff97e60e0bec78cf5114238678f0b5eab617ca770752796b4c795c9d3ada772da5000000006a473044022046412e2b3f820f846a5e8f1cc92529cb694cf0d09d35cf0b5128cc7b9bf32a0802207f736b322727babd41793aeedfad41cc0541c0a1693e88b2a620bcd664da8551012103f6bfdba31cf7e059e19a2b0e60670864d24d7dfe0d7f11045756991271dda237ffffffffce559734242e6a6e0608caa07ee1178d5b9e53e0814d61f002930d78422e8402000000006b4830450221009fab428713fa76057e1bd87381614abc270089ddb23c345b0a56114db0fb8fd30220187a80bedfbb6b23bcf4eaf25017be2efdd64f02a732be9f4846142ad3408798012103f6bfdba31cf7e059e19a2b0e60670864d24d7dfe0d7f11045756991271dda237ffffffff011005d0010000000017a91469545b58fd41a120da3f606be313e061ea818edf8700000000 > tmpfile
-chksum_ref="901e0aa7c14542e2434f4cccdb5d1cf311087151da28a50296d94b4e83f59cfa"
+chksum_ref="51796ad8c3205ff2feb36de7f218c8525b73523e4e7c6c62777649d2623521a4"
 chksum_prep
 
 echo "=== TESTCASE 5c: ./tcls_tx2txt.sh -vv -r 010000000301de569ae..." | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -vv -r 010000000301de569ae0b3d49dff80f79f7953f87f17f61ca1f6d523e815a58e2b8863d098000000006a47304402203930d1ba339c9692367ae37836b1f21c1431ecb4522e7ce0caa356b9813722dc02204086f7ad81d5d656ab1b6d0fd4709b5759c22c44a0aeb1969c1cdb7c463912fa012103f6bfdba31cf7e059e19a2b0e60670864d24d7dfe0d7f11045756991271dda237ffffffff97e60e0bec78cf5114238678f0b5eab617ca770752796b4c795c9d3ada772da5000000006a473044022046412e2b3f820f846a5e8f1cc92529cb694cf0d09d35cf0b5128cc7b9bf32a0802207f736b322727babd41793aeedfad41cc0541c0a1693e88b2a620bcd664da8551012103f6bfdba31cf7e059e19a2b0e60670864d24d7dfe0d7f11045756991271dda237ffffffffce559734242e6a6e0608caa07ee1178d5b9e53e0814d61f002930d78422e8402000000006b4830450221009fab428713fa76057e1bd87381614abc270089ddb23c345b0a56114db0fb8fd30220187a80bedfbb6b23bcf4eaf25017be2efdd64f02a732be9f4846142ad3408798012103f6bfdba31cf7e059e19a2b0e60670864d24d7dfe0d7f11045756991271dda237ffffffff011005d0010000000017a91469545b58fd41a120da3f606be313e061ea818edf8700000000 > tmpfile
-chksum_ref="3e03fb192056db8b79071e8b4a65d3765c326c49e9e8081f6543eb4a37d9e0b9"
+chksum_ref="9438a07a85a4d0989c32d8478519bfb6f63114ca598c4cb5afeff2c03cc4fcad"
 chksum_prep
 echo " " | tee -a $logfile
 }
@@ -241,19 +241,19 @@ echo "https://blockchain.info/de/rawtx/7264f8ba4a85a4780c549bf04a98e8de4c9cb1120
 echo "=== TESTCASE 6a: ./tcls_tx2txt.sh -r 0100000001df64d3e79..." | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -r 0100000001df64d3e790779777de937eea18884e9b131c9910bdb860b1a5cea225b61e3510020000006b48304502210082e594fdd17f4f2995edc180e5373a664eb56f56420f0c8761a27fa612db2a2b02206bcd4763303661c9ccaac3e4e7f6bfc062f17ce4b6b1b479ee067a05e5a578b10121036932969ec8c5cecebc1ff6fc07126f8cb5589ada69db8ca97a4f1291ead8c06bfeffffff04d130ab00000000001976a9141f59b78ccc26b6d84a65b0d362185ac4683197ed88acf0fcf300000000001976a914f12d85961d3a36119c2eaed5ad0e728a789ab59c88acb70aa700000000001976a9142baaf47baf1bd1e3dad3956db536c3f2e87c237b88ac94804707000000001976a914cb1b1d3c8be7db6416c16a1d29db170930970a3088acce3d0600 > tmpfile
-chksum_ref="337e47767fd18c4fa3de97e5e6746e282cc5027a25ee52affa5c3ca6dba9ef05"
+chksum_ref="f660d573d5b8103e9254eefe5e69cb4ef52c28f351657e81f2b31464c30164db"
 chksum_prep
 
 echo "=== TESTCASE 6b: ./tcls_tx2txt.sh -v -r 0100000001df64d3e79..." | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -v -r 0100000001df64d3e790779777de937eea18884e9b131c9910bdb860b1a5cea225b61e3510020000006b48304502210082e594fdd17f4f2995edc180e5373a664eb56f56420f0c8761a27fa612db2a2b02206bcd4763303661c9ccaac3e4e7f6bfc062f17ce4b6b1b479ee067a05e5a578b10121036932969ec8c5cecebc1ff6fc07126f8cb5589ada69db8ca97a4f1291ead8c06bfeffffff04d130ab00000000001976a9141f59b78ccc26b6d84a65b0d362185ac4683197ed88acf0fcf300000000001976a914f12d85961d3a36119c2eaed5ad0e728a789ab59c88acb70aa700000000001976a9142baaf47baf1bd1e3dad3956db536c3f2e87c237b88ac94804707000000001976a914cb1b1d3c8be7db6416c16a1d29db170930970a3088acce3d0600 > tmpfile
-chksum_ref="72337fa91301e1192471b034026b2d30ee59c77d4f89127dde52a5b536f3c542"
+chksum_ref="c6108160fd923ea68b85167e6856e96834812af43c47ad158c427d6c0b9e3e73"
 chksum_prep
 
 echo "=== TESTCASE 6c: ./tcls_tx2txt.sh -vv -r 0100000001df64d3e79..." | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -vv -r 0100000001df64d3e790779777de937eea18884e9b131c9910bdb860b1a5cea225b61e3510020000006b48304502210082e594fdd17f4f2995edc180e5373a664eb56f56420f0c8761a27fa612db2a2b02206bcd4763303661c9ccaac3e4e7f6bfc062f17ce4b6b1b479ee067a05e5a578b10121036932969ec8c5cecebc1ff6fc07126f8cb5589ada69db8ca97a4f1291ead8c06bfeffffff04d130ab00000000001976a9141f59b78ccc26b6d84a65b0d362185ac4683197ed88acf0fcf300000000001976a914f12d85961d3a36119c2eaed5ad0e728a789ab59c88acb70aa700000000001976a9142baaf47baf1bd1e3dad3956db536c3f2e87c237b88ac94804707000000001976a914cb1b1d3c8be7db6416c16a1d29db170930970a3088acce3d0600 > tmpfile
-chksum_ref="521df19dd96c1167c8f06c1468e2f8093d28a2876aa741919d9b6f8771a8706b"
+chksum_ref="662a1f1a0370392ba66de624d8b5bcca1a6f44bea1fb35b8644c7277f781bdae"
 chksum_prep
 echo " " | tee -a $logfile
 }
@@ -268,19 +268,19 @@ echo "https://blockchain.info/de/rawtx/51f7fc9899b068c4a501ffa9b37368fd7c09b3e72
 echo "=== TESTCASE 7a: " | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -r 010000000216f7342825c156476c430f3e2765e0c393283b08246a66d122a45c836554ef03010000006b483045022100dd55b040174c90e85f0d33417dfccd96fa4f6b5ef50c32a1b720c24efc097f73022018d8a6b003b46c578d42ff4221af46068b64dd4e55d2d074175038a6e620e66b012103a86d6cd289a76d1b2b13d362d9f58d1753dd4252be1ef8a404831dd1de45f6c2ffffffffe18f73b450139de5c7375dcd2bd249ef6a42ad19661104df796dccdc98d34722000000006a47304402202e733dd23eb16130c3aa705cd04ffa31928616f2558063281cf642d786bf3eef022010a4d48968c504391c19c1cf67163d5618809bacb644d797a24a05f2130aa9f7012103a86d6cd289a76d1b2b13d362d9f58d1753dd4252be1ef8a404831dd1de45f6c2ffffffff02a6ea17000000000017a914f815b036d9bbbce5e9f2a00abd1bf3dc91e9551087413c0200000000001976a914ff57cb19528c04096067b8db38d18ecd0b37789388ac00000000 > tmpfile
-chksum_ref="b3e0b22ac9014bcca7f1066943bb45edead04549d49b05a743ae48f2e435ba26"
+chksum_ref="3dd5bf5b82de43691fae6578672a7625741150a6088caa76acf049a469f648de"
 chksum_prep
 
 echo "=== TESTCASE 7b: " | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -v -r 010000000216f7342825c156476c430f3e2765e0c393283b08246a66d122a45c836554ef03010000006b483045022100dd55b040174c90e85f0d33417dfccd96fa4f6b5ef50c32a1b720c24efc097f73022018d8a6b003b46c578d42ff4221af46068b64dd4e55d2d074175038a6e620e66b012103a86d6cd289a76d1b2b13d362d9f58d1753dd4252be1ef8a404831dd1de45f6c2ffffffffe18f73b450139de5c7375dcd2bd249ef6a42ad19661104df796dccdc98d34722000000006a47304402202e733dd23eb16130c3aa705cd04ffa31928616f2558063281cf642d786bf3eef022010a4d48968c504391c19c1cf67163d5618809bacb644d797a24a05f2130aa9f7012103a86d6cd289a76d1b2b13d362d9f58d1753dd4252be1ef8a404831dd1de45f6c2ffffffff02a6ea17000000000017a914f815b036d9bbbce5e9f2a00abd1bf3dc91e9551087413c0200000000001976a914ff57cb19528c04096067b8db38d18ecd0b37789388ac00000000 > tmpfile
-chksum_ref="1cb6476e645474175e1242089a5c0d47de79d3129d89d7ae071bef7cdcbc1221"
+chksum_ref="81de161023723c4fc925a6bbfafed79e973541f956ed9b157309a91fe10c243c"
 chksum_prep
 
 echo "=== TESTCASE 7c: " | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -vv -r 010000000216f7342825c156476c430f3e2765e0c393283b08246a66d122a45c836554ef03010000006b483045022100dd55b040174c90e85f0d33417dfccd96fa4f6b5ef50c32a1b720c24efc097f73022018d8a6b003b46c578d42ff4221af46068b64dd4e55d2d074175038a6e620e66b012103a86d6cd289a76d1b2b13d362d9f58d1753dd4252be1ef8a404831dd1de45f6c2ffffffffe18f73b450139de5c7375dcd2bd249ef6a42ad19661104df796dccdc98d34722000000006a47304402202e733dd23eb16130c3aa705cd04ffa31928616f2558063281cf642d786bf3eef022010a4d48968c504391c19c1cf67163d5618809bacb644d797a24a05f2130aa9f7012103a86d6cd289a76d1b2b13d362d9f58d1753dd4252be1ef8a404831dd1de45f6c2ffffffff02a6ea17000000000017a914f815b036d9bbbce5e9f2a00abd1bf3dc91e9551087413c0200000000001976a914ff57cb19528c04096067b8db38d18ecd0b37789388ac00000000 > tmpfile
-chksum_ref="6d30025edd73308384f9bd56e49106fadbd1b91669b10cd706a51045443de92c"
+chksum_ref="ab2486b94351706a99202f16cebff8430d2ff999d5a0ef729adced88ec8b2934"
 chksum_prep
 echo " " | tee -a $logfile
 }
@@ -295,17 +295,17 @@ echo "https://blockchain.info/de/rawtx/c0889855c93eed67d1f5a6b8a31e446e3327ce03b
 
 echo "=== TESTCASE 8a: " | tee -a $logfile
 ./tcls_tx2txt.sh -r 0100000001b9c6777f2d8d710f1e0e3bb5fbffa7cdfd6c814a2257a7cfced9a2205448dd0601000000da0048304502210083a93c7611f5aeee6b0b4d1cbff2d31556af4cd1f951de8341c768ae03f780730220063b5e6dfb461291b1fbd93d58a8111d04fd03c7098834bac5cdf1d3c5fa90d0014730440220137c7320e03b73da66e9cf89e5f5ed0d5743ebc65e776707b8385ff93039408802202c30bc57010b3dd20507393ebc79affc653473a7baf03c5abf19c14e2136c646014752210285cb139a82dd9062b9ac1091cb1f91a01c11ab9c6a46bd09d0754dab86a38cc9210328c37f938748dcbbf15a0e5a9d1ba20f93f2c2d0ead63c7c14a5a10959b5ce8952aeffffffff0280c42b03000000001976a914d199925b52d367220b1e2a2d8815e635b571512f88ac65a7b3010000000017a9145c4dd14b9df138840b34237fdbe9159c420edbbe8700000000 > tmpfile
-chksum_ref="eed10df64c287bc6028466dcb878b1cf2ab49082219c969dcc2134a0525a1c29"
+chksum_ref="4ec287beb077254801219521cc050d52dd3e4b15c0d89fc86060bf94f676ba2b"
 chksum_prep
 
 echo "=== TESTCASE 8b: " | tee -a $logfile
 ./tcls_tx2txt.sh -v -r 0100000001b9c6777f2d8d710f1e0e3bb5fbffa7cdfd6c814a2257a7cfced9a2205448dd0601000000da0048304502210083a93c7611f5aeee6b0b4d1cbff2d31556af4cd1f951de8341c768ae03f780730220063b5e6dfb461291b1fbd93d58a8111d04fd03c7098834bac5cdf1d3c5fa90d0014730440220137c7320e03b73da66e9cf89e5f5ed0d5743ebc65e776707b8385ff93039408802202c30bc57010b3dd20507393ebc79affc653473a7baf03c5abf19c14e2136c646014752210285cb139a82dd9062b9ac1091cb1f91a01c11ab9c6a46bd09d0754dab86a38cc9210328c37f938748dcbbf15a0e5a9d1ba20f93f2c2d0ead63c7c14a5a10959b5ce8952aeffffffff0280c42b03000000001976a914d199925b52d367220b1e2a2d8815e635b571512f88ac65a7b3010000000017a9145c4dd14b9df138840b34237fdbe9159c420edbbe8700000000 > tmpfile
-chksum_ref="a4da0c9fb428b931e51eafc508d3e2f00be05610cc567749511d21ed6a95d380"
+chksum_ref="aa968060b590c3cfbe3e6d4284135b757e6d9709724908e5091c4a3175a9a4b4"
 chksum_prep
 
 echo "=== TESTCASE 8c: " | tee -a $logfile
 ./tcls_tx2txt.sh -vv -r 0100000001b9c6777f2d8d710f1e0e3bb5fbffa7cdfd6c814a2257a7cfced9a2205448dd0601000000da0048304502210083a93c7611f5aeee6b0b4d1cbff2d31556af4cd1f951de8341c768ae03f780730220063b5e6dfb461291b1fbd93d58a8111d04fd03c7098834bac5cdf1d3c5fa90d0014730440220137c7320e03b73da66e9cf89e5f5ed0d5743ebc65e776707b8385ff93039408802202c30bc57010b3dd20507393ebc79affc653473a7baf03c5abf19c14e2136c646014752210285cb139a82dd9062b9ac1091cb1f91a01c11ab9c6a46bd09d0754dab86a38cc9210328c37f938748dcbbf15a0e5a9d1ba20f93f2c2d0ead63c7c14a5a10959b5ce8952aeffffffff0280c42b03000000001976a914d199925b52d367220b1e2a2d8815e635b571512f88ac65a7b3010000000017a9145c4dd14b9df138840b34237fdbe9159c420edbbe8700000000 > tmpfile
-chksum_ref="947c1028249be6c378be2bca7c7aafae46d3e8d317a654deed58ead39ad1535d"
+chksum_ref="ddb6c235ec45bc7adbcff344b2cd5cfd51b637aa787a359d9556f86074b0adf4"
 chksum_prep
 echo " " | tee -a $logfile
 }
@@ -322,19 +322,19 @@ echo "https://blockchain.info/de/rawtx/734c48124d391bfff5750bbc39bd18e6988e8ac87
 echo "=== TESTCASE 9a: " | tee -a $logfile
 echo "=============================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -t 734c48124d391bfff5750bbc39bd18e6988e8ac873c418d64d31cfdc31cc64ac > tmpfile
-chksum_ref="d954cf5b566d2734beecb7a5307f7ae2477e15823f95ebf81962d07e10470ff0"
+chksum_ref="ffb61ed2c40debfa12bc40c33a2870fd1f47171f9f29e13c32fa196861a922ea"
 chksum_prep
 
 echo "=== TESTCASE 9b: " | tee -a $logfile
 echo "=============================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -v -t 734c48124d391bfff5750bbc39bd18e6988e8ac873c418d64d31cfdc31cc64ac > tmpfile
-chksum_ref="b510f9fdc8e9432143d3851a01651e9aee66d9f645cb3c544b02a3993828da14"
+chksum_ref="8d700b1754d6a82206456082206c50cdd0d25757c29bc0dc1294700cb5bd1347"
 chksum_prep
 
 echo "=== TESTCASE 9c: " | tee -a $logfile
 echo "=============================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -vv -t 734c48124d391bfff5750bbc39bd18e6988e8ac873c418d64d31cfdc31cc64ac > tmpfile
-chksum_ref="760535ffdcf067b6cbfbfcd19b84ef1ef5a9dd28252051184f018140527b3444"
+chksum_ref="86aaf9824e4e753d7c6ccf8002784823df6565d1b55ff3f0ac0a1bb47a096618"
 chksum_prep
 echo " " | tee -a $logfile
 }
@@ -349,43 +349,43 @@ echo "https://blockchain.info/de/rawtx/ea9462053d74024ec46dac07c4502001940510206
 echo "=== TESTCASE 10a: " | tee -a $logfile
 echo "=============================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -r 01000000013153f60f294bc14d0481138c1c9627ff71a580b596987a82e9eebf2ae3de232202000000fc0047304402200c2f9e8805de97fa785b93dcc9072197bf5c1095ea536320ed26c645ec3bfafc02202882258f394449f1b1365ce80eed26fbe01217657729664af6827d041e7e98510147304402206d5cbef275b6972bd8cc00aff666a6ca18f09a5b1d1bf49e6966ad815db7119a0220340e49d4b747c9bd8ac80dbe073525c57da43dc4d2727b789be7e66bed9c6d02014c695221037b7c16024e2e6f6575b7a8c55c581dce7effcd6045bdf196461be8ff88db24f1210223eefa59f9b51ca96e1f4710df3639c58aae32c4cef1dd0333e7478de3dd4c6321034d03a7e6806e734c171be535999239aac76822427c217ee7564ab752cdc12dde53aeffffffff048d40ad120100000017a914fb8e0ce6d2f35c566908fd225b7f96e72df603d3872d5f0000000000001976a914768ac2a2530b2987d2e6506edc71dcf9f0a7b6e688ac00350c00000000001976a91452f28673c5aed9126b91d9eac5cbe1e02276a2cb88ac18b30700000000001976a914f3678c60ec389c7b132b5e5b0e1434b6dcd48f4188ac00000000 > tmpfile
-chksum_ref="b7ffaf82b646f61d61d630437294bd2ac330b1f8bffe2fabb8a39904d7cd0265"
+chksum_ref="9bd3e8ba86a0f40d3053362987f24b366f53e5a020a0ccfa30baa1ef42023291"
 chksum_prep
 
 echo "=== TESTCASE 10b: " | tee -a $logfile
 echo "=============================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -v -r 01000000013153f60f294bc14d0481138c1c9627ff71a580b596987a82e9eebf2ae3de232202000000fc0047304402200c2f9e8805de97fa785b93dcc9072197bf5c1095ea536320ed26c645ec3bfafc02202882258f394449f1b1365ce80eed26fbe01217657729664af6827d041e7e98510147304402206d5cbef275b6972bd8cc00aff666a6ca18f09a5b1d1bf49e6966ad815db7119a0220340e49d4b747c9bd8ac80dbe073525c57da43dc4d2727b789be7e66bed9c6d02014c695221037b7c16024e2e6f6575b7a8c55c581dce7effcd6045bdf196461be8ff88db24f1210223eefa59f9b51ca96e1f4710df3639c58aae32c4cef1dd0333e7478de3dd4c6321034d03a7e6806e734c171be535999239aac76822427c217ee7564ab752cdc12dde53aeffffffff048d40ad120100000017a914fb8e0ce6d2f35c566908fd225b7f96e72df603d3872d5f0000000000001976a914768ac2a2530b2987d2e6506edc71dcf9f0a7b6e688ac00350c00000000001976a91452f28673c5aed9126b91d9eac5cbe1e02276a2cb88ac18b30700000000001976a914f3678c60ec389c7b132b5e5b0e1434b6dcd48f4188ac00000000 > tmpfile
-chksum_ref="60d67676bfa0cccefb3aaa8898651f43da41b1235095de5690e1e5aaf8ed0c0b"
+chksum_ref="d0232f662c47b27160c23a841311c0e8ae0637b8584dbb41d582c02532385be8"
 chksum_prep
 
 echo "=== TESTCASE 10c: " | tee -a $logfile
 echo "=============================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -vv -r 01000000013153f60f294bc14d0481138c1c9627ff71a580b596987a82e9eebf2ae3de232202000000fc0047304402200c2f9e8805de97fa785b93dcc9072197bf5c1095ea536320ed26c645ec3bfafc02202882258f394449f1b1365ce80eed26fbe01217657729664af6827d041e7e98510147304402206d5cbef275b6972bd8cc00aff666a6ca18f09a5b1d1bf49e6966ad815db7119a0220340e49d4b747c9bd8ac80dbe073525c57da43dc4d2727b789be7e66bed9c6d02014c695221037b7c16024e2e6f6575b7a8c55c581dce7effcd6045bdf196461be8ff88db24f1210223eefa59f9b51ca96e1f4710df3639c58aae32c4cef1dd0333e7478de3dd4c6321034d03a7e6806e734c171be535999239aac76822427c217ee7564ab752cdc12dde53aeffffffff048d40ad120100000017a914fb8e0ce6d2f35c566908fd225b7f96e72df603d3872d5f0000000000001976a914768ac2a2530b2987d2e6506edc71dcf9f0a7b6e688ac00350c00000000001976a91452f28673c5aed9126b91d9eac5cbe1e02276a2cb88ac18b30700000000001976a914f3678c60ec389c7b132b5e5b0e1434b6dcd48f4188ac00000000 > tmpfile
-chksum_ref="26d8a4d8a54270320c2f23b071e70f0fc3271b649172b34c2c1c9f8560b224da"
+chksum_ref="67275c6c21d9e301369c58ff84fd598dca7658200eb8c6a1d104f0dd28205355"
 chksum_prep
 echo " " | tee -a $logfile
 }
 
 testcase11() {
 echo "=============================================================" | tee -a $logfile
-echo "=== TESTCASE 11: *** worum geht's ? Referenz ??? ***      ===" | tee -a $logfile
+echo "=== TESTCASE 11: *** my first cold storage test ! ***     ===" | tee -a $logfile
 echo "=============================================================" | tee -a $logfile
 echo "=== TESTCASE 11a: " | tee -a $logfile
 echo "=============================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -u 0100000001bc12683c21e46c380933e83c00ec3929453e3d11cc5a2db9f795372efe03e81d000000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88acffffffff01d0a11000000000001976a9140de4457d577bb45dee513bb695bdfdc3b34d467d88ac0000000001000000 > tmpfile
-chksum_ref="005562b2c1bc36a28aa32650c08985875e3262acad2c7256a49b1426f73572a3"
+chksum_ref="991460a177a696c201044940b7dd87509f96d4c8494622525473f6c829c17efd"
 chksum_prep
 
 echo "=== TESTCASE 11b: " | tee -a $logfile
 echo "=============================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -v -u 0100000001bc12683c21e46c380933e83c00ec3929453e3d11cc5a2db9f795372efe03e81d000000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88acffffffff01d0a11000000000001976a9140de4457d577bb45dee513bb695bdfdc3b34d467d88ac0000000001000000 > tmpfile
-chksum_ref="25e93fe8fbb9ce1ff4a51e876fb45c2651f5f31a5a3003bdad5dff03559a061b"
+chksum_ref="0251c337dbd0afa7e52f13729c590317e60d03b430fbe50ef9841e44a21679f1"
 chksum_prep
 
 echo "=== TESTCASE 11c: " | tee -a $logfile
 echo "=============================================================" | tee -a $logfile
 ./tcls_tx2txt.sh -vv -u 0100000001bc12683c21e46c380933e83c00ec3929453e3d11cc5a2db9f795372efe03e81d000000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88acffffffff01d0a11000000000001976a9140de4457d577bb45dee513bb695bdfdc3b34d467d88ac0000000001000000 > tmpfile
-chksum_ref="20114216728df24fcef9539de0f36b3bff6a79b1fd303565f75a59d70bf7d7c7"
+chksum_ref="5c570c53b444c1abb63cdc270e4f1f01f8a83680defce3dad2afba6347e87eef"
 chksum_prep
 echo " " | tee -a $logfile
 }
@@ -400,7 +400,7 @@ echo "https://blockchain.info/tx/cca7507897abc89628f450e8b1e0c6fca4ec3f7b34cccf5
 echo "http://bitcoin.stackexchange.com/questions/32305/how-does-the-ecdsa-verification-algorithm-work-during-transaction/32308#32308"
 echo "./tcls_tx2txt.sh -vv -r 01000000018dd4f5fbd5e980fc02f35c6ce145935b11e284605bf599a13c6d415db55d07a1000000008b4830450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e0141042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabbffffffff0200719a81860000001976a914df1bd49a6c9e34dfa8631f2c54cf39986027501b88ac009f0a5362000000434104cd5e9726e6afeae357b1806be25a4c3d3811775835d235417ea746b7db9eeab33cf01674b944c64561ce3388fa1abd0fa88b06c44ce81e2234aa70fe578d455dac00000000" >> $logfile
 ./tcls_tx2txt.sh -vv -r 01000000018dd4f5fbd5e980fc02f35c6ce145935b11e284605bf599a13c6d415db55d07a1000000008b4830450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e0141042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabbffffffff0200719a81860000001976a914df1bd49a6c9e34dfa8631f2c54cf39986027501b88ac009f0a5362000000434104cd5e9726e6afeae357b1806be25a4c3d3811775835d235417ea746b7db9eeab33cf01674b944c64561ce3388fa1abd0fa88b06c44ce81e2234aa70fe578d455dac00000000 > tmpfile
-chksum_ref="74eefa8081276ab2af6699867be54d485e47e83c74a582759786f394f07c4c19"
+chksum_ref="22b929c817a9630b4a05063ec63c79d032807fe16b35659d3e264a780850f857"
 chksum_prep
 
 echo " " | tee -a $logfile
@@ -408,7 +408,7 @@ echo "=== TESTCASE 12b: the same pizza tx, but fetched from network" | tee -a $l
 echo "=============================================================" | tee -a $logfile
 echo "./tcls_tx2txt.sh -vv -t cca7507897abc89628f450e8b1e0c6fca4ec3f7b34cccf55f3f531c659ff4d79" >> $logfile
 ./tcls_tx2txt.sh -vv -t cca7507897abc89628f450e8b1e0c6fca4ec3f7b34cccf55f3f531c659ff4d79 > tmpfile
-chksum_ref="1c3af19ec7b5102c6c8f200c99148d9eb0bc482e02d9a5f731215c695ef4426a"
+chksum_ref="240b6d677f0a9a4c2a2259d170c486a06be6c693aaac91091afe07add0a5ce37"
 chksum_prep
 
 echo " " | tee -a $logfile
@@ -417,7 +417,7 @@ echo "=============================================================" | tee -a $l
 echo "http://bitcoin.stackexchange.com/questions/48673/confused-about-this-particular-multisig-transaction-with-a-maybe-invalid-scrip"  | tee -a $logfile
 echo "./tcls_tx2txt.sh -vv -t c49b3c445c89d832289de0fd3b0281efdcce418333dacd028061e8de9f0a6f10" >> $logfile
 ./tcls_tx2txt.sh -vv -t c49b3c445c89d832289de0fd3b0281efdcce418333dacd028061e8de9f0a6f10 > tmpfile
-chksum_ref="295ff93b09a7010b62d12dc64041c964916f7a6fdf93740ed818411a07a7006f"
+chksum_ref="5759eabe85dd2828a3d781991c95b5d83ec0b79762c5d86404c25daf5ba7c6c6"
 chksum_prep
 
 echo " " | tee -a $logfile

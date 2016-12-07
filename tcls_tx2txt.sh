@@ -45,14 +45,14 @@ VVERBOSE=0
 proc_help() {
   echo "usage: $0 [-h|-r|-t|-u|-v|-vv] [[raw]trx][...]"
   echo "  "
-  echo "1. examine a raw trx into separate lines, as specified by:"
+  echo "1. examine a raw TX into separate lines, as specified by:"
   echo "   https://en.bitcoin.it/wiki/Protocol_specification#tx"
   echo "2. create and/or sign a raw trx"
   echo "  "
   echo " -h   show this help text"
-  echo " -r   examine RAW trx (requires hex data as a parameter string)"
-  echo " -t   examine an existing TRX (requires TRANSACTION_ID, to fetch from blockchain.info)"
-  echo " -u   examine UNSIGNED raw transaction (requires hex data as a parameter string)"
+  echo " -r   examine RAW TX (requires hex data as a parameter string)"
+  echo " -t   examine an existing TX (requires TRANSACTION_ID, to fetch from blockchain.info)"
+  echo " -u   examine UNSIGNED RAW TX (requires hex data as a parameter string)"
   echo " -v   display verbose output"
   echo " -vv  display even more verbose output"
   echo "  "
@@ -165,27 +165,26 @@ proc_var_int() {
 # procedure to display even more verbose output #
 #################################################
 decode_pkscript() {
-    result=$( sh ./trx_out_pk_script.sh -q $1 )
+    result=$( sh ./tcls_out_pk_script.sh -q $1 )
     echo " $result"
-    # only decode into bitcoin address, if
-    #   $result=20 hex bytes length (40 chars)
-    #   $result=65 hex bytes length (130 chars)
-    # need to strip off any 2nd param (e.g. like "P2SH") for the length check
+    echo "  and translates base58 encoded into this bitcoin address:"
     result=$( echo "$result" | tail -n1 )
     len=$( echo $result | cut -d " " -f 1 )
     len=${#len}
-    if [ $len -eq 130 ] ; then
-      echo "  and translates base58 encoded into this bitcoin address:"
-      sh ./tcls_base58check_enc.sh -q -pk $result
-    fi
-    if [ $len -eq 66 ] ; then
-      echo "  and translates base58 encoded into this bitcoin address:"
-      sh ./tcls_base58check_enc.sh -q -pk $result
-    fi
-    if [ $len -eq 40 ] ; then
-      echo "  and translates base58 encoded into this bitcoin address:"
-      sh ./tcls_base58check_enc.sh -q -pkh $result
-    fi
+    case "$len" in
+       5) # a bit ugly. logic: first param = "-p2sh", which is a length of 5, then:
+          sh ./tcls_base58check_enc.sh -q $result
+          ;;
+      40) 
+          sh ./tcls_base58check_enc.sh -q -p2pkh $result
+          ;;
+      66) 
+          sh ./tcls_base58check_enc.sh -q -p2pk $result
+          ;;
+     130)
+          sh ./tcls_base58check_enc.sh -q -p2pk $result
+          ;;
+    esac
 }
 
 echo "##################################################################"
@@ -487,9 +486,9 @@ while [ $LOOPCOUNTER -lt $tx_in_count_dec ]
       decode_pkscript $sig_script
     else
       if [ "$VVERBOSE" -eq 1 ] ; then
-        ./trx_in_sig_script.sh -v $sig_script 
+        ./tcls_in_sig_script.sh -v $sig_script 
       else
-        ./trx_in_sig_script.sh -q $sig_script 
+        ./tcls_in_sig_script.sh -q $sig_script 
       fi 
     fi
   fi
