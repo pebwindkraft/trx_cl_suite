@@ -41,19 +41,19 @@ base58str="123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 #################################
 proc_help() {
   echo "  "
-  echo "usage: base58check_enc.sh [-h|-P2SH|-pk|-pkh|-q|-v] hex_string"
+  echo "usage: base58check_enc.sh [-h|-p2pk|-p2pkh|-p2sh|-q|-v] hex_string"
   echo "  "
   echo "convert a public key to a bitcoin address"
   echo "basically implementing steps 1-9 (-pk) or 4-9 (-pkh) from:"
   echo "https://en.bitcoin.it/wiki/Technical_background_of_version_1_Bitcoin_addresses"
   echo "http://rosettacode.org/wiki/Category:UNIX_Shell"
   echo "  "
-  echo " -h    show this HELP text"
-  echo " -P2SH parameter string shall be converted to P2SH address"
-  echo " -pk   requires a pubkey in [un]compressed format ([65] 33 hex Bytes)"
-  echo " -pkh  requires a pubkey hash (40 hex Bytes)"
-  echo " -q    quiet, do only show the final address"
-  echo " -v    display verbose output"
+  echo " -h     show this HELP text"
+  echo " -p2pk  requires a pubkey in [un]compressed format ([65] 33 hex Bytes)"
+  echo " -p2pkh requires a pubkey hash (40 hex Bytes)"
+  echo " -p2sh  parameter string shall be converted to P2SH address"
+  echo " -q     quiet, do only show the final address"
+  echo " -v     display verbose output"
   echo "  "
 }
 
@@ -88,19 +88,19 @@ else
          proc_help
          exit 0
          ;;
-      -P2SH)
+      -p2sh)
          P2SH=1
          param=$2
          shift
          shift
          ;;
-      -pk)
+      -p2pk)
          ECDSA_PK=1
          param=$2
          shift
          shift 
          ;;
-      -pkh)
+      -p2pkh)
          ECDSA_PKH=1
          param=$2
          shift

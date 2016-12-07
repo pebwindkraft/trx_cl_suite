@@ -294,7 +294,7 @@ else
          shift
          ;;
       *)
-         UR_TRX=$1
+         UNSIGNED_TX=$1
          shift
 #        echo "unknown parameter(s), don't know what to do. Exiting gracefully ..."
 #        proc_help
@@ -341,10 +341,16 @@ if [ $QUIET -ne 1 ] ; then
 fi
 
 if [ $F_PARAM_FLAG -eq 1 ] ; then
+  if [ ! -r $filename ] ; then
+    echo "*** Error: the file $filename could not be read"
+    echo "           make sure file exists, or change filename acordingly"
+    echo "           Exiting gracefully"
+    exit 1
+  fi
   vv_output "reading data from file $filename"
-  UR_TRX=$( cat $filename )
+  UNSIGNED_TX=$( cat $filename )
 fi
-UR_TRX=$( printf "$UR_TRX" | tr [:upper:] [:lower:] )
+UNSIGNED_TX=$( printf "$UNSIGNED_TX" | tr [:upper:] [:lower:] )
 
 v_output "#######################################################"
 v_output "### collect all tx_in data into array variables...  ###"
@@ -356,7 +362,7 @@ v_output "#######################################################"
 v_output "1.  Version, currently set to 01000000"
 from=1
 to=8
-STEPCODE=$( echo $UR_TRX | cut -b $from-$to )
+STEPCODE=$( echo $UNSIGNED_TX | cut -b $from-$to )
 if [ "$STEPCODE" != "$Version" ] ; then 
   echo "*** Error: unsigned raw transaction normally begins with Version '01000000'"
   echo "           here we have $STEPCODE. Please adjust, and try again. "
@@ -371,7 +377,7 @@ v_output "    $STEPCODE"
 v_output "2.  TX_IN_COUNT, the number of input trx "
 from=$(( $to + 1 ))
 to=$(( $from + 1 ))
-TX_IN_Count_hex=$( echo $UR_TRX | cut -b $from-$to)
+TX_IN_Count_hex=$( echo $UNSIGNED_TX | cut -b $from-$to)
 # need to do a var_int check here ...
 TX_IN_Count=$( echo "ibase=16;$TX_IN_Count_hex" | bc )
 v_output "    $TX_IN_Count_hex (decimal $TX_IN_Count)"
@@ -384,6 +390,7 @@ v_output "    $TX_IN_Count_hex (decimal $TX_IN_Count)"
 i=1
 while [ $i -le $TX_IN_Count ] 
  do
+  j=$(( i - 1 )) # just to make the output headlines correct in their counter
   # Arrays: difference between BASH and KSH !
   # below works in bash 3 and 4, and in ksh. BUT (!): do not declare the arrays
   # at the beginning. BASH uses "declare", ksh uses "typeset -a" ...
@@ -394,20 +401,20 @@ while [ $i -le $TX_IN_Count ]
   ##############################################################################
   ### STEP 3 - TX_IN_PrevOutput_Hash, previous transaction hash (32Bytes)    ###
   ##############################################################################
-  v_output "3.  TX_IN[$i] PrevOutput_Hash: a transaction hash"
+  v_output "3.  TX_IN[$j] PrevOutput_Hash: a transaction hash"
   from=$(( $to + 1 ))
   to=$(( $from + 63 ))
-  STEPCODE=$( echo $UR_TRX | cut -b $from-$to )
+  STEPCODE=$( echo $UNSIGNED_TX | cut -b $from-$to )
   TX_IN_PrevOutput_Hash[$i]="$STEPCODE"
   v_output "    ${TX_IN_PrevOutput_Hash[$i]}"
   
   ##############################################################################
   ### STEP 4 - TX_IN_PrevOutput_Index, the output index we want to use       ###
   ##############################################################################
-  v_output "4.  TX_IN[$i] PrevOutput_Index: the output index, we want to redeem from"
+  v_output "4.  TX_IN[$j] PrevOutput_Index: the output index, we want to redeem from"
   from=$(( $to + 1 ))
   to=$(( $from + 7 ))
-  TX_IN_PrevOutput_Index[$i]=$( echo $UR_TRX | cut -b $from-$to )
+  TX_IN_PrevOutput_Index[$i]=$( echo $UNSIGNED_TX | cut -b $from-$to )
   v_output "    ${TX_IN_PrevOutput_Index[$i]}"
   
   ##############################################################################
@@ -415,10 +422,10 @@ while [ $i -le $TX_IN_Count ]
   ##############################################################################
   # For the purpose of signing the transaction, this is temporarily filled 
   # with the scriptPubKey of the output we want to redeem. 
-  v_output "5.  TX_IN[$i] ScriptBytes: length of prev trx PK Script"
+  v_output "5.  TX_IN[$j] ScriptBytes: length of prev trx PK Script"
   from=$(( $to + 1 ))
   to=$(( $from + 1 ))
-  TX_IN_ScriptBytes_hex[$i]="$( echo $UR_TRX | cut -b $from-$to )"
+  TX_IN_ScriptBytes_hex[$i]="$( echo $UNSIGNED_TX | cut -b $from-$to )"
   # need to do a var_int check here ...
   TX_IN_ScriptBytes[$i]=$( echo "ibase=16;${TX_IN_ScriptBytes_hex[$i]}" | bc )
   v_output "    ${TX_IN_ScriptBytes_hex[$i]} (decimal ${TX_IN_ScriptBytes[$i]})"
@@ -427,11 +434,11 @@ while [ $i -le $TX_IN_Count ]
   ### STEP 6 - TX_IN_Sig_Script, uchar[] - variable length                   ###
   ##############################################################################
   # the actual scriptSig (which is the PubKey script of the PREV_TRX)
-  v_output "6.  TX_IN[$i] Sig_Script, uchar[]: variable length"
+  v_output "6.  TX_IN[$j] Sig_Script, uchar[]: variable length"
   from=$(( $to + 1 ))
   STEPCODE=$(( ${TX_IN_ScriptBytes[$i]} * 2 ))
   to=$(( $from - 1 + $STEPCODE ))
-  STEPCODE=$( echo $UR_TRX | cut -b $from-$to )
+  STEPCODE=$( echo $UNSIGNED_TX | cut -b $from-$to )
   TX_IN_Sig_Script[$i]="$STEPCODE"
   v_output "    ${TX_IN_Sig_Script[$i]}"
   
@@ -439,10 +446,10 @@ while [ $i -le $TX_IN_Count ]
   ### STEP 7 - TX_IN_Sequence: This is currently always set to 0xffffffff    ###
   ##############################################################################
   # This is currently always set to 0xffffffff
-  v_output "7.  TX_IN[$i] Sequence, this is currently always set to 0xffffffff"
+  v_output "7.  TX_IN[$j] Sequence, this is currently always set to 0xffffffff"
   from=$(( $to + 1 ))
   to=$(( $from + 7 ))
-  STEPCODE=$( echo $UR_TRX | cut -b $from-$to )
+  STEPCODE=$( echo $UNSIGNED_TX | cut -b $from-$to )
   if [ "$STEPCODE" != "$TX_IN_Sequence" ] ; then 
     echo "*** Error: TX_IN_Sequence normally is 'ffffffff'"
     echo "           here we have $STEPCODE. Please adjust, and try again. "
@@ -459,7 +466,7 @@ done
 v_output "8.  TX_OUT_COUNT, the number of output trx"
 from=$(( $to + 1 ))
 to=$(( $from + 1 ))
-TX_OUT_Count_hex=$( echo $UR_TRX | cut -b $from-$to )
+TX_OUT_Count_hex=$( echo $UNSIGNED_TX | cut -b $from-$to )
 # need to do a var_int check here ...
 TX_OUT_Count=$( echo "ibase=16;$TX_OUT_Count_hex" | bc )
 v_output "    $TX_OUT_Count_hex (decimal $TX_OUT_Count)"
@@ -471,7 +478,7 @@ v_output "    $TX_OUT_Count_hex (decimal $TX_OUT_Count)"
 v_output "9.  TX_OUT_Value, the value in hex that will be transferred"
 from=$(( $to + 1 ))
 to=$(( $from + 15 ))
-STEPCODE=$( echo $UR_TRX | cut -b $from-$to )
+STEPCODE=$( echo $UNSIGNED_TX | cut -b $from-$to )
 TX_OUT_Value="$STEPCODE"
 v_output "    $TX_OUT_Value"
 
@@ -481,7 +488,7 @@ v_output "    $TX_OUT_Value"
 v_output "10. TX_OUT_PKScriptBytes: length of PK Script"
 from=$(( $to + 1 ))
 to=$(( $from + 1 ))
-TX_OUT_PKScriptBytes_hex=$( echo $UR_TRX | cut -b $from-$to )
+TX_OUT_PKScriptBytes_hex=$( echo $UNSIGNED_TX | cut -b $from-$to )
 TX_OUT_PKScriptBytes=$( echo "ibase=16;$TX_OUT_PKScriptBytes_hex" | bc )
 v_output "    $TX_OUT_PKScriptBytes_hex (decimal $TX_OUT_PKScriptBytes)"
   
@@ -493,7 +500,7 @@ v_output "11. TX_OUT_PKScript, uchar[]: variable length"
 from=$(( $to + 1 ))
 STEPCODE=$(( $TX_OUT_PKScriptBytes * 2 ))
 to=$(( $from - 1 + $STEPCODE ))
-TX_OUT_PKScript=$( echo $UR_TRX | cut -b $from-$to )
+TX_OUT_PKScript=$( echo $UNSIGNED_TX | cut -b $from-$to )
 v_output "    $TX_OUT_PKScript"
 
 ##############################################################################
@@ -502,7 +509,7 @@ v_output "    $TX_OUT_PKScript"
 v_output "12. LockTime, currently always set to 00000000"
 from=$(( $to + 1 ))
 to=$(( $from + 7 ))
-STEPCODE=$( echo $UR_TRX | cut -b $from-$to)
+STEPCODE=$( echo $UNSIGNED_TX | cut -b $from-$to)
 if [ "$STEPCODE" != "$LockTime" ] ; then 
   echo "*** Error: unsigned raw transaction normally ends with LockTime '00000000'"
   echo "           here we have $STEPCODE. Please adjust, and try again. "
@@ -523,6 +530,7 @@ v_output "13. serialize the unsigned raw tx and add 01000000 (SIGHASH_ALL)"
 
 i=1
 j=1
+k=1
 echo "##############################################" > $tmp_vfy_fn
 echo "### Bitcoin prep file to verify signatures ###" >> $tmp_vfy_fn
 echo "##############################################" >> $tmp_vfy_fn
@@ -545,6 +553,7 @@ fi
 
 while [ $j -le $TX_IN_Count ] 
  do
+  k=$(( j - 1 ))
   printf $Version > $utxhex_tmp_fn
   # need to do a var_int check here ...
   printf $TX_IN_Count_hex >> $utxhex_tmp_fn
@@ -557,6 +566,8 @@ while [ $j -le $TX_IN_Count ]
     if [ $i -eq $j ] ; then
       printf ${TX_IN_ScriptBytes_hex[$i]} >> $utxhex_tmp_fn
       printf ${TX_IN_Sig_Script[$i]} >> $utxhex_tmp_fn
+    else
+      printf 00 >> $utxhex_tmp_fn
     fi
     printf $TX_IN_Sequence >> $utxhex_tmp_fn
     i=$(( i + 1 ))
@@ -573,10 +584,10 @@ while [ $j -le $TX_IN_Count ]
   ##############################################################################
   ### STEP 14 - double sha256 that structure from 13                         ###
   ##############################################################################
-  v_output "14. TX_IN[$j]: double hash the raw unsigned TX"
+  v_output "14. TX_IN[$k]: double hash the raw unsigned TX"
   
   if [ "$VVERBOSE" -eq 1 ] ; then 
-    echo "TX_IN[$j], the unsigned raw tx:" >> $tmp_vfy_fn
+    echo "TX_IN[$k], the unsigned raw tx:" >> $tmp_vfy_fn
     result=$( cat $utxhex_tmp_fn )
     indent_data "    $result" >> $tmp_vfy_fn
   fi
@@ -593,7 +604,7 @@ while [ $j -le $TX_IN_Count ]
     od -An -t x1 $utx_sha256_fn | tr -d [:blank:] | tr -d "\n" | sed -e 's/^/    /'
   fi
   # echo "#!/bin/sh" >> $tmp_vfy_fn
-  echo "# TX_IN[$j], double sha256 and signature:" >> $tmp_vfy_fn
+  echo "# TX_IN[$k], double sha256 and signature:" >> $tmp_vfy_fn
   result=$( od -An -t x1 $utx_dsha256_fn | tr -d [:blank:] | tr -d "\n" )
   echo "echo $result > tx_hash.txt" >> $tmp_vfy_fn 
   if [ "$VERBOSE" -eq 1 ] ; then 
@@ -607,7 +618,7 @@ while [ $j -le $TX_IN_Count ]
   #     sign structure from 14 (with openssl, DER-encoded)
   #     add 01 (the one byte hash code terminates signature) to signature
   #     add pubkey (hex chars)
-  v_output "15. TX_IN[$j]: sign the hash from step 14 with the private key"
+  v_output "15. TX_IN[$k]: sign the hash from step 14 with the private key"
   # verify keys are working correctly ...
   if [ "$hex_privkey" ] ; then 
     ./$script_key2pem -q -x $hex_privkey -p $pubkey 
@@ -661,7 +672,7 @@ while [ $j -le $TX_IN_Count ]
   #     - the actual DER-encoded signature plus the one-byte hash code type
   #     - one byte script OPCODE containing the length of the public key
   #     - the actual public key
-  v_output "16. TX_IN[$j]: construct the final scriptSig[$j]"
+  v_output "16. TX_IN[$k]: construct the final scriptSig[$k]"
   
   # Strict DER checking (in step 15) had it's output in file "$sigtxt_tmp_of" 
   vv_output "    the one byte script length OPCODE"
@@ -674,7 +685,7 @@ while [ $j -le $TX_IN_Count ]
   SCRIPTSIG[$j]=${SCRIPTSIG[$j]}$STEPCODE
   STEPCODE=01
   SCRIPTSIG[$j]=${SCRIPTSIG[$j]}$STEPCODE
-  vv_output "    ${SCRIPTSIG[$j]}"
+  vv_output "    ${SCRIPTSIG[$k]}"
 
   vv_output "    one byte script OPCODE containing the length of the public key"
   STEPCODE=${#pubkey}
@@ -684,7 +695,7 @@ while [ $j -le $TX_IN_Count ]
 
   vv_output "    the actual public key"
   SCRIPTSIG[$j]=${SCRIPTSIG[$j]}$pubkey
-  vv_output "    ${SCRIPTSIG[$j]}"
+  vv_output "    ${SCRIPTSIG[$k]}"
   vv_output " "
 
   if [ $VERBOSE -eq 1 ] ; then 
@@ -728,25 +739,26 @@ trx_concatenate
 j=1
 while [ $j -le $TX_IN_Count ] 
  do
-  vv_output "    TX_IN[$j] PrevOutput_Hash"
+  k=$(( j - 1 ))
+  vv_output "    TX_IN[$k] PrevOutput_Hash"
   STEPCODE=${TX_IN_PrevOutput_Hash[$j]}
   trx_concatenate
 
-  vv_output "    TX_IN[$j] PrevOutput_Index"
+  vv_output "    TX_IN[$k] PrevOutput_Index"
   STEPCODE=${TX_IN_PrevOutput_Index[$j]}
   trx_concatenate
 
-  # TX_IN_ScriptBytes[$j] 
-  vv_output "    TX_IN[$j] ScriptBytes"
+  # TX_IN_ScriptBytes[$k] 
+  vv_output "    TX_IN[$k] ScriptBytes"
   STEPCODE=${#SCRIPTSIG[$j]}
   STEPCODE=$( echo "obase=16;$STEPCODE / 2" | bc )
   trx_concatenate
 
-  vv_output "    TX_IN[$j] SCRIPTSIG"
+  vv_output "    TX_IN[$k] SCRIPTSIG"
   STEPCODE=${SCRIPTSIG[$j]}
   trx_concatenate
 
-  vv_output "    TX_IN[$j] Sequence"
+  vv_output "    TX_IN[$k] Sequence"
   STEPCODE=$TX_IN_Sequence
   trx_concatenate
   j=$(( j + 1 ))
