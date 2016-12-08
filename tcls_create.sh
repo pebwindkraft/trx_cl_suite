@@ -35,7 +35,7 @@ RAW_TRX=''
 RAW_TRX_LINK2HEX="?format=hex"
 
 filename=''
-typeset -r c_urtx_fn=tmp_c_urtx.txt # create unsigned, raw tx file (for later signing)
+typeset -r c_utx_fn=tmp_c_utx.txt # create unsigned, raw tx file (for later signing)
 typeset -r prawtx_fn=tmp_rawtx.txt  # partial raw tx file, used to extract data
 
 typeset -i prev_total_amount=0
@@ -430,8 +430,8 @@ step11() {
 calc_txfee() {
 # calc_txfee needs to know the length of our RAW_TRX
 # we drop here, whatever we have so far ...
-echo $RAW_TRX > $c_urtx_fn
-trx_chars=$( wc -c $c_urtx_fn | awk '{ print $1 }' )
+echo $RAW_TRX > $c_utx_fn
+trx_chars=$( wc -c $c_utx_fn | awk '{ print $1 }' )
 trx_bytes=$(( $line_item * 90 + $trx_chars ))
 c_txfee=$(( $TRXFEE_Per_Bytes * $trx_bytes ))
 }
@@ -860,7 +860,7 @@ trx_concatenate
 v_output "### 13. HASH CODE TYPE"
 STEPCODE="01000000" 
 trx_concatenate
-echo $RAW_TRX > $c_urtx_fn
+echo $RAW_TRX > $c_utx_fn
 
 ##############################################################################
 ### Finished, presenting results ...                                       ###
@@ -959,9 +959,9 @@ fi
 
 echo "###########################################################################"
 echo " "
-echo "$RAW_TRX" | tr [:upper:] [:lower:] > $c_urtx_fn
+echo "$RAW_TRX" | tr [:upper:] [:lower:] > $c_utx_fn
 echo "*** DOUBLE CHECK YOUR MATH! *** "
-echo "File '$c_urtx_fn' contains the unsigned raw transaction. If *YOUR MATH*"
+echo "File '$c_utx_fn' contains the unsigned raw transaction. If *YOUR MATH*"
 echo "is ok, then take this file on a clean USB stick to the cold storage"
 echo "(second computer), and sign it there."
 echo " "

@@ -226,8 +226,7 @@ reverse_hex() {
 # procedure to convert from wif (base58) to hex #
 #################################################
 wif2hex() {
-  # s=$( echo $wif_privkey | awk -f trx_base58.awk )
-  s=$( echo $wif_privkey | awk -f trx_verify_bc_address.awk )
+  s=$( echo $wif_privkey | awk -f tcls_verify_bc_address.awk )
   vv_output "$s"
   s=$( echo $s | sed 's/[0-9]*/ 58*&+ /g' )
   vv_output "$s"
@@ -394,7 +393,7 @@ v_output " "
 v_output "### Verify private key characteristics"
 if [ ! "$wif_privkey" ] ; then
   v_output "hex privkey: $hex_privkey"
-  echo $hex_privkey | awk -f trx_verify_hexkey.awk 
+  echo $hex_privkey | awk -f tcls_verify_hexkey.awk 
   if [ $? -eq 0 ] ; then
     v_output "  valid hex privkey found"
   else
@@ -455,7 +454,7 @@ fi
 v_output " "
 v_output "### Verify public key characteristics"
 v_output "hex pubkey: $pubkey"
-echo $pubkey | awk -f trx_verify_hexkey.awk
+echo $pubkey | awk -f tcls_verify_hexkey.awk
 if [ $? -eq 0 ] ; then
   v_output "  valid hex pubkey found"
 else

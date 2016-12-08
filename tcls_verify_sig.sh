@@ -1,5 +1,5 @@
 #!/bin/sh
-# tool to verify a bitcoin trx signature
+# tool to verify a bitcoin tx signature
 #
 # Copyright (c) 2015, 2016 Volker Nowarra 
 #
@@ -259,7 +259,7 @@ fi
 if [ $VERBOSE -eq 1 ] ; then
   printf "\n### verify public key characteristics"
 fi
-echo $pubkey | awk -f trx_verify_hexkey.awk
+echo $pubkey | awk -f tcls_verify_hexkey.awk
 if [ $? -eq 0 ] ; then
   if [ $VERBOSE -eq 1 ] ; then
     printf ", pubkey is valid          - ok\n"
@@ -273,7 +273,7 @@ fi
 ### Verifying the signature ### 
 ###############################
 if [ $VERBOSE -eq 1 ] ; then
-  echo "### verify signature (using trx_strict_sig_verify.sh)"
+  echo "### verify signature (using tcls_strict_sig_verify.sh)"
   ./tcls_strict_sig_verify.sh -v $signature   
 else
   ./tcls_strict_sig_verify.sh -q $signature
