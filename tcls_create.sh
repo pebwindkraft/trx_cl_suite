@@ -40,10 +40,10 @@ typeset -r prawtx_fn=tmp_rawtx.txt  # partial raw tx file, used to extract data
 
 typeset -i prev_total_amount=0
 typeset -i TRXFEE_Per_Bytes=50
-typeset -i trxfee=0
-typeset -i c_trxfee=0            # calculated trx fee
-typeset -i d_trxfee=0            # delta trx fee
-typeset -i f_trxfee=0            # file trx fee
+typeset -i txfee=0
+typeset -i c_txfee=0            # calculated trx fee
+typeset -i d_txfee=0            # delta trx fee
+typeset -i f_txfee=0            # file trx fee
 typeset -i Amount=0
 typeset -i TRX_Amount=0
 typeset -i PREV_Amount=0
@@ -59,23 +59,23 @@ typeset -i STEPCODE_decimal=0
 #################################
 proc_help() {
   echo " "
-  echo "usage: $0 [-h|-q|-v|-vv] -m|-t <trx_id> <params> [trxfee] [ret_address]"
-  echo "usage: $0 [-h|-q|-v|-vv] -f <filename> <amount> <address> [trxfee] [ret_address]"
+  echo "usage: $0 [-h|-q|-v|-vv] -m|-t <tx_id> <params> [txfee] [ret_address]"
+  echo "usage: $0 [-h|-q|-v|-vv] -f <filename> <amount> <address> [txfee] [ret_address]"
   echo " "
   echo "Create a single input transaction from command line (or multiple inputs with '-f')"
   echo " -h  show this HELP text"
   echo " -v  display VERBOSE output"
   echo " -vv display VERY VERBOSE output"
   echo " "
-  echo " -f  create a trx with multiple inputs from file (use -f help for further details)"
+  echo " -f  create a TX with multiple inputs from file (use -f help for further details)"
   echo " -m  MANUALLY provide <params> for a single input and output (see below)"
-  echo " -t  <TRANSACTION_ID>: fetch trx_id and pubkey script from blockchain.info"
+  echo " -t  <TRANSACTION_ID>: fetch TX-id and pubkey script from blockchain.info"
   echo " "
   echo " <params> consists of these details (keep the order!):"
-  echo "  1) <prev output index> : output index from previous TRX_ID"
-  echo "  2) <prev pubkey script>: (not with '-t') the PK SCRIPT from previous TRX"
+  echo "  1) <prev output index> : output index from previous TX-ID"
+  echo "  2) <prev pubkey script>: (not with '-t') the PK SCRIPT from previous TX"
   echo "  3) <amount>            : the amount to spend (decimal, in Satoshi)"
-  echo "                           *** careful: input - output = trx fee !!!"
+  echo "                           *** careful: input - output = TX fee !!!"
   echo "  4) <address>           : the target Bitcoin address"
   echo " "
 }
@@ -261,15 +261,14 @@ get_trx_values() {
 ### Check bitcoin address hash ###
 ##################################
 chk_bc_address_hash() {
-  echo $s | awk -f trx_verify_bc_address.awk > /dev/null
+  echo $s | awk -f tcls_verify_bc_address.awk > /dev/null
   if [ $? -eq 1 ] ; then
     echo "*** ERROR: invalid address: $s"
     echo "    exiting gracefully ..."
     exit 1
   fi 
   
-  # s=$( echo $s | awk -f trx_base58.awk )
-  s=$( echo $s | awk -f trx_verify_bc_address.awk )
+  s=$( echo $s | awk -f tcls_verify_bc_address.awk )
   vv_output "$s"
   s=$( echo $s | sed 's/[0-9]*/ 58*&+ /g' )
   vv_output "$s"
@@ -381,7 +380,7 @@ step3to7() {
 ##############################################################################
 # a 8-byte reversed hex field, e.g.: 3a01000000000000"
 step9() {
-  v_output "###  9. TX_OUT, trx_out amount (in Satoshis): $Amount"
+  v_output "###  9. TX_OUT, tx_out amount (in Satoshis): $Amount"
   STEPCODE=$( echo "obase=16;$Amount"|bc -l ) 
   STEPCODE=$( zero_pad $STEPCODE 16 )
   STEPCODE_rev=$( reverse_hex $STEPCODE ) 
@@ -428,19 +427,19 @@ step11() {
 ##############################
 ### Calculate the trx fees ###
 ##############################
-calc_trxfee() {
-# calc_trxfee needs to know the length of our RAW_TRX
+calc_txfee() {
+# calc_txfee needs to know the length of our RAW_TRX
 # we drop here, whatever we have so far ...
 echo $RAW_TRX > $c_urtx_fn
 trx_chars=$( wc -c $c_urtx_fn | awk '{ print $1 }' )
 trx_bytes=$(( $line_item * 90 + $trx_chars ))
-c_trxfee=$(( $TRXFEE_Per_Bytes * $trx_bytes ))
+c_txfee=$(( $TRXFEE_Per_Bytes * $trx_bytes ))
 }
 
 
-echo "#########################################################"
-echo "### trx_create.sh: create a raw, unsigned Bitcoin trx ###"
-echo "#########################################################"
+echo "##########################################################"
+echo "### tcls_create.sh: create a raw, unsigned Bitcoin trx ###"
+echo "##########################################################"
 
 ################################
 # command line params handling #
@@ -453,12 +452,12 @@ fi
 
 if [ "$1" == "-f" ] && [ "$2" == "help" ] ; then
   echo " provide the following parameters:"
-  echo " -f <filename> <amount> <address> [trxfee] [ret_address]"
+  echo " -f <filename> <amount> <address> [txfee] [ret_address]"
   echo "    <filename>:    prev trx params line by line separated by blanks, containing:"
   echo "                   prev_trx-id prev_output-index prev_pubkey-script"
   echo "    <amount>:      amount in Satoshis for the whole transaction"
   echo "    <address>:     the target address for this transaction"
-  echo "    [trxfee]:      numeric amount for trx fees (Satoshi/Byte), default=50 Satoshis/Byte"
+  echo "    [txfee]:      numeric amount for trx fees (Satoshi/Byte), default=50 Satoshis/Byte"
   echo "    [ret_address]: a return address, to avoid spending too much trx fees to miners :-)"
   echo " "
   echo "    help:"
@@ -722,12 +721,12 @@ if [ "$T_PARAM_FLAG" -eq 1 ] ; then
       echo " "
       echo "*** ERROR: fetching RAW_TRX data:"
       echo "    $http_get_cmd https://blockchain.info/de/rawtx/$PREV_TRX$RAW_TRX_LINK2HEX"
-      echo "    downoad manually, and call 'trx_2txt -r ...'"
+      echo "    downoad manually, and call 'tcls_tx2txt.sh -r ...'"
       exit 1
     fi
     if [ ${#RAW_TRX} -eq 0 ] ; then
       echo "*** ERROR: the raw trx has a length of 0. Something failed."
-      echo "    downoad manually, and call 'trx_2txt -r ...'"
+      echo "    downoad manually, and call 'tcls_tx2txt.sh -r ...'"
       exit 1
     fi
   fi
@@ -832,16 +831,16 @@ step11
 ############################################
 # if we have a return address (which is between 28 and 32 chars...), 
 # then make sure, money gets back to us ...
-# but before, we need to calculate trxfees, and deduct the return amounts ...
-calc_trxfee
+# but before, we need to calculate txfees, and deduct the return amounts ...
+calc_txfee
 if [ "$F_PARAM_FLAG" -eq 1 ] ; then
-  d_trxfee=$(( $prev_total_amount - $TRX_Amount - $c_trxfee ))
+  d_txfee=$(( $prev_total_amount - $TRX_Amount - $c_txfee ))
 fi
 if [ "$T_PARAM_FLAG" -eq 1 ] ; then
-  d_trxfee=$(( $PREV_Amount - $TRX_Amount - $c_trxfee ))
+  d_txfee=$(( $PREV_Amount - $TRX_Amount - $c_txfee ))
 fi
 if [ ${#RETURN_Address} -gt 28 ] ; then
-  Amount=$d_trxfee 
+  Amount=$d_txfee 
   step9
   step10
   TARGET_Address=$RETURN_Address
@@ -904,56 +903,56 @@ fi
 # the existing PKSCRIPT (length 25 Bytes, 50 chars). Each input must be signed, 
 # so roughly 90 chars signature are added. Normal 1 input one output P2PKH trx are 
 # roughly 227 Bytes ... THIS NEEDS FURTHER ANALYSIS !!!
-calc_trxfee
+calc_txfee
 
-printf "### proposed TRXFEE (@ $TRXFEE_Per_Bytes Satoshi/Byte * $trx_bytes trx_bytes):"
+printf "### proposed TX-FEE (@ $TRXFEE_Per_Bytes Satoshi/Byte * $trx_bytes tx_bytes):"
 line_length=$(( ${#TRXFEE_Per_Bytes} + ${#trx_bytes} ))
 case $line_length in
- 5) printf "     %10d" $c_trxfee
+ 5) printf "      %10d" $c_txfee
     ;;
- 6) printf "    %10d" $c_trxfee
+ 6) printf "     %10d" $c_txfee
     ;;
- 7) printf "   %10d" $c_trxfee
+ 7) printf "    %10d" $c_txfee
     ;;
- 8) printf "  %10d" $c_trxfee
+ 8) printf "   %10d" $c_txfee
     ;;
- 9) printf " %10d" $c_trxfee
+ 9) printf "  %10d" $c_txfee
     ;;
 esac
-printf " ###\n" $c_trxfee
+printf " ###\n" $c_txfee
 
 if [ "$F_PARAM_FLAG" -eq 1 ] ; then
-  f_trxfee=$(( $prev_total_amount - $TRX_Amount ))
-  # d_trxfee=$(( $prev_total_amount - $TRX_Amount - $c_trxfee ))
-  if [ $d_trxfee -lt 0 ] ; then
-    printf "### Achieving negative value with this trxfee:         %16d ###\n" $d_trxfee 
+  f_txfee=$(( $prev_total_amount - $TRX_Amount ))
+  d_txfee=$(( $prev_total_amount - $TRX_Amount - $c_txfee ))
+  if [ $d_txfee -lt 0 ] ; then
+    printf "### Achieving negative value with this txfee:          %16d ###\n" $d_txfee 
     echo "*** ERROR: input insufficient, to cover trx fees, exiting gracefully ..." 
     echo " "
     exit 0
   else
     if [ ${#RETURN_Address} -gt 28 ] ; then
-      printf "### value to return address:                           %16d ###\n" $d_trxfee 
+      printf "### value to return address:                           %16d ###\n" $d_txfee 
     else
-      printf "### *** possible value to return address:              %16d ###\n" $d_trxfee 
-      printf "### *** without return address, trxfee will be:        %16d ###\n" $f_trxfee 
+      printf "### *** possible value to return address:              %16d ###\n" $d_txfee 
+      printf "### *** without return address, txfee will be:         %16d ###\n" $f_txfee 
     fi
   fi
 fi
 
 if [ "$T_PARAM_FLAG" -eq 1 ] ; then
-  f_trxfee=$(( $PREV_Amount - $TRX_Amount ))
-  # d_trxfee=$(( $PREV_Amount - $TRX_Amount - $c_trxfee ))
-  if [ $d_trxfee -lt 0 ] ; then
-    printf "### Achieving negative value with this trxfee:         %16d ###\n" $d_trxfee 
+  f_txfee=$(( $PREV_Amount - $TRX_Amount ))
+  d_txfee=$(( $PREV_Amount - $TRX_Amount - $c_txfee ))
+  if [ $d_txfee -lt 0 ] ; then
+    printf "### Achieving negative value with this txfee:           %16d ###\n" $d_txfee 
     echo "*** ERROR: input insufficient, to cover trx fees, exiting gracefully ..." 
     echo " "
     exit 0
   else
     if [ ${#RETURN_Address} -gt 28 ] ; then
-      printf "### value to return address:                           %16d ###\n" $d_trxfee 
+      printf "### value to return address:                           %16d ###\n" $d_txfee 
     else
-      printf "### *** possible value to return address:              %16d ###\n" $d_trxfee 
-      printf "### *** without return address, trxfee will be:        %16d ###\n" $f_trxfee 
+      printf "### *** possible value to return address:              %16d ###\n" $d_txfee 
+      printf "### *** without return address, txfee will be:         %16d ###\n" $f_txfee 
     fi
   fi
 fi
