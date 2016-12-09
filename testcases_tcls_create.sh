@@ -51,13 +51,13 @@ echo "================================================================" | tee -a
 echo "=== TESTCASE 1a: $chksum_cmd tcls_create.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 cp tcls_create.sh tmp_trx_cfile
-chksum_ref="35c0e0046428d86e7fdf423065b8b50491b911b1fcaeb1fc6897c639a35b5b2e" 
+chksum_ref="0217428388df5ef6460fd72d46cd3d759fd9695d3f144af7f0d3d296d72c10c2" 
 chksum_prep
 
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 cp tcls_key2pem.sh tmp_trx_cfile
-chksum_ref="c761104dc86dfc5705377a45e368fd1337cc0bc400b9cab13f735485a4409b89" 
+chksum_ref="34cad1c05bb7fd7c4bce56b157c9faf1cdfe92d9076128e493d1b3fe382e0dc5" 
 chksum_prep
 
 echo "=== TESTCASE 1c: $chksum_cmd tcls_verify_bc_address.awk" | tee -a $logfile
@@ -101,7 +101,7 @@ echo "=== TESTCASE 2c: same as 2a, with very verbose output" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "./tcls_create.sh -vv -m F2B3EB2DEB76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
 ./tcls_create.sh -vv -m F2B3EB2DEB76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_trx_cfile
-chksum_ref="72268067616cc04e638eb2649a94f2cd62cff096da7ea405cac4c75fee38aa60" 
+chksum_ref="cd02e99a650ff1e8a14db7f779acf2af2036aa4e0299d4c5dbe2be5d1bc9232d" 
 chksum_prep
 
 echo " " | tee -a $logfile
@@ -148,7 +148,7 @@ echo "=== TESTCASE 4c: same as 4a, with very verbose output" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdx" >> $logfile
 ./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdx > tmp_trx_cfile
-chksum_ref="7e467afc2fd3658a2f3516d13dba42d816c8919ad1d48b64266e4c5fd88a656b" 
+chksum_ref="de9c6670f5423dd18b1fb0e987e7f7c54ec743acd5a95b32b19eae38e9437aff" 
 chksum_prep
 
 echo "   " | tee -a $logfile
@@ -156,7 +156,7 @@ echo "=== TESTCASE 4d: and now with correct bitcoin adress hash" | tee -a $logfi
 echo "================================================================" | tee -a $logfile
 echo "./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
 ./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_trx_cfile
-chksum_ref="f34d1da68f53cc9592ee1c8237bd9fda2fd5e5c96bb34b52afdc27f1330a8c4c" 
+chksum_ref="5d24a5bda003f4792bb7142301598d86c5d0d3acd937a1874e10b54cc3108208" 
 chksum_prep
 echo " " | tee -a $logfile
 }
@@ -190,7 +190,7 @@ echo "===              to:   112ZbzFcSpcCoY2EfPNmgxFmv4tVuLSoB4" | tee -a $logfi
 echo "================================================================" | tee -a $logfile
 echo "./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 112ZbzFcSpcCoY2EfPNmgxFmv4tVuLSoB4" >> $logfile
 ./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 112ZbzFcSpcCoY2EfPNmgxFmv4tVuLSoB4 > tmp_trx_cfile
-chksum_ref="b4100edb8d5dfb8598d461133c237600e9ef29c2d6ab5886bfc8932fb4616b6c" 
+chksum_ref="85c31c3033d3896406f0ebf141579a5e7e4cd3e7e1e158cacc850f6a648841ed" 
 chksum_prep
 
 echo "   " | tee -a $logfile
@@ -200,7 +200,7 @@ echo "===              to:   12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" | tee -a $logfi
 echo "================================================================" | tee -a $logfile
 echo "./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
 ./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_trx_cfile
-chksum_ref="1a67ec2ccf6f1f5b485ead87b47d934e75ed5010dd4bd55e4f0f66624b6f28b8" 
+chksum_ref="4bfab57199fc714cba63ad87364fcc1c1b8fc23b9461eea62ec257411d45e75a" 
 chksum_prep
 echo " " | tee -a $logfile
 }
@@ -259,7 +259,7 @@ echo "=== TESTCASE 6f: same as 6c, VERY VERBOSE output" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "./tcls_create.sh -vv -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1077777 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 50 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
 ./tcls_create.sh -vv -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1077777 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 50 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_trx_cfile
-chksum_ref="dce052a2f04671a7dbed28fa646d110243c0c461bc688c50bdf61f4d43546cd8" 
+chksum_ref="b8afe26b58d48dd3f7d6098040b9f49b7740be58126c1a58a2c6bb25dfc4a7e0" 
 chksum_prep
 
 echo " " | tee -a $logfile
@@ -336,7 +336,7 @@ echo "bb745b565d23c2041022392469114cbd94d29d941e1c6860c609b5ed6ee321cc 0 76a914c
 echo "e84959a7148737df867d6c83f3683abeb977c297729ccbd609d54ee0879491ea 0 76a914c2df275d78e506e17691fd6f0c63c43d15c897fc88ac 120000" >> tmp_4inputs.txt
 echo "./tcls_create.sh -vv -f tmp_4inputs.txt 821000 13GnHB51piDBf1avocPL7tSKLugK4F7U2B 32" >> $logfile
 ./tcls_create.sh -vv -f tmp_4inputs.txt 821000 13GnHB51piDBf1avocPL7tSKLugK4F7U2B 32 > tmp_trx_cfile
-chksum_ref="435e57c39f6dbb8b72a43200102b7eedff718d7d4a5a781ee0c3049b727d76a6"
+chksum_ref="5a6c2d14d1cd26db598f27ac8f83e8a199b07ab85f18ba4d07bfc4bf7ab0c80b"
 chksum_prep
 
 echo " " | tee -a $logfile
@@ -356,7 +356,7 @@ echo "a3e719b12275357b15fc5decd9088a0964fe860d49f026f2152e71f681ac3fa4 1073 76A9
 echo "874cd4c4e1683c43a98a9daa0926bea37c10616f165ac35481e8181bfd449c65 480 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 50000" >> tmp_3inputs.txt
 echo "./tcls_create.sh -vv -f tmp_3inputs.txt 80000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM" >> $logfile
 ./tcls_create.sh -vv -f tmp_3inputs.txt 80000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM > tmp_trx_cfile
-chksum_ref="8921203b656e6db3e10764a2abdb27402c846641629263d0ddac66c4973a82fa" 
+chksum_ref="22d1f3fa13a8c838e27e6070a25bb13d39b1c08e487d4c2e27a0cee6e6cca3b6" 
 chksum_prep
 
 echo "=== TESTCASE 8b: 5 inputs to a trx" | tee -a $logfile

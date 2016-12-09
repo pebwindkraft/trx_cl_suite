@@ -130,9 +130,19 @@ zero_pad(){
 ##########################################
 check_tool() {
   if [ $VVERBOSE -eq 1 ]; then
-    printf " %-8s" $1
+    if [ $1 != "http_get_cmd" ] ; then
+      printf " %-35s" $1
+    fi
   fi
-  which $1 > /dev/null
+  if [ $1 == "http_get_cmd" ] ; then
+    if [ $OS == "OpenBSD" ] ; then
+      which ftp > /dev/null
+    else
+      which curl > /dev/null
+    fi
+  else
+    which $1 > /dev/null
+  fi
   if [ $? -eq 0 ]; then
     if [ $VVERBOSE -eq 1 ]; then
       printf " - yes \n" 
@@ -234,7 +244,7 @@ get_trx_values() {
   ./tcls_tx2txt.sh -vv -r $RAW_TRX | grep -A7 TX_OUT[[]$PREV_OutPoint[]] > $prawtx_fn
   #
   # is it better to use grep / cut / tr or a simple awk ???
-  # awk is 30% faster, and uses only half the system udn usr CPU cycles
+  # awk is 30% faster, and uses only half the system udn usr CPU cycles
   #
   # PREV_Amount=$( grep -m1 bitcoin $prawtx_fn | cut -d "=" -f 4 | cut -d "," -f 1 )
   # STEP5_SCRIPT_LEN=$( grep -A1 -B1 pk_script $prawtx_fn | head -n1 | cut -b 7,8 )
@@ -429,7 +439,7 @@ step11() {
 ##############################
 calc_txfee() {
 # calc_txfee needs to know the length of our RAW_TRX
-# we drop here, whatever we have so far ...
+# we drop here, whatever we have so far ...
 echo $RAW_TRX > $c_utx_fn
 trx_chars=$( wc -c $c_utx_fn | awk '{ print $1 }' )
 trx_bytes=$(( $line_item * 90 + $trx_chars ))
@@ -505,7 +515,6 @@ else
            RETURN_Address=$5
            shift 
          fi
-         shift 
          shift 
          shift 
          shift 
@@ -649,13 +658,17 @@ vv_output "### Check if necessary tools are there ###"
 vv_output "##########################################"
 check_tool awk
 check_tool bc
-check_tool curl
 check_tool cut
 check_tool dc
 check_tool od
 check_tool openssl
 check_tool sed
 check_tool tr
+# OpenBSD uses ftp, others curl:
+if [ $VVERBOSE -eq 1 ]; then
+  printf " http_get: OpenBSD=ftp, others=curl "
+fi
+check_tool http_get_cmd
 
 vv_output " "
 vv_output "###################"
@@ -714,7 +727,7 @@ if [ "$T_PARAM_FLAG" -eq 1 ] ; then
     exit 1
   else
     if [ $VVERBOSE -eq 1 ]; then
-      printf " - yes \n fetch data from blockchain.info with $http_get_cmd \n"
+      printf " - yes \n fetch data from blockchain.info \n"
     fi
     RAW_TRX=$( $http_get_cmd https://blockchain.info/de/rawtx/$PREV_TRX$RAW_TRX_LINK2HEX )
     if [ $? -ne 0 ] ; then
@@ -778,18 +791,18 @@ trx_concatenate
 ### TX_IN: call STEP 3-7 ### 
 ############################
 if [ "$F_PARAM_FLAG" -eq 1 ] ; then
-  # each line item is a references to the previous transaction:
+  # each line item is a references to the previous transaction:
   # PREV_TRX      --> the trx number
   # PREV_OutPoint --> the outpoint, from which to spend 
   # PREV_PKScript --> the corresponding public key script
   # PREV_Amount   --> and the amount from all inputs
   # if only PREV_TRX is given, need to connect to network and do s.th. like
-  # listunspend(trx_number) ?
+  # listunspend(trx_number) ?
   while IFS=" " read PREV_TRX PREV_OutPoint PREV_PKScript PREV_Amount
    do
     # for every line item we need to check the trx, and get the values:
     chk_trx_len 
-    # if only PREV_TRX is given, then we can fetch remaining items with 'get_trx_values' ?
+    # if only PREV_TRX is given, then we can fetch remaining items with 'get_trx_values' ?
     v_output "####### TX_IN: line item $line_item"
     vv_output "        PREV_TRX=$PREV_TRX"
     vv_output "        PREV_OutPoint=$PREV_OutPoint"
@@ -809,7 +822,7 @@ fi
 ##############################################################################
 # This is per default set to 1 
 # if we have a return address (which is between 28 and 32 chars...), 
-# then add another tx_out, otherwise miners get happy :-)
+# then add another tx_out, otherwise miners get happy :-)
 v_output "###  8. TX_OUT, Number of Transaction outputs (var_int)"
 if [ ${#RETURN_Address} -gt 28 ] ; then
   STEPCODE="02"
@@ -830,8 +843,8 @@ step11
 ### TX_OUT: if there is a return address ###
 ############################################
 # if we have a return address (which is between 28 and 32 chars...), 
-# then make sure, money gets back to us ...
-# but before, we need to calculate txfees, and deduct the return amounts ...
+# then make sure, money gets back to us ...
+# but before, we need to calculate txfees, and deduct the return amounts ...
 calc_txfee
 if [ "$F_PARAM_FLAG" -eq 1 ] ; then
   d_txfee=$(( $prev_total_amount - $TRX_Amount - $c_txfee ))
@@ -896,13 +909,13 @@ fi
 #########################
 ### checking TRX FEEs ###
 #########################
-# trx fees are calculated  with a trx fee per byte, which is changing...
+# trx fees are calculated  with a trx fee per byte, which is changing...
 # currently in Sep 2016 it is roughly 50 Satoshis per Byte. Exact length can only 
 # be determined during signing process, but here is a rough calc: each input 
 # requires later on a signature (length=70 Bytes/140 chars), which replaces 
 # the existing PKSCRIPT (length 25 Bytes, 50 chars). Each input must be signed, 
 # so roughly 90 chars signature are added. Normal 1 input one output P2PKH trx are 
-# roughly 227 Bytes ... THIS NEEDS FURTHER ANALYSIS !!!
+# roughly 227 Bytes ... THIS NEEDS FURTHER ANALYSIS !!!
 calc_txfee
 
 printf "### proposed TX-FEE (@ $TRXFEE_Per_Bytes Satoshi/Byte * $trx_bytes tx_bytes):"

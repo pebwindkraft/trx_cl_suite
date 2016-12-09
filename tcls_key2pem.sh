@@ -38,14 +38,14 @@
 # verifying-a-bitcoin-trx-on-the-unix-cmd-line-with-openssl?noredirect=1
 # 
 # the signing process in short:
-#  prepare keys:
+#  prepare keys:
 #   openssl ecparam -genkey -name secp256k1 -noout -out privkey.pem
-#   openssl ec -in privkey.pem -pubout -out pubkey.pem
+#   openssl ec -in privkey.pem -pubout -out pubkey.pem
 #   openssl ec -in privkey.pem -pubout -out pubkey.pem -conv_form compressed
-#  sign:
+#  sign:
 #   openssl dgst -sign privkey.pem  -sha256 -hex tmp_c_urtx.txt
 #   openssl dgst -sign privkey.pem  -sha256 tmp_c_urtx.txt > tmp_sig.hex
-#  verify:
+#  verify:
 #   openssl dgst -verify pubkey.pem -sha256 -signature tmp_sig.hex tmp_c_urtx.txt
 #  
 # echo "MDYwEAYHKo...BASE64_PART_OF_PEM...3txRPk8bqOWhIkprA=" | base64 -D - | hexdump -C
@@ -65,20 +65,20 @@ mid_string=''
 pre_pubstr_uc=''
 pre_pubstr_c=''
 
-# ASN.1 structures explained: 
+# ASN.1 structures explained: 
 # openssl ecparam -name secp256k1
 # -----BEGIN EC PARAMETERS-----
 # BgUrgQQACg==
 # -----END EC PARAMETERS-----
 # 
 # The BgUrgQQACg== is a Base64 encoded representation of the ASN.1 
-# encoding of the compressed 7-byte Object Identifier 1.2.840.10045.2.1: 
+# encoding of the compressed 7-byte Object Identifier 1.2.840.10045.2.1: 
 # the ANSI designation of the ANSI standard Elliptic curve secp256k1.
 #
 #   2a 86 48 ce 3d 02 01 <-- Object Identifier: 1.2.840.10045.2.1
 #                            = ecPublicKey, ANSI X9.62 public key typeA
 #   
-# ASN.1 STRUCTURE FOR PRIVATE KEY:
+# ASN.1 STRUCTURE FOR PRIVATE KEY:
 #   30  <-- declares the start of an ASN.1 sequence
 #   74  <-- length of following sequence 
 #   02  <-- declares the start of an integer
@@ -109,7 +109,7 @@ mid_string_uc=$( echo "a00706052b8104000aa144034200" )
 pre_string_c=$( echo "30540201010420" )
 mid_string_c=$( echo "a00706052b8104000aa124032200" )
 
-# ASN.1 STRUCTURE FOR PUBKEY (uncompressed and compressed):
+# ASN.1 STRUCTURE FOR PUBKEY (uncompressed and compressed):
 #   30  <-- declares the start of an ASN.1 sequence
 #   56  <-- length of following sequence (dez 86)
 #   30  <-- length declaration is following  

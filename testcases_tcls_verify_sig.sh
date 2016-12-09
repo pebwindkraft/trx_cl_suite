@@ -54,21 +54,21 @@ echo "   " | tee -a $logfile
 echo "=== TESTCASE 1a: $chksum_cmd tcls_verify_sig.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 cp tcls_verify_sig.sh tmp_tx_cfile
-chksum_ref="9a8c65120a2ccd6da409b0105ea942a29c7b5f5f74d04b451c7b244f8240c128" 
+chksum_ref="19230aca75482b09841fe1b6a761588157dd24f2a0db5afa8c4d21c429e62c1d" 
 chksum_prep
 
 echo "   " | tee -a $logfile
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 cp tcls_key2pem.sh tmp_tx_cfile
-chksum_ref="c761104dc86dfc5705377a45e368fd1337cc0bc400b9cab13f735485a4409b89" 
+chksum_ref="34cad1c05bb7fd7c4bce56b157c9faf1cdfe92d9076128e493d1b3fe382e0dc5" 
 chksum_prep
 
 echo "   " | tee -a $logfile
 echo "=== TESTCASE 1c: $chksum_cmd tcls_strict_sig_verify.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 cp tcls_strict_sig_verify.sh tmp_tx_cfile
-chksum_ref="6ab63138c0458b37998335aba0b86e41cc4e0213f6dec3875530e5e0983944b1"
+chksum_ref="d15facf384d754754ed7b7becfb971b76795cdabed9f4109b8995a548e8d5f8e"
 chksum_prep
 
 echo "   " | tee -a $logfile

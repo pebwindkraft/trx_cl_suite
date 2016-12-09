@@ -1,6 +1,6 @@
 #!/bin/sh
 # tool to verify scriptsig of a signed raw transaction
-# see: https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki
+# see: https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki
 # 
 # Copyright (c) 2015, 2016 Volker Nowarra 
 # Coded in June 2016 following this reference:
@@ -93,7 +93,7 @@ indent_data() {
 # to stay with portable code, use zero padding function ###
 ###########################################################
 zero_pad(){
-  # for S-Values of signature: sometimes need a zero at the beginning ...
+  # for S-Values of signature: sometimes need a zero at the beginning ...
   # zero_pad <string> 
   printf "0$1" 
 }
@@ -241,6 +241,7 @@ vv_output $SCRIPTSIG
 vv_output "  ################################################"
 vv_output "  # strict verification of DER-encoded SCRIPTSIG #"
 vv_output "  ################################################"
+# A signature exists of: <30> <total len> <02> <len R> <R> <02> <len S> <S> <hashtype>
 
 scriptsig_len_chars=${#SCRIPTSIG}
 scriptsig_len=$(( $scriptsig_len_chars / 2 ))
@@ -450,6 +451,14 @@ fi
 #################################
 # if s -gt N/2 ; then s = N - s #
 #################################
+#  Where R and S are not negative (their first byte has its highest bit not set), and not
+#  excessively padded (do not start with a 0 byte, unless an otherwise negative number follows,
+#  in which case a single 0 byte is necessary and even required).
+#  
+#  See https://bitcointalk.org/index.php?topic=8392.msg127623#msg127623
+# 
+#  This function is consensus-critical since BIP66.
+# 
 # make sure, SIG has correct parts - this is "Bitcoin" specific... 
 # SIG is <r><s> concatenated together. An s value greater than N/2 
 # is not allowed. Need to add code: if s -gt N/2 ; then s = N - s
@@ -500,7 +509,7 @@ else
     # now length of R-Value and S-Value and codes 
     # R-Value was defined in $R_len_dec, S value = 32 Bytes (0x20) --> 64 chars
     # and 4 hex codes (for R and S: '0x02' + length value)         -->  8 chars
-    # value=$( echo "$R_len_dec + 64 + 8" | bc )
+    # value=$( echo "$R_len_dec + 64 + 8" | bc )
     value=$( echo "obase=16;($R_len_dec + 64 + 8) / 2" | bc )
     SCRIPTSIG=$( echo "$SCRIPTSIG$value" )
     

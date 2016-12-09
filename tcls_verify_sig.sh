@@ -24,10 +24,10 @@
 #    1.) the public key 
 #        or a bitcoin address, which then needs base58 decoding
 #        or the output script hash from trx? 
-#    2.) the hash value 
-#        this is a double sha256 from any message (e.g. an unsigned raw trx)
+#    2.) the hash value 
+#        this is a double sha256 from any message (e.g. an unsigned raw trx)
 #    3.) the signature
-#        can be obtained from the trx directly, e.g. blockchain.info
+#       can be obtained from the trx directly, e.g. blockchain.info
 #
 # Coded in Sep 2016, using this reference:
 # http://bitcoin.stackexchange.com/questions/46455/ \
@@ -45,7 +45,8 @@
 #   $ xxd -r -p <pizza.keyhex | openssl pkey -pubin -inform der >pizza.keypem
 #   $ openssl pkeyutl <pizza.hash2 -verify -pubin -inkey pizza.keypem -sigfile pizza.sigraw
 #
-# which results in a "Signatre Verified Successfully" (or not ...)
+#   which results in a "Signatre Verified Successfully" (or not ...)
+#   (Hint: OpenBSD does not come with xxd by defaut)
 # 
 
 ###########################
@@ -291,7 +292,7 @@ fi
 v_output "### manually setup the PEM pubkey"
 v_output "    use pre defined ASN.1 strings to concatenate pubkey.hex"
 # get first 2 chars of pubkey
-# must be '03' or '04' for compressed or uncompressed key
+# must be '03' or '04' for compressed or uncompressed key
 pubkey_1stchar=$( echo $pubkey | cut -b 1-2 )
 if [ "$pubkey_1stchar" == "04" ] ; then
   if [ $VVERBOSE -eq 1 ] ; then
@@ -326,7 +327,7 @@ fi
 v_output "    openssl asn1parse pubkey"
 openssl asn1parse -in pubkey.pem > tmp_asn1parse.txt
 # the file tmp_asn1parse.txt should contain these lines,
-# to be a valid BitCoin pubkey 
+# to be a valid BitCoin pubkey 
 #   4:d=2  hl=2 l=   7 prim: OBJECT            :id-ecPublicKey
 #  13:d=2  hl=2 l=   5 prim: OBJECT            :secp256k1
 grep -e "secp256k1" -e "id-ecPublicKey" tmp_asn1parse.txt > /dev/null
@@ -343,7 +344,7 @@ fi
 if [ $VERBOSE -eq 1 ] ; then
   echo "### verify the signature with hash and pub key"
 fi 
-# convert the hex strings to raw data (dump with "hexdump -C <filename>")
+# convert the hex strings to raw data (dump with "hexdump -C <filename>")
 result=$( echo $dsha256hash | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
 printf $result > $tmp_dsha256_fn
 result=$( echo $signature | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )

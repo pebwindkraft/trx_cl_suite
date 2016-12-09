@@ -33,14 +33,14 @@
 # are possible with exponentially decreasing probability.
 #
 # the signing process in short:
-#  prepare keys:
+#  prepare keys:
 #   openssl ecparam -genkey -name secp256k1 -noout -out privkey.pem
-#   openssl ec -in privkey.pem -pubout -out pubkey.pem
+#   openssl ec -in privkey.pem -pubout -out pubkey.pem
 #   openssl ec -in privkey.pem -pubout -out pubkey.pem -conv_form compressed
-#  sign:
+#  sign:
 #   openssl dgst -sign privkey.pem  -sha256 -hex tmp_c_urtx.txt
 #   openssl dgst -sign privkey.pem  -sha256 tmp_c_urtx.txt > tmp_sig.hex
-#  verify:
+#  verify:
 #   openssl dgst -verify pubkey.pem -sha256 -signature tmp_sig.hex tmp_c_urtx.txt
 # 
 # echo "MDYwEAYHKo...BASE64_PART_OF_PEM...3txRPk8bqOWhIkprA=" | base64 -D - | hexdump -C
@@ -58,8 +58,8 @@ typeset -r utxtxt_tmp_fn=tmp_utx.hex           # the hex assembled, unsigned tx 
 typeset -r sighex_tmp_fn=tmp_sig.hex           # openssl's signature per tx input in hex
 typeset -r sigtxt_tmp_if=tmp_tssv_in.txt       # txt input file for tcls_strict_sig_verify
 typeset -r sigtxt_tmp_of=tmp_tssv_out.txt      # txt output file for tcls_strict_sig_verify
-typeset -r utx_sha256_fn=tmp_utx_sha256.hex    # the sha256 hashed tx 
-typeset -r utx_dsha256_fn=tmp_utx_dsha256.hex  # the double sha256 hashed tx
+typeset -r utx_sha256_fn=tmp_utx_sha256.hex    # the sha256 hashed tx 
+typeset -r utx_dsha256_fn=tmp_utx_dsha256.hex  # the double sha256 hashed tx
 typeset -r tmp_vfy_fn=tmp_vfy.txt              # for all tx inputs, put sig, hash and pubkey here
 
 typeset -r Version=01000000
@@ -378,7 +378,7 @@ v_output "2.  TX_IN_COUNT, the number of input trx "
 from=$(( $to + 1 ))
 to=$(( $from + 1 ))
 TX_IN_Count_hex=$( echo $UNSIGNED_TX | cut -b $from-$to)
-# need to do a var_int check here ...
+# need to do a var_int check here ...
 TX_IN_Count=$( echo "ibase=16;$TX_IN_Count_hex" | bc )
 v_output "    $TX_IN_Count_hex (decimal $TX_IN_Count)"
 
@@ -386,18 +386,18 @@ v_output "    $TX_IN_Count_hex (decimal $TX_IN_Count)"
 ### collect all tx_in data into array variables...  ###
 #######################################################
 # here we know, how many TX_IN structures will follow, 
-# so we collect all TX_IN data into simple arrays
+# so we collect all TX_IN data into simple arrays
 i=1
 while [ $i -le $TX_IN_Count ] 
  do
   j=$(( i - 1 )) # just to make the output headlines correct in their counter
-  # Arrays: difference between BASH and KSH !
+  # Arrays: difference between BASH and KSH !
   # below works in bash 3 and 4, and in ksh. BUT (!): do not declare the arrays
-  # at the beginning. BASH uses "declare", ksh uses "typeset -a" ...
-  # arr_var[0]="0"
-  # echo ${arr_var[@]}
-  # echo "arr_var[0]=${arr_var[0]}"
-  # v_output "    TX_IN[$i] ########## "
+  # at the beginning. BASH uses "declare", ksh uses "typeset -a" ...
+  # arr_var[0]="0"
+  # echo ${arr_var[@]}
+  # echo "arr_var[0]=${arr_var[0]}"
+  # v_output "    TX_IN[$i] ########## "
   ##############################################################################
   ### STEP 3 - TX_IN_PrevOutput_Hash, previous transaction hash (32Bytes)    ###
   ##############################################################################
@@ -426,7 +426,7 @@ while [ $i -le $TX_IN_Count ]
   from=$(( $to + 1 ))
   to=$(( $from + 1 ))
   TX_IN_ScriptBytes_hex[$i]="$( echo $UNSIGNED_TX | cut -b $from-$to )"
-  # need to do a var_int check here ...
+  # need to do a var_int check here ...
   TX_IN_ScriptBytes[$i]=$( echo "ibase=16;${TX_IN_ScriptBytes_hex[$i]}" | bc )
   v_output "    ${TX_IN_ScriptBytes_hex[$i]} (decimal ${TX_IN_ScriptBytes[$i]})"
   
@@ -467,7 +467,7 @@ v_output "8.  TX_OUT_COUNT, the number of output trx"
 from=$(( $to + 1 ))
 to=$(( $from + 1 ))
 TX_OUT_Count_hex=$( echo $UNSIGNED_TX | cut -b $from-$to )
-# need to do a var_int check here ...
+# need to do a var_int check here ...
 TX_OUT_Count=$( echo "ibase=16;$TX_OUT_Count_hex" | bc )
 v_output "    $TX_OUT_Count_hex (decimal $TX_OUT_Count)"
 
@@ -532,21 +532,21 @@ i=1
 j=1
 k=1
 echo "##############################################" > $tmp_vfy_fn
-echo "### Bitcoin prep file to verify signatures ###" >> $tmp_vfy_fn
+echo "### Bitcoin prep file to verify signatures ###" >> $tmp_vfy_fn
 echo "##############################################" >> $tmp_vfy_fn
 if [ "$VERBOSE" -eq 1 ] ; then 
-  echo "# Bitcoin (and so here openssl) works only on binary files. TX hash files" >> $tmp_vfy_fn
-  echo "# must be double sha256'd. For each input, need to convert to binary." >> $tmp_vfy_fn
-  echo "# The pubkey is: $pubkey " >> $tmp_vfy_fn
-  echo "# The pubkey.pem file is provided from here: $script_key2pem" >> $tmp_vfy_fn
-  echo "# If you need YOUR OWN pubkey, you need to convert it first:" >> $tmp_vfy_fn
-  echo "# UNCOMPRESSED pubkey:" >> $tmp_vfy_fn
+  echo "# Bitcoin (and so here openssl) works only on binary files. TX hash files" >> $tmp_vfy_fn
+  echo "# must be double sha256'd. For each input, need to convert to binary." >> $tmp_vfy_fn
+  echo "# The pubkey is: $pubkey " >> $tmp_vfy_fn
+  echo "# The pubkey.pem file is provided from here: $script_key2pem" >> $tmp_vfy_fn
+  echo "# If you need YOUR OWN pubkey, you need to convert it first:" >> $tmp_vfy_fn
+  echo "# UNCOMPRESSED pubkey:" >> $tmp_vfy_fn
   echo "#   echo 3056301006072a8648ce3d020106052b8104000a034200 > pubkey.txt" >> $tmp_vfy_fn
   echo "#   echo 04...your PUBKEY with 130 hexchars... > pubkey.txt" >> $tmp_vfy_fn
-  echo "# COMPRESSED pubkey:" >> $tmp_vfy_fn
+  echo "# COMPRESSED pubkey:" >> $tmp_vfy_fn
   echo "#   echo 3036301006072a8648ce3d020106052b8104000a032200 > pubkey.txt" >> $tmp_vfy_fn
   echo "#   echo 03...your PUBKEY with 66 hexchars... > pubkey.txt" >> $tmp_vfy_fn
-  echo "# And then:" >> $tmp_vfy_fn
+  echo "# And then:" >> $tmp_vfy_fn
   echo "#   xxd -r -p <pubkey.txt | openssl pkey -pubin -inform der >pubkey.pem" >> $tmp_vfy_fn
   echo "#  " >> $tmp_vfy_fn
 fi
@@ -555,7 +555,7 @@ while [ $j -le $TX_IN_Count ]
  do
   k=$(( j - 1 ))
   printf $Version > $utxhex_tmp_fn
-  # need to do a var_int check here ...
+  # need to do a var_int check here ...
   printf $TX_IN_Count_hex >> $utxhex_tmp_fn
 
   # manage all the TX_INs
@@ -603,8 +603,8 @@ while [ $j -le $TX_IN_Count ]
   if [ "$VVERBOSE" -eq 1 ] ; then 
     od -An -t x1 $utx_sha256_fn | tr -d [:blank:] | tr -d "\n" | sed -e 's/^/    /'
   fi
-  # echo "#!/bin/sh" >> $tmp_vfy_fn
-  echo "# TX_IN[$k], double sha256 and signature:" >> $tmp_vfy_fn
+  # echo "#!/bin/sh" >> $tmp_vfy_fn
+  echo "# TX_IN[$k], double sha256 and signature:" >> $tmp_vfy_fn
   result=$( od -An -t x1 $utx_dsha256_fn | tr -d [:blank:] | tr -d "\n" )
   echo "echo $result > tx_hash.txt" >> $tmp_vfy_fn 
   if [ "$VERBOSE" -eq 1 ] ; then 
@@ -633,11 +633,11 @@ while [ $j -le $TX_IN_Count ]
       exit 1
     fi
   fi
-  # v_output "     openssl dgst -sign privkey.pem -sha256 \\"
-  # v_output "             -out $sighex_tmp_fn $utx_dsha256_fn"
-  # openssl dgst -sign privkey.pem -sha256 -out $sighex_tmp_fn $utx_dsha256_fn
-  # SCRIPTSIG=$( od -An -t x1 $sighex_tmp_fn | tr -d [:blank:] | tr -d "\n" )
-  # v_output "    $SCRIPTSIG"
+  # v_output "     openssl dgst -sign privkey.pem -sha256 \\"
+  # v_output "             -out $sighex_tmp_fn $utx_dsha256_fn"
+  # openssl dgst -sign privkey.pem -sha256 -out $sighex_tmp_fn $utx_dsha256_fn
+  # SCRIPTSIG=$( od -An -t x1 $sighex_tmp_fn | tr -d [:blank:] | tr -d "\n" )
+  # v_output "    $SCRIPTSIG"
 
   v_output "     openssl pkeyutl -sign -in $utx_dsha256_fn \\"
   v_output "             -inkey privkey.pem -keyform PEM > $sighex_tmp_fn"
@@ -723,7 +723,7 @@ v_output "17. concatenate the final transaction for all inputs and outputs"
 # | STEP5  = TX_IN_ScriptBytes (var_int!)    -->  1+ Bytes -->  8 chars
 # | STEP6  = TX_IN_Sig_Script (uchar[])      --> 10+ Bytes -->  8 chars
 # \ STEP7  = TX_IN_Sequence                  -->  4  Bytes -->  8 chars
-# 
+# 
 # / STEP8  = TX_OUT_Count (var_int!)         -->  1+ Bytes -->  8 chars
 # | STEP9  = TX_OUT_Value                    -->  8  Bytes --> 16 chars
 # | STEP10 = TX_OUT_PKScriptBytes (var_int!) -->  1+ Bytes -->  8 chars
@@ -748,7 +748,7 @@ while [ $j -le $TX_IN_Count ]
   STEPCODE=${TX_IN_PrevOutput_Index[$j]}
   trx_concatenate
 
-  # TX_IN_ScriptBytes[$k] 
+  # TX_IN_ScriptBytes[$k] 
   vv_output "    TX_IN[$k] ScriptBytes"
   STEPCODE=${#SCRIPTSIG[$j]}
   STEPCODE=$( echo "obase=16;$STEPCODE / 2" | bc )
@@ -764,10 +764,10 @@ while [ $j -le $TX_IN_Count ]
   j=$(( j + 1 ))
  done
 
-# here we would need to create a TX_OUT loop, not yet implemented...
-# j=1
-# while [ $j -le $TX_OUT_Count ] 
-#  do
+# here we would need to create a TX_OUT loop, not yet implemented...
+# j=1
+# while [ $j -le $TX_OUT_Count ] 
+#  do
   vv_output "    TX_OUT_Count_hex"
   STEPCODE=$TX_OUT_Count_hex
   trx_concatenate
@@ -783,7 +783,7 @@ while [ $j -le $TX_IN_Count ]
   vv_output "    LockTime"
   STEPCODE=$LockTime
   trx_concatenate
-# done
+# done
 
 echo $SIGNED_TRX > $stx_fn
 vv_output $SIGNED_TRX
