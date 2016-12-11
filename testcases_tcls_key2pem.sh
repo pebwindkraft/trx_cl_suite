@@ -51,7 +51,7 @@ echo "=============================================================" | tee -a $l
 echo "TESTCASE 1a: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
 echo "=============================================================" | tee -a $logfile
 cp tcls_key2pem.sh tmp_tx_cfile
-chksum_ref="34cad1c05bb7fd7c4bce56b157c9faf1cdfe92d9076128e493d1b3fe382e0dc5"
+chksum_ref="4c9c5941cb87fa16dcfad1f86d97f72997be41c0dce658ad81d4be043d8fa5d9"
 chksum_prep
 
 echo "TESTCASE 1b: $chksum_cmd tcls_verify_bc_address.awk" | tee -a $logfile
@@ -152,8 +152,8 @@ chksum_prep
 
 echo "   " | tee -a $logfile
 echo "TESTCASE 2i: call should work, cause -x works with -p <compressed>"    | tee -a $logfile
-echo "             with '-vv' given, openssl creates new priv/pub key   "    | tee -a $logfile
-echo "             pairs. So we only checksum the first 60 lines of output." | tee -a $logfile
+echo "             with '-vv' given, openssl creates new priv/pub key   "    >> $logfile
+echo "             pairs. So we only checksum the first 60 lines of output." >> $logfile
 echo "=====================================================================" | tee -a $logfile
 ./tcls_key2pem.sh -vv -x 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725 -p 0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352 | head -n60 > tmp_tx_cfile 
 chksum_ref="33cade63795fc8b305942d46f761de9583361ca805b5b3b0fed749e27ca6edd6"

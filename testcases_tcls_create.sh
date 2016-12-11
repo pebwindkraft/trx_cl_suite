@@ -51,13 +51,13 @@ echo "================================================================" | tee -a
 echo "=== TESTCASE 1a: $chksum_cmd tcls_create.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 cp tcls_create.sh tmp_trx_cfile
-chksum_ref="0217428388df5ef6460fd72d46cd3d759fd9695d3f144af7f0d3d296d72c10c2" 
+chksum_ref="bd3d2ece88565ce8cb5ab3c05bd9b39cd20d93a08a4eb53f683d905dcb20cab3" 
 chksum_prep
 
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 cp tcls_key2pem.sh tmp_trx_cfile
-chksum_ref="34cad1c05bb7fd7c4bce56b157c9faf1cdfe92d9076128e493d1b3fe382e0dc5" 
+chksum_ref="4c9c5941cb87fa16dcfad1f86d97f72997be41c0dce658ad81d4be043d8fa5d9" 
 chksum_prep
 
 echo "=== TESTCASE 1c: $chksum_cmd tcls_verify_bc_address.awk" | tee -a $logfile
@@ -78,8 +78,8 @@ echo "   " | tee -a $logfile
 testcase2() {
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 2: parameters testing ...                       ===" | tee -a $logfile
-echo "=== spend from: 16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM            ===" | tee -a $logfile
-echo "=== spend to:   1runeksijzfVxyrpiyCY2LCBvYsSiFsCm            ===" | tee -a $logfile
+echo "=== spend from: 16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM            ===" >> $logfile
+echo "=== spend to:   1runeksijzfVxyrpiyCY2LCBvYsSiFsCm            ===" >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 2a: manually create a simple unsigned, raw trx"      | tee -a $logfile
 echo "================================================================" | tee -a $logfile
@@ -110,8 +110,8 @@ echo " " | tee -a $logfile
 testcase3() {
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 3: param '-m' testing ...                       ===" | tee -a $logfile
-echo "=== spend from: 1MBngSqZbMydscpzSoehjP8kznMaHAzh9y           ===" | tee -a $logfile
-echo "=== spend to:   14zWNsgUMmHhYx4suzc2tZD6HieGbkQi5s           ===" | tee -a $logfile
+echo "=== spend from: 1MBngSqZbMydscpzSoehjP8kznMaHAzh9y           ===" >> $logfile
+echo "=== spend to:   14zWNsgUMmHhYx4suzc2tZD6HieGbkQi5s           ===" >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 3a: same as testcase 2, different parameters" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
@@ -125,8 +125,8 @@ echo " " | tee -a $logfile
 testcase4() {
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 4: 4a, 4b and 4c not ok, 4d ok                  ===" | tee -a $logfile
-echo "=== spend from: 1CAue7dQ2ASD6Wj9ZUWJABdC2zteiCe5cK           ===" | tee -a $logfile
-echo "=== spend to:   12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM           ===" | tee -a $logfile
+echo "=== spend from: 1CAue7dQ2ASD6Wj9ZUWJABdC2zteiCe5cK           ===" >> $logfile
+echo "=== spend to:   12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM           ===" >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 4a: wrong bitcoin adress hash (x at end)" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
@@ -166,7 +166,7 @@ echo "================================================================" | tee -a
 echo "=== TESTCASE 5: zero pad testing of bitcoin address hashes   ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 5a: zero padding:  invalid bitcoin adress hash " | tee -a $logfile
-echo "===              wrong address: 6UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM" | tee -a $logfile
+echo "===              wrong address: 6UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM" >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "./tcls_create.sh -v -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 6UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM" >> $logfile
 ./tcls_create.sh -v -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 6UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM > tmp_trx_cfile
@@ -175,8 +175,8 @@ chksum_prep
 
 echo "   " | tee -a $logfile
 echo "=== TESTCASE 5b: zero pad of 16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM  " | tee -a $logfile
-echo "===              from: 1CAue7dQ2ASD6Wj9ZUWJABdC2zteiCe5cK" | tee -a $logfile
-echo "===              to:   16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvMK" | tee -a $logfile
+echo "===              from: 1CAue7dQ2ASD6Wj9ZUWJABdC2zteiCe5cK" >> $logfile
+echo "===              to:   16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvMK" >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "./tcls_create.sh -v -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM" >> $logfile
 ./tcls_create.sh -v -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM > tmp_trx_cfile
@@ -185,8 +185,8 @@ chksum_prep
 
 echo "   " | tee -a $logfile
 echo "=== TESTCASE 5c: zero pad of 112Zbz... " | tee -a $logfile
-echo "===              from: 1CAue7dQ2ASD6Wj9ZUWJABdC2zteiCe5cK" | tee -a $logfile
-echo "===              to:   112ZbzFcSpcCoY2EfPNmgxFmv4tVuLSoB4" | tee -a $logfile
+echo "===              from: 1CAue7dQ2ASD6Wj9ZUWJABdC2zteiCe5cK" >> $logfile
+echo "===              to:   112ZbzFcSpcCoY2EfPNmgxFmv4tVuLSoB4" >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 112ZbzFcSpcCoY2EfPNmgxFmv4tVuLSoB4" >> $logfile
 ./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 112ZbzFcSpcCoY2EfPNmgxFmv4tVuLSoB4 > tmp_trx_cfile
@@ -195,8 +195,8 @@ chksum_prep
 
 echo "   " | tee -a $logfile
 echo "=== TESTCASE 5d: zero pad of 12GTF5ARS... " | tee -a $logfile
-echo "===              from: 1CAue7dQ2ASD6Wj9ZUWJABdC2zteiCe5cK" | tee -a $logfile
-echo "===              to:   12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" | tee -a $logfile
+echo "===              from: 1CAue7dQ2ASD6Wj9ZUWJABdC2zteiCe5cK" >> $logfile
+echo "===              to:   12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
 ./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_trx_cfile
@@ -210,11 +210,11 @@ echo "================================================================" | tee -a
 echo "=== TESTCASE 6: usage of param '-t'                          ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 6a: read a transaction from the network"  | tee -a $logfile
-echo "===   from: 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM" | tee -a $logfile
-echo "===   to:   12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" | tee -a $logfile
-echo "===   proposed TX-FEE (@ 50 Satoshi/Byte * 319 tx_bytes): 15950"  | tee -a $logfile
-echo "===   *** possible value to return address:                  50"  | tee -a $logfile
-echo "===   *** without return address, txfee will be:          16000"  | tee -a $logfile
+echo "===   from: 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM" >> $logfile
+echo "===   to:   12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
+echo "===   proposed TX-FEE (@ 50 Satoshi/Byte * 319 tx_bytes): 15950"  >> $logfile
+echo "===   *** possible value to return address:                  50"  >> $logfile
+echo "===   *** without return address, txfee will be:          16000"  >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "./tcls_create.sh -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1084000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
 ./tcls_create.sh -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1084000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_trx_cfile
@@ -229,9 +229,9 @@ chksum_ref="3a0f57d7944e8e51143032599df2a76457e2f4bc255663444bdaebbee22f49aa"
 chksum_prep
 
 echo "=== TESTCASE 6c: same as 6b, with parameter for TRXFEE" | tee -a $logfile
-echo "===   proposed TX-FEE (@ 50 Satoshi/Byte * 319 tx_bytes): 24563"  | tee -a $logfile
-echo "===   *** possible value to return address:                 437"  | tee -a $logfile
-echo "===   *** without return address, txfee will be:          25000"  | tee -a $logfile
+echo "===   proposed TX-FEE (@ 50 Satoshi/Byte * 319 tx_bytes): 24563"  >> $logfile
+echo "===   *** possible value to return address:                 437"  >> $logfile
+echo "===   *** without return address, txfee will be:          25000"  >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "./tcls_create.sh -v -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1075000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 77" >> $logfile
 ./tcls_create.sh -v -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1075000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 77 > tmp_trx_cfile
@@ -239,9 +239,9 @@ chksum_ref="0e165c07f59298d3b762e5c251b1d9c4d5ab15cc192ef093f6cbcd4e01c53ed0"
 chksum_prep
 
 echo "=== TESTCASE 6d: same as 6a, with parameter for a return address" | tee -a $logfile
-echo "===   proposed TX-FEE (@ 50 Satoshi/Byte * 387 tx_bytes): 19350 " | tee -a $logfile
-echo "===   value to return address:                             2873 " | tee -a $logfile
-echo "===   return address: 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm         " | tee -a $logfile
+echo "===   proposed TX-FEE (@ 50 Satoshi/Byte * 387 tx_bytes): 19350 " >> $logfile
+echo "===   value to return address:                             2873 " >> $logfile
+echo "===   return address: 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm         " >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "./tcls_create.sh -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1077777 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 50 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
 ./tcls_create.sh -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1077777 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 50 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_trx_cfile
@@ -270,8 +270,8 @@ echo "================================================================" | tee -a
 echo "=== TESTCASE 7: several trx with wrong parameters:           ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 7a: insufficient input" | tee -a $logfile
-echo "===              amount of trx input(s) (in Satoshis):    59372 " | tee -a $logfile
-echo "===              desired amount to spend (in Satoshis):   70000 " | tee -a $logfile
+echo "===              amount of trx input(s) (in Satoshis):    59372 " >> $logfile
+echo "===              desired amount to spend (in Satoshis):   70000 " >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "94fae0ac28792796063f23f4a4ba4f977a9599d1579c5aae7ce6dda4f8a6b1bb 1044 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 19235" > tmp_3inputs.txt
 echo "a3e719b12275357b15fc5decd9088a0964fe860d49f026f2152e71f681ac3fa4 1073 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 16197" >> tmp_3inputs.txt
@@ -302,8 +302,8 @@ chksum_ref="72248aec6d419800473c6b5f21350d87b04c22e3c5743a8da106c41456854ecf"
 chksum_prep
 
 echo "=== TESTCASE 7d: insufficient trx fee" | tee -a $logfile
-echo "=== proposed TX-FEE (@ 50 Satoshi/Byte * 763 tx_bytes):    38150" | tee -a $logfile
-echo "=== Achieving negative value with this txfee:               -900" | tee -a $logfile
+echo "=== proposed TX-FEE (@ 50 Satoshi/Byte * 763 tx_bytes):    38150" >> $logfile
+echo "=== Achieving negative value with this txfee:               -900" >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "94fae0ac28792796063f23f4a4ba4f977a9599d1579c5aae7ce6dda4f8a6b1bb 1044 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 39255" > tmp_3inputs.txt
 echo "a3e719b12275357b15fc5decd9088a0964fe860d49f026f2152e71f681ac3fa4 1073 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 19999" >> tmp_3inputs.txt
@@ -324,11 +324,11 @@ chksum_ref="2f76d308665b2303392388ec051f8eca10b5ab3865e4c3229e29e71de4c8b888"
 chksum_prep
 
 echo "=== TESTCASE 7f: a spend from 1JmPRD_unspent.txt     " | tee -a $logfile
-echo "=== 4 inputs from: 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM" | tee -a $logfile
-echo "===            to: 13GnHB51piDBf1avocPL7tSKLugK4F7U2B" | tee -a $logfile
-echo "=== proposed TX-FEE (@ 23 Satoshi/Byte * 985 tx_bytes):    31520" | tee -a $logfile
-echo "=== *** possible value to return address:                    480" | tee -a $logfile
-echo "=== *** without return address, txfee will be:             32000" | tee -a $logfile
+echo "=== 4 inputs from: 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM" >> $logfile
+echo "===            to: 13GnHB51piDBf1avocPL7tSKLugK4F7U2B" >> $logfile
+echo "=== proposed TX-FEE (@ 23 Satoshi/Byte * 985 tx_bytes):    31520" >> $logfile
+echo "=== *** possible value to return address:                    480" >> $logfile
+echo "=== *** without return address, txfee will be:             32000" >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "48d2c9c76dc282eb7075a0fce543b9d615c0c2d5b78b41603c2d6cf46e2e77b0 1 76a914c2df275d78e506e17691fd6f0c63c43d15c897fc88ac 120000" > tmp_4inputs.txt
 echo "811848214a52c823f53eaaa302eaddb7dd2b03874174c9202d291ac35868fb74 1 76a914c2df275d78e506e17691fd6f0c63c43d15c897fc88ac 500000" >> tmp_4inputs.txt
@@ -347,9 +347,9 @@ echo "================================================================" | tee -a
 echo "=== TESTCASE 8: some multi input trx with 3, 5 and 20 inputs ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 8a: 3 inputs to a trx"                               | tee -a $logfile
-echo "=== proposed TX-FEE (@ 50 Satoshi/Byte * 763 tx_bytes):    38150" | tee -a $logfile
-echo "=== *** possible value to return address:                      2" | tee -a $logfile
-echo "=== *** without return address, txfee will be:             38152" | tee -a $logfile
+echo "=== proposed TX-FEE (@ 50 Satoshi/Byte * 763 tx_bytes):    38150" >> $logfile
+echo "=== *** possible value to return address:                      2" >> $logfile
+echo "=== *** without return address, txfee will be:             38152" >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "94fae0ac28792796063f23f4a4ba4f977a9599d1579c5aae7ce6dda4f8a6b1bb 1044 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 49265" > tmp_3inputs.txt
 echo "a3e719b12275357b15fc5decd9088a0964fe860d49f026f2152e71f681ac3fa4 1073 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 18887" >> tmp_3inputs.txt
@@ -360,9 +360,9 @@ chksum_ref="22d1f3fa13a8c838e27e6070a25bb13d39b1c08e487d4c2e27a0cee6e6cca3b6"
 chksum_prep
 
 echo "=== TESTCASE 8b: 5 inputs to a trx" | tee -a $logfile
-echo "=== proposed TX-FEE (@ 50 Satoshi/Byte * 1207 tx_bytes):   60350" | tee -a $logfile
-echo "=== *** possible value to return address:                      7" | tee -a $logfile
-echo "=== *** without return address, txfee will be:             60357" | tee -a $logfile
+echo "=== proposed TX-FEE (@ 50 Satoshi/Byte * 1207 tx_bytes):   60350" >> $logfile
+echo "=== *** possible value to return address:                      7" >> $logfile
+echo "=== *** without return address, txfee will be:             60357" >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "94fae0ac28792796063f23f4a4ba4f977a9599d1579c5aae7ce6dda4f8a6b1bb 1044 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 39235" >> tmp_5inputs.txt
 echo "a3e719b12275357b15fc5decd9088a0964fe860d49f026f2152e71f681ac3fa4 1073 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 48197" >> tmp_5inputs.txt
@@ -375,11 +375,11 @@ chksum_ref="22445784e72a35712aba8019addbd91f027fb89cbfb1e87d50f79f0886e2cf66"
 chksum_prep
 
 echo "=== TESTCASE 8c: 20 inputs to a trx" | tee -a $logfile
-echo "=== proposed TX-FEE (@ 50 Satoshi/Byte * 4537 tx_bytes):  226850" | tee -a $logfile
-echo "=== *** possible value to return address:                     24" | tee -a $logfile
-echo "=== *** without return address, txfee will be:            226874" | tee -a $logfile
-echo "===     all 22 inputs from: 1FyJw3R7cs9TrSXPhh1FnnGmgTMdptPSE7  " | tee -a $logfile
-echo "===                     to: 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM  " | tee -a $logfile
+echo "=== proposed TX-FEE (@ 50 Satoshi/Byte * 4537 tx_bytes):  226850" >> $logfile
+echo "=== *** possible value to return address:                     24" >> $logfile
+echo "=== *** without return address, txfee will be:            226874" >> $logfile
+echo "===     all 22 inputs from: 1FyJw3R7cs9TrSXPhh1FnnGmgTMdptPSE7  " >> $logfile
+echo "===                     to: 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM  " >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "94fae0ac28792796063f23f4a4ba4f977a9599d1579c5aae7ce6dda4f8a6b1bb 1044 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 119235" >> tmp_20inputs.txt
 echo "a3e719b12275357b15fc5decd9088a0964fe860d49f026f2152e71f681ac3fa4 1073 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 16197" >> tmp_20inputs.txt

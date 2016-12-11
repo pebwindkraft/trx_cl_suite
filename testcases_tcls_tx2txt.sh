@@ -230,11 +230,11 @@ echo " " | tee -a $logfile
 testcase6() {
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 6: this trx has 1 input, and 4 outputs          ===" | tee -a $logfile
-echo "===  trx-in sequence = feffffff - what does this mean?       ===" | tee -a $logfile
-echo "=== bitcoin.org: setting all sequence numbers to 0xffffffff  ===" | tee -a $logfile
-echo "=== (the default in Bitcoin Core) can still disable the time ===" | tee -a $logfile
-echo "=== lock, so if you want to use locktime, at least one input ===" | tee -a $logfile
-echo "=== must have a sequence number below the the maximum.       ===" | tee -a $logfile
+echo "=== trx-in sequence = feffffff - what does this mean?        ===" >> $logfile
+echo "=== bitcoin.org: setting all sequence numbers to 0xffffffff  ===" >> $logfile
+echo "=== (the default in Bitcoin Core) can still disable the time ===" >> $logfile
+echo "=== lock, so if you want to use locktime, at least one input ===" >> $logfile
+echo "=== must have a sequence number below the the maximum.       ===" >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "https://blockchain.info/de/rawtx/7264f8ba4a85a4780c549bf04a98e8de4c9cb1120cb1dfe8ab85ff6832eff864" | tee -a $logfile
 
@@ -289,7 +289,7 @@ echo " " | tee -a $logfile
 testcase8() {
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 8: just another multisig trx                    ===" | tee -a $logfile
-echo "===  Here we have a multisig in and out address ...          ===" | tee -a $logfile
+echo "===  Here we have a multisig in and out address ...          ===" >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "https://blockchain.info/de/rawtx/c0889855c93eed67d1f5a6b8a31e446e3327ce03bc267f2db958e79802941c73" | tee -a $logfile
 
@@ -314,8 +314,8 @@ echo " " | tee -a $logfile
 testcase9() {
 echo "=============================================================" | tee -a $logfile
 echo "=== TESTCASE 9: 4 inputs and 2 outputs (P2SH multisig!)   ===" | tee -a $logfile
-echo "===  This is a long transaction, which is fetched via     ===" | tee -a $logfile
-echo "===  the -t parameter.                                    ===" | tee -a $logfile
+echo "===  This is a long transaction, which is fetched via     ===" >> $logfile
+echo "===  the -t parameter.                                    ===" >> $logfile
 echo "=============================================================" | tee -a $logfile
 echo "https://blockchain.info/de/rawtx/734c48124d391bfff5750bbc39bd18e6988e8ac873c418d64d31cfdc31cc64ac" | tee -a $logfile
 

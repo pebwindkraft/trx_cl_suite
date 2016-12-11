@@ -50,28 +50,24 @@ echo "================================================================" | tee -a
 echo "=== TESTCASE 1: get the checksums of all necessary files     ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 
-echo "   " | tee -a $logfile
 echo "=== TESTCASE 1a: $chksum_cmd tcls_verify_sig.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 cp tcls_verify_sig.sh tmp_tx_cfile
 chksum_ref="19230aca75482b09841fe1b6a761588157dd24f2a0db5afa8c4d21c429e62c1d" 
 chksum_prep
 
-echo "   " | tee -a $logfile
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 cp tcls_key2pem.sh tmp_tx_cfile
-chksum_ref="34cad1c05bb7fd7c4bce56b157c9faf1cdfe92d9076128e493d1b3fe382e0dc5" 
+chksum_ref="4c9c5941cb87fa16dcfad1f86d97f72997be41c0dce658ad81d4be043d8fa5d9" 
 chksum_prep
 
-echo "   " | tee -a $logfile
 echo "=== TESTCASE 1c: $chksum_cmd tcls_strict_sig_verify.sh" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 cp tcls_strict_sig_verify.sh tmp_tx_cfile
 chksum_ref="d15facf384d754754ed7b7becfb971b76795cdabed9f4109b8995a548e8d5f8e"
 chksum_prep
 
-echo "   " | tee -a $logfile
 echo "=== TESTCASE 1d: $chksum_cmd tcls_verify_hexkey.awk" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 cp tcls_verify_hexkey.awk tmp_tx_cfile

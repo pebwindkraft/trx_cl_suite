@@ -707,7 +707,7 @@ if [ "$T_PARAM_FLAG" -eq 1 ] ; then
   fi
   if [ $OS == "Linux" ] ; then
     nw_if=$( netstat -rn | awk '/^0.0.0.0/ { print $NF }' | head -n1 )
-    ifstatus $nw_if | grep -q "up"
+    /sbin/ifstatus $nw_if | grep -q "up"
   else
     nw_if=$( netstat -rn | awk '/^default/ { print $NF }' | head -n1 )
     ifconfig $nw_if | grep -q " active"

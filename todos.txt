@@ -12,13 +12,13 @@ try cold storage with this: 1JmPRD_unspent.txt
 
 I16: 31jul16, svn:
 ==================
-testcases_trx_2txt.sh: testcase 9 on OpenBSD failes this way:
-need to take care for buffering input?
+testcases_trx_2txt.sh: testcase 9a, 9b and 9c on OpenBSD fail this way:
 TESTCASE 9c: 
 cut: [-bcf] list: 2072 too large (max 2048)
 cut: [-bcf] list: 2080 too large (max 2048)
 cut: [-bcf] list: 2082 too large (max 2048)
 ...
+need to take care for buffering input?
 
 I19: 09Oct2016, svn:
 ====================
@@ -95,20 +95,6 @@ trx_sign.sh:
 STEP 5:  need to do a var_int check here ...
 STEP 8:  need to do a var_int check here ...
 STEP 17: when there is a trx with multiple output, need to create a loop
-
-
-I28: 02Nov2016, svn:
-====================
-when tmp_urtx.txt file is missing, then wrong reply by sign script:
-./tcls_sign.sh -f tmp_urtx.txt -w XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0
-######################################################
-### trx_sign.sh: sign an unsigned, raw Bitcoin trx ###
-######################################################
-cat: tmp_urtx.txt: No such file or directory
-*** Error: unsigned raw transaction normally begins with Version '01000000'
-           here we have . Please adjust, and try again. 
-           Exiting gracefully
-
 
 I29: 02Nov2016, svn:
 ====================
@@ -237,32 +223,49 @@ Verify with Electrum, if the script is uncorrect, everytime when the signture ha
 It looks like Electrum shows these tx as not green. This would mean, using the opposite S-Value "destroys" the link between sig, double sha256 and pubkey?
 
 
-I37: 13nov2016, svn:
+I38: 16nov2016, svn:
 ====================
-trx_2txt.sh: this signature in a tcls_create.sh and tcls_sign.sh generated trx creates problems in bitcoin qt, and cannot be "pushtx'd" then. It looks like the changed S-Values create a problem. Need to compare to Electrum generated signing, or eventually do a test in bitcoin qt...
-  493045022100D6DF255B4C7671BED184C964E0C53FAD4B2B53013DC986244028948A7EA7621502201CC01171011C43F1D1672EBC209D1893E42B158E1DFB71A7118669D9ABA23E10012103CC5DEBC62369BD861900B167BC6ADD5F1A6249BDAB4146D5CE698879988DCED0 
-  ##################################################################
-  ### trx_in_sig_script.sh: decode SIG_script OPCODES from a trx ###
-  ##################################################################
-    49: OP_DATA_0x49:     push hex 49 (decimal 73) bytes as data
-    30: OP_SEQUENCE_0x30: type tag indicating SEQUENCE, begin sigscript
-    45: unknown opcode 
-    02: unknown OpCode
-        2100D6DF255B4C76:71BED184C964E0C5
-        3FAD4B2B53013DC9:86244028948A7EA7
-        621502201CC01171:011C43F1D1672EBC
-        209D1893E42B158E:1DFB71A7118669D9
-        ABA23E10012103CC:5DEBC62369BD8619
-        00B167BC6ADD5F1A:6249BDAB4146D5CE
-        698879988DCED0:
-take also a look at trx_in_script_sig.sh and it's png pictures...
-I have seen "483045022100...", but never "493045022100...", e.g.:
-4830450221009A559CE3CEE7C7106BDB45E6CBF51F5B008FD91D03947AD9578EAFA346BEB2290220797E31F9365EB11BE3476A7F9E53B9A8E95C904C1A169CF83ED09B37EF5A4D17012103CC5DEBC62369BD861900B167BC6ADD5F1A6249BDAB4146D5CE698879988DCED0
+tcls_key2pem: the assembly of the pubkey can be made very easy, in this section:
+######################################
+### manually setup a second pubkey ### 
+######################################
+
+instead of base64, use openssl:
+   openssl enc -base64 -in tmp_key2pem >> pubkey_m.pem
+this?
+   xxd -r -p <pubkey.txt | openssl pkey -pubin -inform der >pubkey.pem
+without xxd it might become slightly different...
+   cat pubkey.hex | openssl pkey -pubin -inform der >pubkey.pem
+
+I38: 16nov2016, svn:
+====================
+Gerade in Schleifen sind immer neu gestartete Unterprozesse für jede Menge Ressourcenverbrauch verantwortlich. Ein kurzer Benchmark durchsuchte knapp 3 300 Dateien nach einem Suchstring. Die Variante in Listing 2 braucht daher 3 300 Prozesse mehr als die kürzere Variante in Listing 3. Das zweite Skript benötigte 88 Prozent mehr Laufzeit als das erste. Hängt man hinten an die Pipe ein weiteres, nutzloses »| cat« an, so dauert dies 153 Prozent länger als ein einzelnes »grep«. Zwei solche Aufrufe benötigen schon zusätzliche 239 Prozent und dreimal »cat« schlägt mit einer Zugabe von gesalzenen 322 Prozent zu Buche. Die letzteren Werte leiden überdurchschnittlich an den begrenzten Ressourcen auf dem Testrechner und lasten ihn vollständig aus. Dennoch zeigt das durchaus praxisnahe Beispiel, dass sich zusätzliche Prozesse erheblich im Schleifenrumpf auswirken.
+
+Listing 2: Suche mit »cat«
+01 #!/bin/bash
+02 find $HOME/Artikel/2009/1* -type f |
+03 while read i
+04 do
+05     cat "$i" | grep bashing > /dev/null
+06 done
+
+Listing 3: Suche ohne »cat«
+01 #!/bin/bash
+02 find $HOME/Artikel/2009/1* -type f |
+03 while read i
+04 do
+05     grep bashing "$i" > /dev/null
+06 done
+
+
+I38: 16nov2016, svn:
+====================
+tcls_key2pem: we are currently checking only negative S-values, the original bitcoin cpp code (master/src/script/interpreter.cpp) avoids negative numbers for R and S. 
+--> need to add negative R-Check as well ...
 
 
 
 
- 
 
 #####################################
 ### Extensions / new Requirements ###
