@@ -2,27 +2,9 @@
 ### Issues / errors in processing ###
 #####################################
 
-I10: 18jul16 svn:
-==================
-testcases_trx2txt.sh: testcase 20 fails on OpenBSD, cause parameter buffer is only 2048 Bytes
-
-I14: 30jul16, svn:
-==================
-try cold storage with this: 1JmPRD_unspent.txt
-
-I16: 31jul16, svn:
-==================
-testcases_trx_2txt.sh: testcase 9a, 9b and 9c on OpenBSD fail this way:
-TESTCASE 9c: 
-cut: [-bcf] list: 2072 too large (max 2048)
-cut: [-bcf] list: 2080 too large (max 2048)
-cut: [-bcf] list: 2082 too large (max 2048)
-...
-need to take care for buffering input?
-
 I19: 09Oct2016, svn:
 ====================
-I think the maximum size of a trx is 100 kb. How many trx does that make? 
+I think the maximum size of a trx is 100 kb. How many UTXO does that make? 
 How can this be implemented?
 --> minimum signature is ~50 Bytes, prev trx = 32 Bytes + PKScript 20 Bytes plus, plus, plus... so a minimum trx is roughly 227 Bytes. This would limit to ~440 particular trx? And if a trx has many inputs and many outputs?
 
@@ -107,7 +89,7 @@ NAMING CONVENTION:
 this needs to be inmplemented into tcls_create.sh, tcls_sign.sh and tcls_verify_sig.sh
 (and later into all other files)
 --> script "trx_2txt.sh" has a switch "-r" - this needs to get replaced as well!
-
+also a common standard is to use the extension „.bin“ for binary files, but this can also be misleading (binary executable). So „.hex“ is better :-)
 
 I30: 04Nov2016, svn:
 ====================
@@ -116,10 +98,9 @@ https://blockchain.info/rawtx/cca7507897abc89628f450e8b1e0c6fca4ec3f7b34cccf55f3
 http://bitcoin.stackexchange.com/questions/32305/how-does-the-ecdsa-verification-algorithm-work-during-transaction/32308#32308
 
 testcases_trx_2txt.sh
-? testcases_tcls_create.sh - it has two outputs, not yet ready ...
-? testcases_tcls_sign.sh   - I don't have the priv keys, how to?
+testcases_tcls_create.sh - it has two outputs, not yet ready ...
+testcases_tcls_sign.sh   - I don't have the priv keys, how to?
 testcases_tcls_verify_sig.sh	
-
 
 I31: 05Nov2016, svn:
 ====================
@@ -185,43 +166,13 @@ Compressed form of above needs to start with 0x02:
   a2:fd:ab:eb:a4:79:01:e5:48:b4:74:cb:0a:df:af:
   06:46:51
 
-
-
 I33: 08Nov2016, svn:
 ====================
 tcls_sign.sh (and others): TRX_IN[i] shall always start with "0", like in script trx_2txt.sh
 
-
 I34: 09Nov2016, svn:
 ====================
 update readme.md files and description and usage …
-
-
-I35: 10Nov2016, svn:
-====================
-there is something wrong with the calculation of fees, see this example:
-lorena:/Data/BitCoin/trx_cl_suite $ ./tcls_create.sh -v -f ../svn_4inputs.txt 820000 13GnHB51piDBf1avocPL7tSKLugK4F7U2B 34
-###########################################################################
-### amount(tx_in) - amount(tx_out) = TRXFEEs. *Double check YOUR MATH!* ###
-### amount of trx input(s) (in Satoshis):                        853000 ###
-### desired amount to spend (in Satoshis):                       820000 ###
-### proposed TRXFEE (@ 34 Satoshi/Byte * 985 trx_bytes):          33490 ###
-### *** possible value to return address:                            54 ###
-### *** without return address, trxfee will be:                   33000 ###
-###########################################################################
-proposed trx fees are higher than remaining amount (33000). What?
-
-I36: 10nov2016, svn:
-====================
-tcls_sign.sh: using 4inputs, and verifying output in Electrum is ok, but when bradcasting, this error appears:
-error: The transaction was rejected by network rules.(16: mandatory-script-verify-flag-failed (Script evaluated without error but finished with a false/empty top stack element))
-
-I37: 10nov2016, svn:
-====================
-tcls_sign.sh: using 4inputs...
-Verify with Electrum, if the script is uncorrect, everytime when the signture has an S-Value not smaller than N/2. 
-It looks like Electrum shows these tx as not green. This would mean, using the opposite S-Value "destroys" the link between sig, double sha256 and pubkey?
-
 
 I38: 16nov2016, svn:
 ====================

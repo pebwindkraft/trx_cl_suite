@@ -30,6 +30,9 @@ Usecases:
 ./tcls_tx2txt.sh 
   Without parameters, the details of a sample transaction are shown, line by line.
 
+./tcls_tx2txt.sh -f 
+  read the transaction data from a file 
+
 ./tcls_tx2txt.sh -r 
   pass the hex code of a RAW TRANSACTION as option, for example the output of:
   https://blockchain.info/de/rawtx/cc8a279b0736e6a2cc20b324acc5aa688b3af7b63bbb002f46f6573c1ad84408?format=hex

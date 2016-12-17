@@ -231,7 +231,7 @@ wif2hex() {
   s=$( echo $s | sed 's/[0-9]*/ 58*&+ /g' )
   vv_output "$s"
   h=$( echo "16o0d $s +f" | dc )
-  hex_privkey=$( echo $h | tr -d '\\' | tr -d ' ' | cut -b 3-66 )
+  hex_privkey=$( echo $h | tr -d '\' | tr -d ' ' | cut -b 3-66 )
   vv_output "$hex_privkey"
 }
   
