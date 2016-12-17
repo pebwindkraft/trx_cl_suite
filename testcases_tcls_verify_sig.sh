@@ -51,25 +51,21 @@ echo "=== TESTCASE 1: get the checksums of all necessary files     ===" | tee -a
 echo "================================================================" | tee -a $logfile
 
 echo "=== TESTCASE 1a: $chksum_cmd tcls_verify_sig.sh" | tee -a $logfile
-echo "================================================================" | tee -a $logfile
 cp tcls_verify_sig.sh tmp_tx_cfile
 chksum_ref="19230aca75482b09841fe1b6a761588157dd24f2a0db5afa8c4d21c429e62c1d" 
 chksum_prep
 
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
-echo "================================================================" | tee -a $logfile
 cp tcls_key2pem.sh tmp_tx_cfile
-chksum_ref="4c9c5941cb87fa16dcfad1f86d97f72997be41c0dce658ad81d4be043d8fa5d9" 
+chksum_ref="34cad1c05bb7fd7c4bce56b157c9faf1cdfe92d9076128e493d1b3fe382e0dc5" 
 chksum_prep
 
 echo "=== TESTCASE 1c: $chksum_cmd tcls_strict_sig_verify.sh" | tee -a $logfile
-echo "================================================================" | tee -a $logfile
 cp tcls_strict_sig_verify.sh tmp_tx_cfile
 chksum_ref="d15facf384d754754ed7b7becfb971b76795cdabed9f4109b8995a548e8d5f8e"
 chksum_prep
 
 echo "=== TESTCASE 1d: $chksum_cmd tcls_verify_hexkey.awk" | tee -a $logfile
-echo "================================================================" | tee -a $logfile
 cp tcls_verify_hexkey.awk tmp_tx_cfile
 chksum_ref="055b79074a8f33d0aa9aa7634980d29f4e3eb0248a730ea784c7a88e64aa7cfd"
 chksum_prep
@@ -82,21 +78,18 @@ echo "================================================================" | tee -a
 echo "=== TESTCASE 2: parameters testing ...                       ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 2a: -d param too short...     "                      | tee -a $logfile
-echo "================================================================" | tee -a $logfile
 echo "./tcls_verify_sig.sh -v -d 0123456789abcdef -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e" >> $logfile
 ./tcls_verify_sig.sh -v -d 0123456789abcdef -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e > tmp_tx_cfile
 chksum_ref="0895db88502710dd7e1aa02f7042e3cdfc55cb9f9f260898da29e8dfa819613f"
 chksum_prep
 
 echo "=== TESTCASE 2b: -p param too short...     "                      | tee -a $logfile
-echo "================================================================" | tee -a $logfile
 echo "./tcls_verify_sig.sh -v -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 0123456789abcdef -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e" >> $logfile
 ./tcls_verify_sig.sh -v -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 0123456789abcdef -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e > tmp_tx_cfile
 chksum_ref="5e4c1e8aea4da32de2d1230c7ec99980be669d11d7d49d82ec66b8e902797ade"
 chksum_prep
 
 echo "=== TESTCASE 2c: -s param too short...     "                      | tee -a $logfile
-echo "================================================================" | tee -a $logfile
 echo "./tcls_verify_sig.sh -v -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221000123456789abcdef" >> $logfile
 ./tcls_verify_sig.sh -v -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221000123456789abcdef > tmp_tx_cfile
 chksum_ref="a487656ba7144e0560ed6c2c389aa7b71dfdb56e0bcda4c262f11d6e72f090f2"
@@ -110,7 +103,6 @@ echo "================================================================" | tee -a
 echo "=== TESTCASE 3: the pizza transaction ...                    ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 3a: pizza, quiet operation..."                       | tee -a $logfile
-echo "================================================================" | tee -a $logfile
 echo "http://bitcoin.stackexchange.com/questions/32305/how-does-the-ecdsa-verification-algorithm-work-during-transaction/32308#32308"
 echo "./tcls_verify_sig.sh -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e" >> $logfile
 ./tcls_verify_sig.sh -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669  -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e > tmp_tx_cfile
@@ -118,14 +110,12 @@ chksum_ref="0bd65ea014d3210c1b9a7d7d5af78bc4e4b4384b4f3f7f5674e8d6447e4112c3"
 chksum_prep
 
 echo "=== TESTCASE 3b: pizza, be a bit more verbose..." | tee -a $logfile
-echo "================================================================" | tee -a $logfile
 echo "./tcls_verify_sig.sh -v -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e" >> $logfile
 ./tcls_verify_sig.sh -v -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669  -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e > tmp_tx_cfile 
 chksum_ref="9f66e16ff23ecff54da880556714930cf80b583354e8882c96a31b98277f5980" 
 chksum_prep
 
 echo "=== TESTCASE 3c: pizza, be very verbose..." | tee -a $logfile
-echo "================================================================" | tee -a $logfile
 echo "./tcls_verify_sig.sh -vv -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e" >> $logfile
 ./tcls_verify_sig.sh -vv -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669  -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e > tmp_tx_cfile 
 chksum_ref="29030285a727db40d69776a2432b199688f199e5d1cc0db92315b388b40d988f" 
@@ -165,46 +155,52 @@ chksum_prep
 echo "################################################" >> $logfile
 echo "### we cross check with openssl directly ... ###" >> $logfile
 echo "################################################" >> $logfile
-# The pubkey is: 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0 
-echo 3036301006072a8648ce3d020106052b8104000a032200 > pubkey.txt
-echo 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0 >> pubkey.txt
-xxd -r -p <pubkey.txt | openssl pkey -pubin -inform der >pubkey.pem
 
-# TX_IN[0], double sha256 and signature:   
-echo "TX_IN[0]:" >> $logfile
-echo 6f13d86405f2672b98d52e9d5244e133244885c4ce0d4f9087da9433a09f914f > tx_hash.txt
-echo 304502210086199572c8e5879fa610bd244c7b2d054c389ed8b023f0a3d11f25606773e3f5022037086414c32a875fc2d43ec30664edbce447836e25f68ec39a3d04fd03590b57 > tx_sig.txt
-xxd -r -p <tx_hash.txt >tx_hash.hex
-xxd -r -p <tx_sig.txt >tx_sig.hex
-openssl pkeyutl <tx_hash.hex -verify -pubin -inkey pubkey.pem -sigfile tx_sig.hex >> $logfile
- 
-# TX_IN[1], double sha256 and signature:
-echo "TX_IN[1]:" >> $logfile
-echo e09e861272e2377a4528fbe28d1ee764706ca4b829aad7e08f4a0325e25c9053 > tx_hash.txt
-echo 3044022069f4f02bd808eb5381a8bc5b6e3a18219089f83b10b25277345439c52dfb42e30220107a09ad1aff0e20fd5c07b71d536943d72ca15c6e86f77282fe75478a64a466 > tx_sig.txt
-xxd -r -p <tx_hash.txt >tx_hash.hex
-xxd -r -p <tx_sig.txt >tx_sig.hex
-openssl pkeyutl <tx_hash.hex -verify -pubin -inkey pubkey.pem -sigfile tx_sig.hex >> $logfile
- 
-# TX_IN[2], double sha256 and signature:
-echo "TX_IN[2]:" >> $logfile
-echo c5bfe4a6c58fb2e0398006b4109cdea737eb1413a127c5e61039a8858367750b > tx_hash.txt
-echo 3044022058c884db944e2265f013493d98a56c958a86aeacc6655473a8cf477fac31f375022026b5915ed26e0149effac955ac30ba90ca25919072ab5a20a161575a55a8bc30 > tx_sig.txt
-xxd -r -p <tx_hash.txt >tx_hash.hex
-xxd -r -p <tx_sig.txt >tx_sig.hex
-openssl pkeyutl <tx_hash.hex -verify -pubin -inkey pubkey.pem -sigfile tx_sig.hex >> $logfile
- 
-# TX_IN[3], double sha256 and signature:
-echo "TX_IN[3]:" >> $logfile
-echo 64623a854acfc3e9ba5761a1209af9f3162d360b4eaff7f5c2d19010fa30f418 > tx_hash.txt
-echo 304402202adca291dd1c4058f124c01218e6d34e5a968de6fb932a4237fd33c5aa26930a0220493502e86bf6684593d5ea888f112503ed7ae054a1f4fa62d38df76898a6731e > tx_sig.txt
-xxd -r -p <tx_hash.txt >tx_hash.hex
-xxd -r -p <tx_sig.txt >tx_sig.hex
-openssl pkeyutl <tx_hash.hex -verify -pubin -inkey pubkey.pem -sigfile tx_sig.hex >> $logfile
- 
+which xxd
+if [ $? -gt 1 ] ; then
+  echo "ERROR: cannot find tool 'xxd'..." 
+else
+  # The pubkey is: 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0 
+  echo 3036301006072a8648ce3d020106052b8104000a032200 > pubkey.txt
+  echo 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0 >> pubkey.txt
+  xxd -r -p <pubkey.txt | openssl pkey -pubin -inform der >pubkey.pem
+
+  # TX_IN[0], double sha256 and signature:   
+  echo "TX_IN[0]:" >> $logfile
+  echo 6f13d86405f2672b98d52e9d5244e133244885c4ce0d4f9087da9433a09f914f > tx_hash.txt
+  echo 304502210086199572c8e5879fa610bd244c7b2d054c389ed8b023f0a3d11f25606773e3f5022037086414c32a875fc2d43ec30664edbce447836e25f68ec39a3d04fd03590b57 > tx_sig.txt
+  xxd -r -p <tx_hash.txt >tx_hash.hex
+  xxd -r -p <tx_sig.txt >tx_sig.hex
+  openssl pkeyutl <tx_hash.hex -verify -pubin -inkey pubkey.pem -sigfile tx_sig.hex | tee -a $logfile
+   
+  # TX_IN[1], double sha256 and signature:
+  echo "TX_IN[1]:" >> $logfile
+  echo e09e861272e2377a4528fbe28d1ee764706ca4b829aad7e08f4a0325e25c9053 > tx_hash.txt
+  echo 3044022069f4f02bd808eb5381a8bc5b6e3a18219089f83b10b25277345439c52dfb42e30220107a09ad1aff0e20fd5c07b71d536943d72ca15c6e86f77282fe75478a64a466 > tx_sig.txt
+  xxd -r -p <tx_hash.txt >tx_hash.hex
+  xxd -r -p <tx_sig.txt >tx_sig.hex
+  openssl pkeyutl <tx_hash.hex -verify -pubin -inkey pubkey.pem -sigfile tx_sig.hex | tee -a $logfile
+   
+  # TX_IN[2], double sha256 and signature:
+  echo "TX_IN[2]:" >> $logfile
+  echo c5bfe4a6c58fb2e0398006b4109cdea737eb1413a127c5e61039a8858367750b > tx_hash.txt
+  echo 3044022058c884db944e2265f013493d98a56c958a86aeacc6655473a8cf477fac31f375022026b5915ed26e0149effac955ac30ba90ca25919072ab5a20a161575a55a8bc30 > tx_sig.txt
+  xxd -r -p <tx_hash.txt >tx_hash.hex
+  xxd -r -p <tx_sig.txt >tx_sig.hex
+  openssl pkeyutl <tx_hash.hex -verify -pubin -inkey pubkey.pem -sigfile tx_sig.hex | tee -a $logfile
+   
+  # TX_IN[3], double sha256 and signature:
+  echo "TX_IN[3]:" >> $logfile
+  echo 64623a854acfc3e9ba5761a1209af9f3162d360b4eaff7f5c2d19010fa30f418 > tx_hash.txt
+  echo 304402202adca291dd1c4058f124c01218e6d34e5a968de6fb932a4237fd33c5aa26930a0220493502e86bf6684593d5ea888f112503ed7ae054a1f4fa62d38df76898a6731e > tx_sig.txt
+  xxd -r -p <tx_hash.txt >tx_hash.hex
+  xxd -r -p <tx_sig.txt >tx_sig.hex
+  openssl pkeyutl <tx_hash.hex -verify -pubin -inkey pubkey.pem -sigfile tx_sig.hex | tee -a $logfile
+
+fi   
 echo " " | tee -a $logfile
-}
-
+  }
+  
 
 
 all_testcases() {

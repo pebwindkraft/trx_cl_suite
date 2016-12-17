@@ -12,5 +12,11 @@ yymmmdd
 16sep12 svn   all                    created a new version out of trx2txt, cause it is more
                                      than simply trx to txt. It became a complete tool suite
                                      "trx2txt" suite is discontinued with this release.
-
+16oct02 svn   all files              further updated all naming convention, also inside files
+16oct23 svn   all testcases          harmonized output of all testcases files
+16nov11 svn   tcls_sign.sh           updated to be able to use multiple inputs
+16nov30 svn   tcls_create/sign.sh    fixed assembly of TX to create correct hash, and sign=ok
+16dec03 svn   tcls_tx2txt.sh         added possibility to load TX data from file
+16dec14 svn   tcls_tx2txt.sh         loading TX data into array, to fix (OpenBSD) pdksh issue
+                                     where parameters exceed 2048 bytes
 
