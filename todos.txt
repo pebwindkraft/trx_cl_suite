@@ -4,7 +4,7 @@
 
 I19: 09Oct2016, svn:
 ====================
-I think the maximum size of a trx is 100 kb. How many UTXO does that make? 
+I think the maximum size of a trx is 100 kb. How many trx does that make? 
 How can this be implemented?
 --> minimum signature is ~50 Bytes, prev trx = 32 Bytes + PKScript 20 Bytes plus, plus, plus... so a minimum trx is roughly 227 Bytes. This would limit to ~440 particular trx? And if a trx has many inputs and many outputs?
 
@@ -31,36 +31,6 @@ https://en.bitcoin.it/wiki/Protocol_rules#.22tx.22_messages
     Relay transaction to peers
     For each orphan transaction that uses this one as one of its inputs, run all these steps (including this one) recursively on that orphan
 
-
-I22: 12Oct2016, svn:
-====================
-trx_create.sh - testcase 6: wenn er doch ins Netz geht, und die TRX mit '-t' holt,
-kann er auch gleich checken, ob genug "input Satoshis" da sind, um den Transferbetrag und die TRXFEE zu bezahlen...
-
-I24: 14Oct2016, svn:
-====================
-trx_create.sh - trxfee calculation:
-# trx fees are calculated  with a trx fee per byte, which is changing...
-# currently in Sep 2016 it is roughly 50 Satoshis per Byte. Exact length can only
-# be determined during signing process, but here is a rough calc: each input
-# requires later on a signature (length=70 Bytes/140 chars), which replaces
-# the existing PKSCRIPT (length 25 Bytes, 50 chars). Each input must be signed,
-# so roughly 90 chars signature are added. Normal 1 input one output P2PKH trx are
-# roughly 227 Bytes ... THIS NEEDS FURTHER ANALYSIS !!!
---> need to get empirical data to improve math calculation, P2PKH is min 227 bytes, but P2SH can be much longer, and when SegWit and MerkleTrees come in, even much shorter.
---> when multi-input transactions are used, is the 50Satoshi/Bytes calc still true? What would a reasonable trxfee, if trx is 1000 Bytes?
-
-I25: 17Oct2016, svn:
-====================
-if network is "on", then get the average last trx fee as proposal in the system... 
-wget --no-check-certificate https://bitcoinfees.21.co/api/v1/fees/list
-awk 'BEGIN { RS="},{"; OFS="\n" } { print $1 }' list | grep \"minDelay\":0,\"maxDelay\":0 | head -n1
-
-or look here: https://blockchain.info/de/stats or https://api.blockchain.info/stats
-divide total trx costs by amount of trx?
-"total_fees_btc":7571592387
-"n_tx":245576
-= ~30000 Satoshis
 
 I26: 19Oct2016, svn:
 ====================
@@ -89,7 +59,7 @@ NAMING CONVENTION:
 this needs to be inmplemented into tcls_create.sh, tcls_sign.sh and tcls_verify_sig.sh
 (and later into all other files)
 --> script "trx_2txt.sh" has a switch "-r" - this needs to get replaced as well!
-also a common standard is to use the extension „.bin“ for binary files, but this can also be misleading (binary executable). So „.hex“ is better :-)
+
 
 I30: 04Nov2016, svn:
 ====================
@@ -98,9 +68,10 @@ https://blockchain.info/rawtx/cca7507897abc89628f450e8b1e0c6fca4ec3f7b34cccf55f3
 http://bitcoin.stackexchange.com/questions/32305/how-does-the-ecdsa-verification-algorithm-work-during-transaction/32308#32308
 
 testcases_trx_2txt.sh
-testcases_tcls_create.sh - it has two outputs, not yet ready ...
-testcases_tcls_sign.sh   - I don't have the priv keys, how to?
+? testcases_tcls_create.sh - it has two outputs, not yet ready ...
+? testcases_tcls_sign.sh   - I don't have the priv keys, how to?
 testcases_tcls_verify_sig.sh	
+
 
 I31: 05Nov2016, svn:
 ====================
@@ -166,6 +137,8 @@ Compressed form of above needs to start with 0x02:
   a2:fd:ab:eb:a4:79:01:e5:48:b4:74:cb:0a:df:af:
   06:46:51
 
+
+
 I33: 08Nov2016, svn:
 ====================
 tcls_sign.sh (and others): TRX_IN[i] shall always start with "0", like in script trx_2txt.sh
@@ -173,6 +146,7 @@ tcls_sign.sh (and others): TRX_IN[i] shall always start with "0", like in script
 I34: 09Nov2016, svn:
 ====================
 update readme.md files and description and usage …
+
 
 I38: 16nov2016, svn:
 ====================
@@ -188,7 +162,7 @@ this?
 without xxd it might become slightly different...
    cat pubkey.hex | openssl pkey -pubin -inform der >pubkey.pem
 
-I38: 16nov2016, svn:
+I39: 16nov2016, svn:
 ====================
 Gerade in Schleifen sind immer neu gestartete Unterprozesse für jede Menge Ressourcenverbrauch verantwortlich. Ein kurzer Benchmark durchsuchte knapp 3 300 Dateien nach einem Suchstring. Die Variante in Listing 2 braucht daher 3 300 Prozesse mehr als die kürzere Variante in Listing 3. Das zweite Skript benötigte 88 Prozent mehr Laufzeit als das erste. Hängt man hinten an die Pipe ein weiteres, nutzloses »| cat« an, so dauert dies 153 Prozent länger als ein einzelnes »grep«. Zwei solche Aufrufe benötigen schon zusätzliche 239 Prozent und dreimal »cat« schlägt mit einer Zugabe von gesalzenen 322 Prozent zu Buche. Die letzteren Werte leiden überdurchschnittlich an den begrenzten Ressourcen auf dem Testrechner und lasten ihn vollständig aus. Dennoch zeigt das durchaus praxisnahe Beispiel, dass sich zusätzliche Prozesse erheblich im Schleifenrumpf auswirken.
 
@@ -209,11 +183,29 @@ Listing 3: Suche ohne »cat«
 06 done
 
 
-I38: 16nov2016, svn:
+I40: 16nov2016, svn:
 ====================
 tcls_key2pem: we are currently checking only negative S-values, the original bitcoin cpp code (master/src/script/interpreter.cpp) avoids negative numbers for R and S. 
 --> need to add negative R-Check as well ...
 
+I41: 14dec2016, svn:
+====================
+it is generally not a good idea, to have capital letters as variable names in shell scripts. They might interfere with shell variables! 
+Maybe rework all *.sh files - low priority…
+
+
+I41: 16nov2016, svn:
+====================
+make a copy of wallet and priv keys from SuSE cold and from Mac Bitcoin client into new virtual machine, to see that copying of wallets works well ...
+
+
+I42: 20dec2016, svn:
+====================
+tcls_create.sh: 
+### TX_IN: call STEP 3-7 ###
+...
+# if only prev_TX is given, we could fetch remaining items with 'get_trx_values' ?
+--> assume we have -f and -t, then we can read values from network?   
 
 
 
