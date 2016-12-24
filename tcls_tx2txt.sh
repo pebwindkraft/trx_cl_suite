@@ -32,15 +32,18 @@
 ###########################
 typeset -i tx_array_ptr=0
 typeset -i loopcounter=0
-TRX=''
+TX_id=''
 raw_TX=''
 raw_TX_LINK=https://blockchain.info/de/rawtx/cc8a279b0736e6a2cc20b324acc5aa688b3af7b63bbb002f46f6573c1ad84408
 raw_TX_LINK2HEX="?format=hex"
 raw_TX_DEFAULT=010000000253603b3fdb9d5e10de2172305ff68f4b5227310ba6bd81d4e1bf60c0de6183bc010000006a4730440220128487f04a591c43d7a6556fff9158999b46d6119c1a4d4cf1f5d0ac1dd57a94022061556761e9e1b1e656c0a70aa7b3e83454cd61662df61ebdc31e43196b5e0c10012102b12126a716ce7bbb84703bcfbf0afa80283c75a7304a48cd311a5027efd906c2ffffffff0e52c4701577287b6dd02f422c2a8033fa0b4614f75fa9f0a5c4ab69634b5ba7000000006b483045022100a428348ff55b2b59bc55ddacb1a00f4ecdabe282707ba5185d39fe9cdf05d7f0022074232dae76965b6311cea2d9e5708a0f137f4ea2b0e36d0818450c67c9ba259d0121025f95e8a33556e9d7311fa748e9434b333a4ecfb590c773480a196deab0dedee1ffffffff0290257300000000001976a914fca68658b537382e27a85522d292e1ad9543fe0488ac98381100000000001976a9146af1d17462c6146a8a61217e8648903acd3335f188ac00000000
-USR_TRX=0
+
+typeset -i r_flag=0
+typeset -i t_flag=0
+typeset -i u_flag=0
 var_int=0
-VERBOSE=0
-VVERBOSE=0
+Verbose=0
+VVerbose=0
 
 #################################################################
 ### set -A or declare tx_array - bash and ksh are different ! ###
@@ -90,7 +93,7 @@ get_TX_section() {
 # procedure to check trx length (=64chars) #
 ############################################
 check_trx_len() {
-  if [ ${#TRX} -ne 64 ] ; then
+  if [ ${#TX_id} -ne 64 ] ; then
     echo "*** expecting a proper formatted Bitcoin TRANSACTION_ID."
     echo "    please provide a 64 bytes string (aka 32 hex chars) with '-t'."
     exit 0
@@ -112,7 +115,7 @@ check_rawtrx_len() {
 # procedure to display verbose output #
 #######################################
 v_output() {
-  if [ $VERBOSE -eq 1 ] ; then
+  if [ $Verbose -eq 1 ] ; then
     echo "$1"
   fi
 }
@@ -121,7 +124,7 @@ v_output() {
 # procedure to display even more verbose output #
 #################################################
 vv_output() {
-  if [ $VVERBOSE -eq 1 ] ; then
+  if [ $VVerbose -eq 1 ] ; then
     echo "$1"
   fi
 }
@@ -130,12 +133,12 @@ vv_output() {
 # procedure to check for necessary tools #
 ##########################################
 check_tool() {
-  if [ $VVERBOSE -eq 1 ]; then
+  if [ $VVerbose -eq 1 ]; then
     printf " %-8s" $1
   fi
   which $1 > /dev/null
   if [ $? -eq 0 ]; then
-    if [ $VVERBOSE -eq 1 ]; then
+    if [ $VVerbose -eq 1 ]; then
       printf " - yes \n"
     fi
   else
@@ -199,21 +202,20 @@ proc_var_int() {
 decode_pkscript() {
     result=$( sh ./tcls_out_pk_script.sh -q $1 )
     echo " $result"
-    echo "  and translates base58 encoded into this bitcoin address:"
     result=$( echo "$result" | tail -n1 )
     len=$( echo $result | cut -d " " -f 1 )
     len=${#len}
     case "$len" in
        5) # a bit ugly. logic: first param = "-p2sh", which is a length of 5, then:
+          echo "  and translates base58 encoded into this bitcoin address:"
           sh ./tcls_base58check_enc.sh -q $result
           ;;
       40) 
+          echo "  and translates base58 encoded into this bitcoin address:"
           sh ./tcls_base58check_enc.sh -q -p2pkh $result
           ;;
-      66) 
-          sh ./tcls_base58check_enc.sh -q -p2pk $result
-          ;;
-     130)
+      66|130)
+          echo "  and translates base58 encoded into this bitcoin address:"
           sh ./tcls_base58check_enc.sh -q -p2pk $result
           ;;
     esac
@@ -246,6 +248,14 @@ else
              echo " "
              exit 1
            fi
+           if [ "$3" == "-r" ] ; then
+             r_flag=1
+             shift 
+           fi
+           if [ "$3" == "-u" ] ; then
+             u_flag=1
+             shift 
+           fi
          else
            echo "ERROR: no filename given, exiting gracefully ..."
            echo " "
@@ -259,12 +269,16 @@ else
          exit 0
          ;;
       -r)
-         if [ "$TRX" ] || [ $USR_TRX -eq 1 ] ; then
-           echo "*** you cannot use -r with any of -t|-u at the same time!"
+         r_flag=1
+         if [ $u_flag -eq 1 ] ; then
+           echo "*** you cannot use -r with any of -u at the same time!"
            echo " "
            exit 0
          fi
-         if [ "$2" == ""  ] ; then
+         if [ "$2" == "-f"  ] ; then
+           echo "*** set '-r' to the end, like this: -f <filename> -r"
+           exit 0
+         elif [ "$2" == ""  ] ; then
            echo "*** you must provide a string to the -r parameter!"
            exit 0
          else
@@ -275,32 +289,31 @@ else
          shift 
          ;;
       -t)
-         if [ "$raw_TX" ] || [ $USR_TRX -eq 1 ] ; then
-           echo "*** you cannot use -t with any of -r|-u at the same time!"
-           echo " "
-           exit 0
-         fi
+         t_flag=1
          if [ "$2" == ""  ] ; then
            echo "*** you must provide a Bitcoin TRANSACTION_ID to the -t parameter!"
            exit 0
          else
-           TRX=$2
+           TX_id=$2
            shift 
          fi
          check_trx_len
          shift 
          ;;
       -u)
-         if [ "$raw_TX" ] || [ "$TRX" ] ; then
+         u_flag=1  
+         if [ $r_flag -eq 1 ] || [ $t_flag -eq 1 ] ; then
            echo "*** you cannot use -u with any of -r|-t at the same time!"
            echo " "
            exit 0
          fi
-         if [ "$2" == ""  ] ; then
+         if [ "$2" == "-f"  ] ; then
+           echo "*** set '-u' to the end, like this: -f <filename> -u"
+           exit 0
+         elif [ "$2" == ""  ] ; then
            echo "*** you must provide an unsigned raw transaction to the -u parameter!"
            exit 0
          else
-           USR_TRX=1  
            raw_TX=$2 
            shift 
          fi
@@ -308,17 +321,17 @@ else
          shift 
          ;;
       -v)
-         VERBOSE=1
-         echo "VERBOSE output turned on"
+         Verbose=1
+         echo "Verbose output turned on"
          if [ "$2" == ""  ] ; then
            raw_TX=$raw_TX_DEFAULT
          fi
          shift
          ;;
       -vv)
-         VERBOSE=1
-         VVERBOSE=1
-         echo "VVERBOSE and VERBOSE output turned on"
+         Verbose=1
+         VVerbose=1
+         echo "VVerbose and Verbose output turned on"
          if [ "$2" == ""  ] ; then
            raw_TX=$raw_TX_DEFAULT
            echo "using defaults, based on: "
@@ -367,7 +380,7 @@ check_tool tr
 ### Check if network is required and active ###
 ###############################################
 # 
-# if param -t was given, then a Bitcoin TRANSACTION_ID should be in variable "TRX":
+# if param -t was given, then a Bitcoin TRANSACTION_ID should be in variable "TX_id":
 #   ./trx2txt -t cc8a279b0736e6a2cc20b324acc5aa688b3af7b63bbb002f46f6573c1ad84408
 # 
 # no we need to:
@@ -378,14 +391,14 @@ check_tool tr
 #     OpenBSD: ftp -M -V -o - https://blockchain.info/de/rawtx/...
 # 4.) pass everything into the variable "raw_TX"
 # 
-if [ "$TRX" ] ; then
+if [ "$TX_id" ] ; then
   echo "###############################################"
   echo "### Check if network is required and active ###"
   echo "###############################################"
-  v_output "working with this TRX: $TRX"
+  v_output "working with this TX_id: $TX_id"
   if [ $OS == "Linux" ] ; then
     nw_if=$( netstat -rn | awk '/^0.0.0.0/ { print $NF }' | head -n1 )
-    /sbin/ifstatus $nw_if | grep -q "up"
+    ifstatus $nw_if | grep -q "up"
   else
     nw_if=$( netstat -rn | awk '/^default/ { print $NF }' | head -n1 )
     ifconfig $nw_if | grep -q " active"
@@ -393,10 +406,10 @@ if [ "$TRX" ] ; then
   if [ $? -eq 0 ] ; then
     v_output "network interface is active, good"
     v_output "trying to fetch data from blockchain.info"
-    raw_TX=$( $http_get_cmd https://blockchain.info/de/rawtx/$TRX$raw_TX_LINK2HEX )
+    raw_TX=$( $http_get_cmd https://blockchain.info/de/rawtx/$TX_id$raw_TX_LINK2HEX )
     if [ $? -ne 0 ] ; then
       echo "*** error - fetching raw_TX data:"
-      echo "    $http_get_cmd https://blockchain.info/de/rawtx/$TRX$raw_TX_LINK2HEX"
+      echo "    $http_get_cmd https://blockchain.info/de/rawtx/$TX_id$raw_TX_LINK2HEX"
       echo "    downoad manually, and call 'trx2txt -r ...'"
       exit 1
     fi
@@ -443,7 +456,7 @@ echo "###################"
 ### STEP 1 - VERSION (4 Bytes) - Transaction data format version           ###
 ##############################################################################
 ### Size: uint32_t 
-if [ "$VERBOSE" -eq 1 ] ; then
+if [ "$Verbose" -eq 1 ] ; then
   echo " "
   echo "VERSION"
 fi
@@ -463,7 +476,7 @@ proc_var_int
 tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
 tx_in_count_hex=$( echo $var_int | tr -d " " )
 tx_in_count_dec=$( echo "ibase=16; $tx_in_count_hex"|bc) 
-if [ "$VERBOSE" -eq 1 ] ; then
+if [ "$Verbose" -eq 1 ] ; then
   echo "TX_IN COUNT [var_int]: hex=$tx_in_count_hex, decimal=$tx_in_count_dec"
 else
   echo " $tx_in_count_hex"
@@ -508,7 +521,7 @@ while [ $loopcounter -lt $tx_in_count_dec ]
   result=$( reverse_hex $trx_value_hex )
   # and convert into decimal, and then Satoshis ...
   trx_value_dec=$( echo "ibase=16; $result"|bc) 
-  if [ "$VERBOSE" -eq 1 ] ; then
+  if [ "$Verbose" -eq 1 ] ; then
     echo " TX_IN[$loopcounter] OutPoint index (uint32_t)"
     echo "  hex=$trx_value_hex, reversed=$result, decimal=$trx_value_dec"
   else 
@@ -524,7 +537,7 @@ while [ $loopcounter -lt $tx_in_count_dec ]
   tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
   script_length_hex=$var_int
   script_length_dez=$( echo "ibase=16; $script_length_hex"|bc) 
-  if [ "$VERBOSE" -eq 1 ] ; then
+  if [ "$Verbose" -eq 1 ] ; then
     echo " TX_IN[$loopcounter] Script Length (var_int)"
     echo "  hex=$script_length_hex, decimal=$script_length_dez"
   else
@@ -548,13 +561,13 @@ while [ $loopcounter -lt $tx_in_count_dec ]
   ### STEP 7 - TX_IN, signature script, uchar[] - variable length            ###
   ##############################################################################
   ### Size: 20+, Data type uchar[] 
-  if [ "$VVERBOSE" -eq 1 ] && [ "$script_length_dez" -ne 0 ] ; then
-    if [ $USR_TRX -eq 1 ] ; then
-      echo "  Working on an unsigned raw TRX. This is the pubkey script "
+  if [ "$VVerbose" -eq 1 ] && [ "$script_length_dez" -ne 0 ] ; then
+    if [ $u_flag -eq 1 ] ; then
+      echo "  Working on an unsigned raw TX. This is the pubkey script "
       echo "  of previous trx, for which you'll need the privkey to sign:"
       decode_pkscript $sig_script
     else
-      if [ "$VVERBOSE" -eq 1 ] ; then
+      if [ "$VVerbose" -eq 1 ] ; then
         ./tcls_in_sig_script.sh -v $sig_script 
       else
         ./tcls_in_sig_script.sh -q $sig_script 
@@ -597,7 +610,7 @@ tx_array_bytes=1
 proc_var_int
 tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
 tx_out_count_dez=$( echo "ibase=16; $var_int"|bc) 
-if [ "$VERBOSE" -eq 1 ] ; then
+if [ "$Verbose" -eq 1 ] ; then
   echo "TX_OUT COUNT, hex=$var_int, decimal=$tx_out_count_dez"
 else
   echo " $var_int"
@@ -633,7 +646,7 @@ do
   else
     trx_value_bitcoin=$(echo "scale=8; $trx_value_dez / 100000000;" | bc)
   fi
-  if [ "$VERBOSE" -eq 1 ] ; then
+  if [ "$Verbose" -eq 1 ] ; then
     echo " TX_OUT[$loopcounter] Value (uint64_t)"
     echo "  hex=$trx_value_hex, reversed_hex=$reverse, dec=$trx_value_dez, bitcoin=$trx_value_bitcoin"
   else
@@ -649,7 +662,7 @@ do
   tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
   pk_script_length_hex=$var_int
   pk_script_length_dez=$( echo "ibase=16; $pk_script_length_hex"|bc) 
-  if [ "$VERBOSE" -eq 1 ] ; then
+  if [ "$Verbose" -eq 1 ] ; then
     echo " TX_OUT[$loopcounter] PK_Script Length (var_int)"
     echo "  hex=$pk_script_length_hex, dec=$pk_script_length_dez"
   else
@@ -666,7 +679,7 @@ do
   tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
   echo "  $pk_script"
 
-  if [ "$VVERBOSE" -eq 1 ] && [ $pk_script_length_dez -ne 0 ] ; then
+  if [ "$VVerbose" -eq 1 ] && [ $pk_script_length_dez -ne 0 ] ; then
     decode_pkscript $pk_script
   fi
   loopcounter=$(($loopcounter + 1))
@@ -685,7 +698,7 @@ done
 ###      time has expired (replacement is currently disabled in Bitcoin, 
 ###      however, so this is useless). 
 ### 
-if [ "$VERBOSE" -eq 1 ] ; then
+if [ "$Verbose" -eq 1 ] ; then
   echo " "
   echo " LOCK_TIME"
 fi

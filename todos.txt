@@ -80,33 +80,7 @@ usage: ./trx_2txt.sh [-h|-r|-t|-u|-v|-vv] [[raw]trx][...]
 need to search and replace in whole file.
 
 
-I32: 05Nov2016, svn:
-====================
-trx_2txt.sh does not recognize output script correctly, see testcase 12b:
-TX_OUT COUNT, hex=01, decimal=1
-TX_OUT[0]
- TX_OUT[0] Value (uint64_t)
-  hex=A0BB0D0000000000, reversed_hex=00000000000DBBA0, dec=900000, bitcoin=0.00900000
- TX_OUT[0] PK_Script Length (var_int)
-  hex=0119, dec=281
- TX_OUT[0] pk_script (uchar[])
-  514C78FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF4C78FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF2102323C909B017748294C1D1FB82648B2C2905CD941D9A863E036B3157E8AA85DD353AE
-     51: OP_1, OP_TRUE
-    4C: unknown opcode 
-    21: OP_Data33
-        02323C909B017748:294C1D1FB82648B2
-        C2905CD941D9A863:E036B3157E8AA85D
-        D3
-    53: unknown opcode 
-   02323C909B017748294C1D1FB82648B2C2905CD941D9A863E036B3157E8AA85DD3
-  and translates base58 encoded into this bitcoin address:
-   15GcaaL7edMsqQnKEviqqmmsb4ibskZUjkSsCNf3mmku8PCdvsb
- 
- LOCK_TIME
-00000000
-
-
-I32: 05Nov2016, svn:
+I33: 05Nov2016, svn:
 ====================
 is this missing in sign.sh or key2pem.sh?
 https://github.com/KittehOrg/KittehIRCClientLib/issues/45
@@ -139,11 +113,11 @@ Compressed form of above needs to start with 0x02:
 
 
 
-I33: 08Nov2016, svn:
+I34: 08Nov2016, svn:
 ====================
 tcls_sign.sh (and others): TRX_IN[i] shall always start with "0", like in script trx_2txt.sh
 
-I34: 09Nov2016, svn:
+I35: 09Nov2016, svn:
 ====================
 update readme.md files and description and usage …
 
@@ -194,12 +168,12 @@ it is generally not a good idea, to have capital letters as variable names in sh
 Maybe rework all *.sh files - low priority…
 
 
-I41: 16nov2016, svn:
+I42: 16nov2016, svn:
 ====================
 make a copy of wallet and priv keys from SuSE cold and from Mac Bitcoin client into new virtual machine, to see that copying of wallets works well ...
 
 
-I42: 20dec2016, svn:
+I43: 20dec2016, svn:
 ====================
 tcls_create.sh: 
 ### TX_IN: call STEP 3-7 ###

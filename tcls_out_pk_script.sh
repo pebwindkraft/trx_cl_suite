@@ -5,13 +5,14 @@
 #
 # Version	by	date	comment
 # 0.1		svn	02jun16	initial release
+# 0.2		svn	22dec16	added status 27ff, multisig...
 # 
 # Copyright (c) 2015, 2016 Volker Nowarra 
 # Complete rewrite of code in June 2016 from following reference:
 #   https://en.bitcoin.it/wiki/Protocol_specification#tx
 #   https://en.bitcoin.it/wiki/Script
 # 
-#  As of Bitcoin Core 0.10, these are considered standard scripts:
+#  this tool works on these standard scripts:
 # 
 #   P2PKH (pay-to-public-key-hash)
 #   P2SH (pay-to-script-hash)
@@ -81,10 +82,10 @@ op_data_show() {
    do
     output=$output${opcode_ar[offset]}
     ret_string=$ret_string${opcode_ar[offset]}
-    if [ $n -eq 8 ] || [ $n -eq 24 ] || [ $n -eq 40 ] || [ $n -eq 56 ] ; then 
+    if [ $n -eq 8 ] || [ $n -eq 24 ] || [ $n -eq 40 ] || [ $n -eq 56 ] || [ $n -eq 72 ] || [ $n -eq 88 ] || [ $n -eq 104 ] ; then 
       output=$output":"
     fi
-    if [ $n -eq 16 ] || [ $n -eq 32 ] || [ $n -eq 48 ] || [ $n -eq 64 ] ; then 
+    if [ $n -eq 16 ] || [ $n -eq 32 ] || [ $n -eq 48 ] || [ $n -eq 64 ] || [ $n -eq 80 ] || [ $n -eq 96 ] || [ $n -eq 112 ] ; then 
       echo "        $output" 
       output=
     fi
@@ -244,15 +245,21 @@ S12_P2PK() {
 ### STATUS 13 (OP_1)              ###
 #####################################
 S13_OP_1() {
+  echo "    S13_OP_1"
   get_next_opcode
   case $cur_opcode in
     21) echo "    $cur_opcode: OP_Data$cur_opcode (= decimal $cur_opcode_dec)"
-        op_data_show
-        S20_OP_DATA33
+        S14_OP_DATA33
         ;;
     41) echo "    $cur_opcode: OP_Data$cur_opcode (= decimal $cur_opcode_dec)"
-        op_data_show
-        S14_OP_DATA65
+        S15_OP_DATA65
+        ;;
+    4C) echo "    $cur_opcode: OP_PushData"
+        S16_OP_0x4C 
+        ;;
+    51|52|53|54|55|56|57|58|59|5A|5B|5C|5D|5E|5F)
+        echo "    $cur_opcode: OP_Data$cur_opcode (= decimal $cur_opcode_dec)"
+        S18_OP_1to16
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
         ;;
@@ -261,94 +268,36 @@ S13_OP_1() {
 #####################################
 ### STATUS 14 (OP_DATA65)         ###
 #####################################
-S14_OP_DATA65() {
-  get_next_opcode
-  case $cur_opcode in
-    21) echo "    $cur_opcode: OP_Data$cur_opcode (= decimal $cur_opcode_dec)"
-        op_data_show
-        S15_OP_DATA33 
-        ;;
-    41) echo "    $cur_opcode: OP_Data$cur_opcode (= decimal $cur_opcode_dec)"
-        op_data_show
-        S17_OP_DATA65
-        ;;
-    *)  echo "    $cur_opcode: unknown opcode "
-        ;;
-  esac
+S14_OP_DATA33() {
+  op_data_show
+  S13_OP_1
 }
 #####################################
 ### STATUS 15 (OP_DATA33)         ###
 #####################################
-S15_OP_DATA33() {
-  get_next_opcode
-  case $cur_opcode in
-    52) echo "    $cur_opcode: OP_Data$cur_opcode (= decimal $cur_opcode_dec)"
-        op_data_show
-        S22_PRE_MULTISIG
-        ;;
-    *)  echo "    $cur_opcode: unknown opcode "
-        ;;
-  esac
+S15_OP_DATA65() {
+  op_data_show
+  S13_OP_1
 }
 #####################################
-### STATUS 17 (OP_DATA65)         ###
+### STATUS 16 (PushData)          ###
 #####################################
-S17_OP_DATA65() {
+S16_OP_0x4C() {
   get_next_opcode
-  case $cur_opcode in
-    41) echo "    $cur_opcode: OP_Data$cur_opcode (= decimal $cur_opcode_dec)"
-        op_data_show
-        S18_OP_DATA65
-        ;;
-    *)  echo "    $cur_opcode: unknown opcode "
-        ;;
-  esac
+  echo "    $cur_opcode: OP_Data$cur_opcode (= decimal $cur_opcode_dec)"
+  S17_Length
 }
 #####################################
-### STATUS 18 (OP_DATA65)         ###
+### STATUS 17 (length)            ###
 #####################################
-S18_OP_DATA65() {
-  get_next_opcode
-  case $cur_opcode in
-    53) echo "    $cur_opcode: OP_Data$cur_opcode (= decimal $cur_opcode_dec)"
-        S22_PRE_MULTISIG
-        ;;
-    *)  echo "    $cur_opcode: unknown opcode "
-        ;;
-  esac
+S17_Length() {
+  op_data_show
+  S13_OP_1
 }
 #####################################
-### STATUS 20 (OP_DATA33)         ###
+### STATUS 18_OP_1-16             ###
 #####################################
-S20_OP_DATA33() {
-  get_next_opcode
-  case $cur_opcode in
-    21) echo "    $cur_opcode: OP_Data$cur_opcode (= decimal $cur_opcode_dec)"
-        op_data_show
-        S21_OP_DATA33
-        ;;
-    *)  echo "    $cur_opcode: unknown opcode "
-        ;;
-  esac
-}
-#####################################
-### STATUS 21 (OP_DATA33)         ###
-#####################################
-S21_OP_DATA33() {
-  get_next_opcode
-  case $cur_opcode in
-    52) echo "    $cur_opcode: OP_Data$cur_opcode (= decimal $cur_opcode_dec)"
-        op_data_show
-        S22_PRE_MULTISIG
-        ;;
-    *)  echo "    $cur_opcode: unknown opcode "
-        ;;
-  esac
-}
-#####################################
-### STATUS 22 (PRE_MULTISIG)     ###
-#####################################
-S22_PRE_MULTISIG() {
+S18_OP_1to16() { 
   get_next_opcode
   case $cur_opcode in
     AE) echo "    $cur_opcode: OP_CHECKMULTISIG"
@@ -358,11 +307,12 @@ S22_PRE_MULTISIG() {
         ;;
   esac
 }
+
 #####################################
-### STATUS 23 (MULTISIG)          ###
+### STATUS 23 (Multisig)          ###
 #####################################
 S23_MULTISIG() {
-    echo "This is a Multisig script:"
+  echo "This is a MULTISIG script:"
 }
 #####################################
 ### STATUS 24 (OP_RETURN)         ###
@@ -383,14 +333,17 @@ S24_OP_RETURN() {
 ### STATUS 25 (NULL_DATA)         ###
 #####################################
 S25_NULL_DATA() {
-    echo "This is a NULLDATA script:"
+  echo "This is a NULLDATA script:"
 }
 #####################################
 ### STATUS 26 (UNKNOWN)           ###
 #####################################
 S26_UNKNOWN() {
-    echo "This is an UNKNOWN script:"
+  echo "This is an UNKNOWN script:"
 }
+
+        
+        
 
 ##########################################################################
 ### AND HERE WE GO ...                                                 ###
