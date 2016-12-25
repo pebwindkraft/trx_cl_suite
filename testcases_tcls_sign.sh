@@ -51,16 +51,19 @@ echo "=== TESTCASE 1: get the checksums of all necessary files     ===" | tee -a
 echo "================================================================" | tee -a $logfile
 
 echo "=== TESTCASE 1a: $chksum_cmd tcls_sign.sh" | tee -a $logfile
+echo "================================================================" | tee -a $logfile
 cp tcls_sign.sh tmp_tx_cfile
 chksum_ref="1cb1bc4e3674bd946eefbdfcbb97aaf227db6c5a271519336c65d9ae3e041602" 
 chksum_prep
 
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
+echo "================================================================" | tee -a $logfile
 cp tcls_key2pem.sh tmp_tx_cfile
-chksum_ref="34cad1c05bb7fd7c4bce56b157c9faf1cdfe92d9076128e493d1b3fe382e0dc5" 
+chksum_ref="4c9c5941cb87fa16dcfad1f86d97f72997be41c0dce658ad81d4be043d8fa5d9" 
 chksum_prep
 
 echo "=== TESTCASE 1c: $chksum_cmd tcls_strict_sig_verify.sh" | tee -a $logfile
+echo "================================================================" | tee -a $logfile
 cp tcls_strict_sig_verify.sh tmp_tx_cfile
 chksum_ref="d15facf384d754754ed7b7becfb971b76795cdabed9f4109b8995a548e8d5f8e" 
 chksum_prep
@@ -72,10 +75,11 @@ echo " " | tee -a $logfile
 testcase2() {
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 2: parameters testing                           ===" | tee -a $logfile
-echo "=== do several testcases with parameters set incorrectly     ===" >> $logfile
+echo "=== do several testcases with parameters set incorrectly     ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 
 echo "=== TESTCASE 2a: param file is missing, show correct hint ..."    | tee -a $logfile
+echo "================================================================" | tee -a $logfile
 echo "./tcls_sign.sh -f tmp_utx.txt -w XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0" >> $logfile 
 ./tcls_sign.sh -f tmp_utx.txt -w XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0 > tmp_tx_cfile
 chksum_ref="66258cdef1cba9a4538ec12cf6a1894d7b13bf389e04dd75a236ad4b2808f546" 
@@ -94,6 +98,7 @@ echo "================================================================" | tee -a
 echo "=== TESTCASE 3a: use one TX-In and one TX-Out                ===" | tee -a $logfile
 echo "===  1 input from: 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM        ===" >> $logfile
 echo "===  1 output to:  13GnHB51piDBf1avocPL7tSKLugK4F7U2B        ===" >> $logfile
+echo "================================================================" | tee -a $logfile
 echo "./tcls_sign.sh -v -f tmp_c_utx.txt -w KyP5KEp6DCmF222YM5EB9yGeMFxdVK1QWgtGvWnLRnDmiCtQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0" >> $logfile
 printf "010000000174fb6858c31a292d20c9744187032bddb7ddea02a3aa3ef523c8524a21481881010000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88acffffffff01b08f0600000000001976a91418ec49b27624086a2b6f35f263d951d25dbe24b688ac0000000001000000" > tmp_c_utx.txt
 ./tcls_sign.sh -v -f tmp_c_utx.txt -w KyP5KEp6DCmF222YM5EB9yGeMFxdVK1QWgtGvWnLRnDmiCtQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0 > tmp_cfile
@@ -111,7 +116,9 @@ chksum_prep
 result=$( cat tmp_stx.txt )
 ./tcls_tx2txt.sh -vv -r $result >> $logfile
 
+echo " " | tee -a $logfile
 echo "=== TESTCASE 3b: same as 3a, use 1 TX-In and 1 TX-Out        ===" | tee -a $logfile
+echo "================================================================" | tee -a $logfile
 echo "===  4 inputs from: 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM       ===" >> $logfile
 echo "===  1 output to:   13GnHB51piDBf1avocPL7tSKLugK4F7U2B       ===" >> $logfile
 echo "./tcls_sign.sh -v -f tmp_c_utx.txt -w KyP5KEp6DCmF222YM5EB9yGeMFxdVK1QWgtGvWnLRnDmiCtQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0" >> $logfile
