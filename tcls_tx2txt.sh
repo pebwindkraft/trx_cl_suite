@@ -640,11 +640,16 @@ do
 
   trx_value_dez=$(echo "ibase=16; $reverse"|bc) 
   # try to get it in bitcoin notation
-  len=${#trx_value_dez}
-  if [ $len -lt 8 ] ; then
-    trx_value_bitcoin="0"$(echo "scale=8; $trx_value_dez / 100000000;" | bc)
+  # OpenBSD ksh and Linux bash behave different, if value is 0
+  if [ $trx_value_dez -eq 0 ] ; then
+    trx_value_bitcoin=0
   else
-    trx_value_bitcoin=$(echo "scale=8; $trx_value_dez / 100000000;" | bc)
+    len=${#trx_value_dez}
+    if [ $len -lt 8 ] ; then
+      trx_value_bitcoin="0"$(echo "scale=8; $trx_value_dez / 100000000;" | bc)
+    else
+      trx_value_bitcoin=$(echo "scale=8; $trx_value_dez / 100000000;" | bc)
+    fi
   fi
   if [ "$Verbose" -eq 1 ] ; then
     echo " TX_OUT[$loopcounter] Value (uint64_t)"
