@@ -35,6 +35,10 @@
 # USE OR PERFORMANCE OF THIS SOFTWARE. 
 #
 
+typeset -i n=0
+typeset -i offset=0
+typeset -i cur_opcode_dec=0
+
 ret_string=''
 QUIET=0
 param=76A9146AF1D17462C6146A8A61217E8648903ACD3335F188AC
@@ -82,15 +86,41 @@ op_data_show() {
    do
     output=$output${opcode_ar[offset]}
     ret_string=$ret_string${opcode_ar[offset]}
-    if [ $n -eq 8 ] || [ $n -eq 24 ] || [ $n -eq 40 ] || [ $n -eq 56 ] || [ $n -eq 72 ] || [ $n -eq 88 ] || [ $n -eq 104 ] ; then 
+    # after position 8,24,40,56,72,88,104... display a colon for better readability
+    n_mod=$(( $n % 16 ))
+    if [ $n_mod -eq 8 ] ; then
       output=$output":"
     fi
-    if [ $n -eq 16 ] || [ $n -eq 32 ] || [ $n -eq 48 ] || [ $n -eq 64 ] || [ $n -eq 80 ] || [ $n -eq 96 ] || [ $n -eq 112 ] ; then 
+    if [ $n_mod -eq 0 ] ; then 
       echo "        $output" 
       output=
     fi
     n=$(( n + 1 ))
     offset=$(( offset + 1 ))
+  done 
+  echo "        $output" 
+}
+############################################################################
+### procedure to show data for MULTISIG and NULLDATA (Op_Return) scripts ###
+############################################################################
+op_data_mnshow() {
+  n=1
+  output=
+  while [ $n -le $cur_opcode_dec ]
+   do
+    output=$output${opcode_ar[offset]}
+    ret_string=$ret_string${opcode_ar[offset]}
+    n_mod=$(( $n % 32 ))
+    if [ $n_mod -eq 8 ] || [ $n_mod -eq 16 ] || [ $n_mod -eq 24 ] ; then 
+      output=$output":"
+    fi
+    if [ $n_mod -eq 0 ] ; then 
+      echo "        $output" 
+      output=
+    fi
+    n=$(( n + 1 ))
+    offset=$(( offset + 1 ))
+    # printf 'len=%d, n=%d, offset=%d\n' "$cur_opcode_dec" "$n" "$offset"
   done 
   echo "        $output" 
 }
@@ -245,7 +275,6 @@ S12_P2PK() {
 ### STATUS 13 (OP_1)              ###
 #####################################
 S13_OP_1() {
-  echo "    S13_OP_1"
   get_next_opcode
   case $cur_opcode in
     21) echo "    $cur_opcode: OP_Data$cur_opcode (= decimal $cur_opcode_dec)"
@@ -291,7 +320,7 @@ S16_OP_0x4C() {
 ### STATUS 17 (length)            ###
 #####################################
 S17_Length() {
-  op_data_show
+  op_data_mnshow
   S13_OP_1
 }
 #####################################
@@ -301,56 +330,32 @@ S18_OP_1to16() {
   get_next_opcode
   case $cur_opcode in
     AE) echo "    $cur_opcode: OP_CHECKMULTISIG"
-        S23_MULTISIG
+        echo "   This is a MULTISIG script:"
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
         ;;
   esac
 }
-
 #####################################
-### STATUS 23 (Multisig)          ###
-#####################################
-S23_MULTISIG() {
-  echo "This is a MULTISIG script:"
-}
-#####################################
-### STATUS 24 (OP_RETURN)         ###
+### STATUS 24 (NullData)          ###
 #####################################
 S24_OP_RETURN() {
-  get_next_opcode
-  case $cur_opcode in
-    28) echo "    $cur_opcode: OP_Data$cur_opcode (= decimal $cur_opcode_dec)"
-        offset=$(( offset + 1 ))
-        op_data_show
-        S25_NULL_DATA
-        ;;
-    *)  echo "    $cur_opcode: unknown opcode "
-        ;;
-  esac
-}
-#####################################
-### STATUS 25 (NULL_DATA)         ###
-#####################################
-S25_NULL_DATA() {
-  echo "This is a NULLDATA script:"
+  cur_opcode_dec=$opcode_array_elements
+  op_data_mnshow
+  echo "This is a NULLDATA script"
+  exit 0
 }
 #####################################
 ### STATUS 26 (UNKNOWN)           ###
 #####################################
 S26_UNKNOWN() {
-  echo "This is an UNKNOWN script:"
+  echo "This is an UNKNOWN script"
+  exit 0
 }
-
-        
-        
 
 ##########################################################################
 ### AND HERE WE GO ...                                                 ###
 ##########################################################################
-
-typeset -i cur_opcode_dec
-offset=0
 
 opcode_array=$( echo $param | sed 's/[[:xdigit:]]\{2\}/ &/g' )
 opcode_array_elements=$( echo ${#opcode_array} / 3 | bc )
