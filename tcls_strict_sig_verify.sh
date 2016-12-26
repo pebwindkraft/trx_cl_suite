@@ -25,18 +25,18 @@
 ###########################
 # Some variables ...      #
 ###########################
-typeset -i QUIET=0
-typeset -i VERBOSE=0
-typeset -i VVERBOSE=0
+typeset -i Quiet=0
+typeset -i Verbose=0
+typeset -i VVerbose=0
 
-typeset -i SIG_MIN_LENGTH_CHARS=18
-typeset -i SIG_MAX_LENGTH_CHARS=146
+typeset -i sig_min_length_chars=18
+typeset -i sig_max_length_chars=146
 
-typeset -i F_PARAM_FLAG=0
-typeset -i O_PARAM_FLAG=0
+typeset -i f_param_flag=0
+typeset -i o_param_flag=0
 infile=''
 outfile=''
-SCRIPTSIG=''
+ScriptSig=''
 
 #################################
 # procedure to display helptext #
@@ -48,9 +48,9 @@ proc_help() {
   echo " -f  load a signature from a txt file"
   echo " -h  show this HELP text"
   echo " -o  write the signature to a txt file"
-  echo " -q  real QUIET mode, don't display anything"
-  echo " -v  display VERBOSE output"
-  echo " -vv display VERY VERBOSE output"
+  echo " -q  real Quiet mode, don't display anything"
+  echo " -v  display Verbose output"
+  echo " -vv display VERY Verbose output"
   echo " "
 }
 
@@ -102,7 +102,7 @@ zero_pad(){
 # procedure to display verbose output #
 #######################################
 v_output() {
-  if [ $VERBOSE -eq 1 ] ; then
+  if [ $Verbose -eq 1 ] ; then
     indent_data "$1"
   fi
 }
@@ -111,7 +111,7 @@ v_output() {
 # procedure to display even more verbose output #
 #################################################
 vv_output() {
-  if [ $VVERBOSE -eq 1 ] ; then
+  if [ $VVerbose -eq 1 ] ; then
     indent_data "$1"
   fi
 }
@@ -120,12 +120,12 @@ vv_output() {
 # procedure to check for necessary tools #
 ##########################################
 check_tool() {
-  if [ $VVERBOSE -eq 1 ]; then
+  if [ $VVerbose -eq 1 ]; then
     printf " %-8s" $1
   fi
   which $1 > /dev/null
   if [ $? -eq 0 ]; then
-    if [ $VVERBOSE -eq 1 ]; then
+    if [ $VVerbose -eq 1 ]; then
       printf " - yes \n"
     fi
   else
@@ -155,14 +155,14 @@ else
    do
     case "$1" in
       -f)
-         F_PARAM_FLAG=1
+         f_param_flag=1
          if [ "$2" == "" ] ; then
            echo "*** you must provide a FILENAME to the -f parameter!"
            exit 1
          fi
          infile=$2
-         SCRIPTSIG=$( cat $infile )
-         if [ $O_PARAM_FLAG -eq 1 ] ; then
+         ScriptSig=$( cat $infile )
+         if [ $o_param_flag -eq 1 ] ; then
            if [ "$infile" == "$outfile"  ] ; then
              echo "*** you must provide different FILENAMEs when using -f and -o together"
              exit 1
@@ -172,13 +172,13 @@ else
          shift
          ;;
       -o)
-         O_PARAM_FLAG=1
+         o_param_flag=1
          if [ "$2" == "" ] ; then
            echo "*** you must provide a FILENAME to the -o parameter!"
            exit 1
          fi
          outfile=$2
-         if [ $F_PARAM_FLAG -eq 1 ] ; then
+         if [ $f_param_flag -eq 1 ] ; then
            if [ "$infile" == "$outfile"  ] ; then
              echo "*** you must provide different FILENAMEs when using -f and -o together"
              exit 1
@@ -188,43 +188,43 @@ else
          shift
          ;;
       -q)
-         if [ $VERBOSE -eq 1 ] ; then
+         if [ $Verbose -eq 1 ] ; then
            echo "\nwhat? you want verbose and quiet at the same time? think!"
            proc_help
            exit 1
          fi
-         QUIET=1
+         Quiet=1
          shift
          ;;
       -v)
-         if [ $QUIET -eq 1 ] ; then
+         if [ $Quiet -eq 1 ] ; then
            echo "\nwhat? you want quiet and verbose at the same time? think!"
            proc_help
            exit 1
          fi
-         VERBOSE=1
+         Verbose=1
          shift
          ;;
       -vv)
-         if [ $QUIET -eq 1 ] ; then
+         if [ $Quiet -eq 1 ] ; then
            echo "\nwhat? you want quiet and verbose at the same time? think!"
            proc_help
            exit 1
          fi
-         VERBOSE=1
-         VVERBOSE=1
-         vv_output "VERY VERBOSE and VERBOSE output turned on"
+         Verbose=1
+         VVerbose=1
+         vv_output "VERY Verbose and Verbose output turned on"
          shift
          ;;
       *)
-         SCRIPTSIG=$1
+         ScriptSig=$1
          shift
          ;;
     esac
   done
 fi
 
-if [ $QUIET -eq 0 ] ; then
+if [ $Quiet -eq 0 ] ; then
   echo "    #########################################################"
   echo "    ### procedure to strictly check DER-encoded signature ###"
   echo "    #########################################################"
@@ -237,27 +237,27 @@ check_tool bc
 check_tool cut
 check_tool tr
 
-vv_output $SCRIPTSIG
+vv_output $ScriptSig
 vv_output "  ################################################"
-vv_output "  # strict verification of DER-encoded SCRIPTSIG #"
+vv_output "  # strict verification of DER-encoded ScriptSig #"
 vv_output "  ################################################"
 # A signature exists of: <30> <total len> <02> <len R> <R> <02> <len S> <S> <hashtype>
 
-scriptsig_len_chars=${#SCRIPTSIG}
+scriptsig_len_chars=${#ScriptSig}
 scriptsig_len=$(( $scriptsig_len_chars / 2 ))
 
 ########################################
 # Minimum and maximum size constraints #
 # 18 chars < scriptsig_len < 146 chars #
 ########################################
-if [ "$scriptsig_len_chars" -gt $SIG_MIN_LENGTH_CHARS ] && \
-   [ "$scriptsig_len_chars" -lt $SIG_MAX_LENGTH_CHARS ] ; then
+if [ "$scriptsig_len_chars" -gt $sig_min_length_chars ] && \
+   [ "$scriptsig_len_chars" -lt $sig_max_length_chars ] ; then
   v_output  "    Minimum and maximum size constraints                        - ok"
-  vv_output "    Scriptsig length: $scriptsig_len_chars, good ($SIG_MIN_LENGTH_CHARS < scriptsig_len < $SIG_MAX_LENGTH_CHARS )"
+  vv_output "    Scriptsig length: $scriptsig_len_chars, good ($sig_min_length_chars < scriptsig_len < $sig_max_length_chars )"
 else
   echo "*** ERROR: script sig verification:  "
   echo "    scriptsig len ($scriptsig_len_chars) incorrect, expected is:"
-  echo "    $SIG_MIN_LENGTH_CHARS < scriptsig_len < $SIG_MAX_LENGTH_CHARS"
+  echo "    $sig_min_length_chars < scriptsig_len < $sig_max_length_chars"
   echo "    exiting gracefully ... "
   echo " "
   exit 1
@@ -266,10 +266,10 @@ fi
 ######################################
 # scriptsig always starts with 0x30" # 
 ######################################
-SCRIPTSIG=$( echo $SCRIPTSIG | tr [:lower:] [:upper:] )
+ScriptSig=$( echo $ScriptSig | tr [:lower:] [:upper:] )
 from=1
 to=2
-compare_string=$( echo $SCRIPTSIG | cut -b $from-$to )
+compare_string=$( echo $ScriptSig | cut -b $from-$to )
 if [ "$compare_string" == "30" ] ; then
   v_output  "    scriptsig always starts with 0x30                           - ok"
   vv_output "  0x30: scriptsig always starts with 0x30"
@@ -287,7 +287,7 @@ fi
 ###################################################
 from=$(( $from + 2 ))
 to=$(( $to + 2 ))
-SigRS_len=$( echo $SCRIPTSIG | cut -b $from-$to )
+SigRS_len=$( echo $ScriptSig | cut -b $from-$to )
 SigRS_len_dec=$( echo "ibase=16;$SigRS_len" | bc )
 SigRS_len_chars=$(( $SigRS_len_dec * 2 ))
 vv_output "  0x$SigRS_len: a 1-byte length descriptor; must be equal or less than actual sig len ($scriptsig_len_chars)"
@@ -307,7 +307,7 @@ fi
 #########################################
 from=$(( $from + 2 ))
 to=$(( $to + 2 ))
-compare_string=$( echo $SCRIPTSIG | cut -b $from-$to )
+compare_string=$( echo $ScriptSig | cut -b $from-$to )
 if [ "$compare_string" == "02" ] ; then
   vv_output "  0x02: a header byte indicating an integer follows"
 else
@@ -324,7 +324,7 @@ fi
 #############################################
 from=$(( $from + 2 ))
 to=$(( $to + 2 ))
-compare_string=$( echo $SCRIPTSIG | cut -b $from-$to )
+compare_string=$( echo $ScriptSig | cut -b $from-$to )
 R_len_dec=$( echo "ibase=16;$compare_string * 2" | bc )
 vv_output "  0x$compare_string: a 1-byte length descriptor for the R-value (must be >= 0)"
 if [ $R_len_dec -le 0 ] ; then
@@ -350,7 +350,7 @@ fi
 #############################################
 from=$(( $from + 2 ))
 to=$(( $from + $R_len_dec - 1 ))
-R_value_string=$( echo $SCRIPTSIG | cut -b $from-$to )
+R_value_string=$( echo $ScriptSig | cut -b $from-$to )
 vv_output "    the R coordinate, as a big-endian integer"
 vv_output "    0x$R_value_string"
 # in case we need to replace later the S values (if s -gt N/2 ; then s = N - s),
@@ -362,7 +362,7 @@ R_string_end=$(( $to ))
 #########################################
 from=$(( $from + $R_len_dec ))
 to=$(( $from + 1 ))
-compare_string=$( echo $SCRIPTSIG | cut -b $from-$to )
+compare_string=$( echo $ScriptSig | cut -b $from-$to )
 if [ "$compare_string" == "02" ] ; then
   vv_output "  0x02: a header byte indicating an integer follows"
 else
@@ -379,7 +379,7 @@ fi
 #############################################
 from=$(( $from + 2 ))
 to=$(( $to + 2 ))
-compare_string=$( echo $SCRIPTSIG | cut -b $from-$to )
+compare_string=$( echo $ScriptSig | cut -b $from-$to )
 S_len_dec=$( echo "ibase=16;$compare_string * 2" | bc )
 vv_output "  0x$compare_string: a 1-byte length descriptor for the S-value (must be >= 0)"
 if [ $S_len_dec -le 0 ] ; then
@@ -424,7 +424,7 @@ fi
 #############################################
 from=$(( $from + 2 ))
 to=$(( $from + $S_len_dec - 1 ))
-S_value_string=$( echo $SCRIPTSIG | cut -b $from-$to )
+S_value_string=$( echo $ScriptSig | cut -b $from-$to )
 vv_output "    the S coordinate, as a big-endian integer"
 vv_output "    0x$S_value_string"
 
@@ -477,8 +477,8 @@ if [ $value -eq 1 ] ; then
   v_output  "    S-value must be smaller than N/2                            - ok"
   vv_output "    cool, S is smaller than N/2"
   v_output  "    strictly check DER-encoded signature                        - ok"
-  if [ $O_PARAM_FLAG -eq 1 ] ; then
-    printf "$SCRIPTSIG" > $outfile
+  if [ $o_param_flag -eq 1 ] ; then
+    printf "$ScriptSig" > $outfile
   fi
 else
   v_output "    --> S is not smaller than N/2, need new S-Value (new_s = N - s)"
@@ -496,57 +496,57 @@ else
     echo "    new S-value = $S_value"
     echo "    new S value length ${#S_value} (must be 64 chars)"
     echo "    old scriptsig:"
-    echo "    $SCRIPTSIG" 
+    echo "    $ScriptSig" 
     echo "    exiting gracefully ... "
     echo " "
     exit 1
   else
     v_output "    new S=$S_value"
-    # we are good to assemble a new sig, by concatenating values into $SCRIPTSIG
+    # we are good to assemble a new sig, by concatenating values into $ScriptSig
     # we begin with code '0x30' (sequence identfier)
-    SCRIPTSIG=$( echo "30" )
+    ScriptSig=$( echo "30" )
     
     # now length of R-Value and S-Value and codes 
     # R-Value was defined in $R_len_dec, S value = 32 Bytes (0x20) --> 64 chars
     # and 4 hex codes (for R and S: '0x02' + length value)         -->  8 chars
     # value=$( echo "$R_len_dec + 64 + 8" | bc )
     value=$( echo "obase=16;($R_len_dec + 64 + 8) / 2" | bc )
-    SCRIPTSIG=$( echo "$SCRIPTSIG$value" )
+    ScriptSig=$( echo "$ScriptSig$value" )
     
     # this is DER sig code '02', identifiying next hexcode as R-Value length
     value="02"
-    SCRIPTSIG=$( echo "$SCRIPTSIG$value" )
+    ScriptSig=$( echo "$ScriptSig$value" )
     
     # convert $R_len_dec to hex
     value=$( echo "obase=16;$R_len_dec / 2" | bc )
-    SCRIPTSIG=$( echo "$SCRIPTSIG$value" )
+    ScriptSig=$( echo "$ScriptSig$value" )
     
     # and concatenate the original R-Value 
-    SCRIPTSIG=$( echo "$SCRIPTSIG$R_value_string" )
+    ScriptSig=$( echo "$ScriptSig$R_value_string" )
     
     # this is code '02' and S value length, which is here exactly 32 bytes, in hex 20 
     value="0220"
-    SCRIPTSIG=$( echo "$SCRIPTSIG$value" )
+    ScriptSig=$( echo "$ScriptSig$value" )
     
     # and concatenate the new S-Value 
-    SCRIPTSIG=$( echo "$SCRIPTSIG$S_value" )
-    if [ $O_PARAM_FLAG -eq 1 ] ; then
-      printf "$SCRIPTSIG" > $outfile
+    ScriptSig=$( echo "$ScriptSig$S_value" )
+    if [ $o_param_flag -eq 1 ] ; then
+      printf "$ScriptSig" > $outfile
     fi
 
     # and bring it into a tmp file, eventually required in other scripts
     if [ -f tmp_trx_sig.hex ] ; then 
       cp tmp_trx_sig.hex tmp_trx_sig_old.hex
     fi
-    v_output "    new signature=$SCRIPTSIG" 
-    SCRIPTSIG=$( echo $SCRIPTSIG | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
-    printf "$SCRIPTSIG" > tmp_trx_sig.hex
+    v_output "    new signature=$ScriptSig" 
+    ScriptSig=$( echo $ScriptSig | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
+    printf "$ScriptSig" > tmp_trx_sig.hex
 
   fi
 fi
 
  v_output "    #########################################################"
-vv_output "    ### end of strict verification of SCRIPTSIG           ###"
+vv_output "    ### end of strict verification of ScriptSig           ###"
 vv_output "    #########################################################"
 vv_output "  "
 

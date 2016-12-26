@@ -41,8 +41,6 @@
 #  SIGHASH_SINGLE = 3,
 #  SIGHASH_ANYONECANPAY = 0x80
 # 
-#  ???
-# 
 
 typeset -i msig_offset=1
 typeset -i sig_offset=0
@@ -54,9 +52,9 @@ opcode=''
 ret_string=''
 sig_string=''
 
-QUIET=0
-VERBOSE=0
-VVERBOSE=0
+Quiet=0
+Verbose=0
+VVerbose=0
 param=483045022100A428348FF55B2B59BC55DDACB1A00F4ECDABE282707BA5185D39FE9CDF05D7F0022074232DAE76965B6311CEA2D9E5708A0F137F4EA2B0E36D0818450C67C9BA259D0121025F95E8A33556E9D7311FA748E9434B333A4ECFB590C773480A196DEAB0DEDEE1
 
 #################################
@@ -64,13 +62,13 @@ param=483045022100A428348FF55B2B59BC55DDACB1A00F4ECDABE282707BA5185D39FE9CDF05D7
 #################################
 
 v_output() {
-  if [ $VERBOSE -eq 1 ] ; then
+  if [ $Verbose -eq 1 ] ; then
     echo "$1"
   fi
 }
 
 vv_output() {
-  if [ $VVERBOSE -eq 1 ] ; then
+  if [ $VVerbose -eq 1 ] ; then
     echo "$1"
   fi
 }
@@ -341,7 +339,7 @@ S11_SIG() {
     sig_end=$(( $to - 2 ))
     sig_offset=$(( $sig_end + 2 ))
     sig_string=$( echo $param | cut -b $sig_start-$sig_end )
-    if [ $VERBOSE -eq 1 ] ; then
+    if [ $Verbose -eq 1 ] ; then
       ./tcls_strict_sig_verify.sh -v $sig_string
     else
       ./tcls_strict_sig_verify.sh -q $sig_string
@@ -456,7 +454,7 @@ S18_SIG() {
     sig_end=$(( $to - 2 ))
     sig_offset=$(( $sig_end + 2 ))
     sig_string=$( echo $param | cut -b $sig_start-$sig_end )
-    if [ $VERBOSE -eq 1 ] ; then
+    if [ $Verbose -eq 1 ] ; then
       ./tcls_strict_sig_verify.sh -v $sig_string
     else
       ./tcls_strict_sig_verify.sh -q $sig_string
@@ -492,7 +490,7 @@ S20_PK() {
 ### STATUS 21 (S21_SIG_LEN_0x49)  ###
 #####################################
 S21_SIG_LEN_0x49() {
-  # if [ $QUIET -eq 0 ] ; then echo "S21_SIG_LEN_0x49"; fi
+  # if [ $Quiet -eq 0 ] ; then echo "S21_SIG_LEN_0x49"; fi
   get_next_opcode
   case $cur_opcode in
     30) echo "    $cur_opcode: OP_SEQUENCE_0x30: type tag indicating SEQUENCE, begin sigscript"
@@ -532,7 +530,7 @@ S23_Length() {
 ### STATUS 24 (S24_SIG_LEN_0x3C)  ###
 #####################################
 S24_SIG_LEN_0x3C() {
-  # if [ $QUIET -eq 0 ] ; then echo "S21_SIG_LEN_0x49"; fi
+  # if [ $Quiet -eq 0 ] ; then echo "S21_SIG_LEN_0x49"; fi
   get_next_opcode
   case $cur_opcode in
     30) echo "    $cur_opcode: OP_SEQUENCE_0x30: type tag indicating SEQUENCE, begin sigscript"
@@ -753,16 +751,16 @@ S99_Unknown() {
 
 case "$1" in
   -q)
-     QUIET=1
+     Quiet=1
      shift
      ;;
   -v)
-     VERBOSE=1
+     Verbose=1
      shift
      ;;
   -vv)
-     VERBOSE=1
-     VVERBOSE=1
+     Verbose=1
+     VVerbose=1
      shift
      ;;
   -?|-h|--help)
@@ -777,7 +775,7 @@ case "$1" in
      ;;
 esac
 
-if [ $QUIET -eq 0 ] ; then 
+if [ $Quiet -eq 0 ] ; then 
   echo "  ##################################################################"
   echo "  ### trx_in_sig_script.sh: decode SIG_script OPCODES from a trx ###"
   echo "  ##################################################################"
@@ -785,7 +783,7 @@ if [ $QUIET -eq 0 ] ; then
 fi
 
 if [ $# -eq 0 ] ; then 
-  if [ $QUIET -eq 0 ] ; then 
+  if [ $Quiet -eq 0 ] ; then 
     echo "no parameter, hence showing example pk_script:"
     echo "$param"
   fi
@@ -793,7 +791,7 @@ else
   param=$( echo $1 | tr "[:lower:]" "[:upper:]" )
 fi
 
-if [ $VVERBOSE -eq 1 ] ; then 
+if [ $VVerbose -eq 1 ] ; then 
   echo "  a valid bitcoin signature (r,s) is going to look like:"
   echo "  <30><len><02><len><r bytes><02><len><s bytes><01>"
   echo "  with 9 <= length(sig) <= 73 (18-146 chars)"

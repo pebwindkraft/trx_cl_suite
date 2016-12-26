@@ -50,12 +50,12 @@ echo "================================================================" | tee -a
 
 echo "=== TESTCASE 1a: $chksum_cmd tcls_create.sh" | tee -a $logfile
 cp tcls_create.sh tmp_cfile
-chksum_ref="d33611e0f963f614b03bfff04ab3d60ef0664dcd81b7cd20685e3d07fdb5dc73" 
+chksum_ref="3f8aaa3c5aa21f20e0d2261cfe16521bd19967cf33f1fbd38659518f29b4095b" 
 chksum_prep
 
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
 cp tcls_key2pem.sh tmp_cfile
-chksum_ref="4c9c5941cb87fa16dcfad1f86d97f72997be41c0dce658ad81d4be043d8fa5d9" 
+chksum_ref="736af2ceeb382639f271abfe8cde580ebce816b98ae149037a95a2268ba7d893" 
 chksum_prep
 
 echo "=== TESTCASE 1c: $chksum_cmd tcls_verify_bc_address.awk" | tee -a $logfile

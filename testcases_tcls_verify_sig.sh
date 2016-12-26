@@ -52,17 +52,17 @@ echo "================================================================" | tee -a
 
 echo "=== TESTCASE 1a: $chksum_cmd tcls_verify_sig.sh" | tee -a $logfile
 cp tcls_verify_sig.sh tmp_tx_cfile
-chksum_ref="19230aca75482b09841fe1b6a761588157dd24f2a0db5afa8c4d21c429e62c1d" 
+chksum_ref="f1ab5339fc86de2d8cae89c54ffbc7fa148a0d2abce8ed43e29b619e7a909e5e" 
 chksum_prep
 
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
 cp tcls_key2pem.sh tmp_tx_cfile
-chksum_ref="4c9c5941cb87fa16dcfad1f86d97f72997be41c0dce658ad81d4be043d8fa5d9" 
+chksum_ref="736af2ceeb382639f271abfe8cde580ebce816b98ae149037a95a2268ba7d893" 
 chksum_prep
 
 echo "=== TESTCASE 1c: $chksum_cmd tcls_strict_sig_verify.sh" | tee -a $logfile
 cp tcls_strict_sig_verify.sh tmp_tx_cfile
-chksum_ref="d15facf384d754754ed7b7becfb971b76795cdabed9f4109b8995a548e8d5f8e"
+chksum_ref="f45f17eed63026710b9b238ab8315c1816ec779e44ea0726fa6633897ca2c1f5"
 chksum_prep
 
 echo "=== TESTCASE 1d: $chksum_cmd tcls_verify_hexkey.awk" | tee -a $logfile
@@ -86,13 +86,13 @@ chksum_prep
 echo "=== TESTCASE 2b: -p param too short...     "                      | tee -a $logfile
 echo "./tcls_verify_sig.sh -v -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 0123456789abcdef -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e" >> $logfile
 ./tcls_verify_sig.sh -v -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 0123456789abcdef -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e > tmp_tx_cfile
-chksum_ref="5e4c1e8aea4da32de2d1230c7ec99980be669d11d7d49d82ec66b8e902797ade"
+chksum_ref="d39e403b67f013969bab2d50ebf2a0d6804084cb6318d769f249a412512c8be5"
 chksum_prep
 
 echo "=== TESTCASE 2c: -s param too short...     "                      | tee -a $logfile
 echo "./tcls_verify_sig.sh -v -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221000123456789abcdef" >> $logfile
 ./tcls_verify_sig.sh -v -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221000123456789abcdef > tmp_tx_cfile
-chksum_ref="a487656ba7144e0560ed6c2c389aa7b71dfdb56e0bcda4c262f11d6e72f090f2"
+chksum_ref="0e411e0df79fa23e4c504b112bcc0353b8f81dbcc95439459bed91daf5d4726b"
 chksum_prep
 
 echo " " | tee -a $logfile
@@ -112,13 +112,13 @@ chksum_prep
 echo "=== TESTCASE 3b: pizza, be a bit more verbose..." | tee -a $logfile
 echo "./tcls_verify_sig.sh -v -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e" >> $logfile
 ./tcls_verify_sig.sh -v -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669  -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e > tmp_tx_cfile 
-chksum_ref="9f66e16ff23ecff54da880556714930cf80b583354e8882c96a31b98277f5980" 
+chksum_ref="1ef0a0bfa83dc0c003c2abbdcf3825da589dd15faa73612de2803a1c5ed6cf7f" 
 chksum_prep
 
 echo "=== TESTCASE 3c: pizza, be very verbose..." | tee -a $logfile
 echo "./tcls_verify_sig.sh -vv -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e" >> $logfile
 ./tcls_verify_sig.sh -vv -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669  -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e > tmp_tx_cfile 
-chksum_ref="29030285a727db40d69776a2432b199688f199e5d1cc0db92315b388b40d988f" 
+chksum_ref="ffe4e1ccad6b88ec4afa7b777e82803591beedaa3dbc6092613e0043b618374a" 
 chksum_prep
 
 echo " " | tee -a $logfile

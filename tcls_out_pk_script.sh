@@ -5,7 +5,7 @@
 #
 # Version	by	date	comment
 # 0.1		svn	02jun16	initial release
-# 0.2		svn	22dec16	added status 27ff, multisig...
+# 0.2		svn	22dec16	added status for multisig...
 # 
 # Copyright (c) 2015, 2016 Volker Nowarra 
 # Complete rewrite of code in June 2016 from following reference:
@@ -40,12 +40,12 @@ typeset -i offset=0
 typeset -i cur_opcode_dec=0
 
 ret_string=''
-QUIET=0
+Quiet=0
 param=76A9146AF1D17462C6146A8A61217E8648903ACD3335F188AC
 
 case "$1" in
   -q)
-     QUIET=1
+     Quiet=1
      shift
      ;;
   -?|-h|--help)
@@ -60,7 +60,7 @@ case "$1" in
      ;;
 esac
 
-if [ $QUIET -eq 0 ] ; then 
+if [ $Quiet -eq 0 ] ; then 
   echo "################################################################"
   echo "### tcls_out_pk_script.sh: read PK_script OPCODES from a trx ###"
   echo "################################################################"
@@ -68,7 +68,7 @@ if [ $QUIET -eq 0 ] ; then
 fi
 
 if [ $# -eq 0 ] ; then 
-  if [ $QUIET -eq 0 ] ; then 
+  if [ $Quiet -eq 0 ] ; then 
     echo "no parameter, hence showing example pk_script:"
     echo "$param"
   fi
