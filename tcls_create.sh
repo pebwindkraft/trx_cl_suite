@@ -102,7 +102,7 @@ vv_output() {
 }
 
 #################################################
-# procedure to concatenate string for raw trx   #
+# procedure to concatenate string for a raw trx #
 #################################################
 trx_concatenate() {
   RAW_TX=$RAW_TX$StepCode
@@ -792,7 +792,7 @@ if [ "$t_param_flag" -eq 1 ] ; then
   # also as a prep for later txfee calculations, we try to fetch current txfees.
   # we can only use this, if there was no parameter given for txfee!
   if [ $txfee_param_flag -eq 0 ] ; then
-    txfee_per_byte=$( curl -s https://bitcoinfees.21.co/api/v1/fees/recommended | awk ' BEGIN {FS="[:}]"} { print $4 }' )
+    txfee_per_byte=$( $http_get_cmd https://bitcoinfees.21.co/api/v1/fees/recommended | awk ' BEGIN {FS="[:}]"} { print $4 }' )
   fi
 fi
 

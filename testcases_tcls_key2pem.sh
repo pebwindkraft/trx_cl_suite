@@ -50,7 +50,7 @@ echo "=============================================================" | tee -a $l
 
 echo "TESTCASE 1a: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
 cp tcls_key2pem.sh tmp_tx_cfile
-chksum_ref="4c9c5941cb87fa16dcfad1f86d97f72997be41c0dce658ad81d4be043d8fa5d9"
+chksum_ref="736af2ceeb382639f271abfe8cde580ebce816b98ae149037a95a2268ba7d893"
 chksum_prep
 
 echo "TESTCASE 1b: $chksum_cmd tcls_verify_bc_address.awk" | tee -a $logfile
@@ -79,25 +79,25 @@ echo "=============================================================" >> $logfile
 echo "TESTCASE 2a: call should fail, cause no param at all" | tee -a $logfile
 echo "./tcls_key2pem.sh " >> $logfile
 ./tcls_key2pem.sh > tmp_tx_cfile
-chksum_ref="1ad035232212b66ee02e216af898f5eb1bad451efc8642feee30f74b05901539" 
+chksum_ref="dab9fd3828a3902487a905101779ddbc2001a4290d9f5259953c52438dd731a8" 
 chksum_prep
 
 echo "TESTCASE 2b: call should fail, cause -w has a wrong parameter" | tee -a $logfile
 echo "./tcls_key2pem.sh -w abc -p 0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352" >> $logfile
 ./tcls_key2pem.sh -w abc -p 0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352 > tmp_tx_cfile
-chksum_ref="c421146f3ed99302e7934dc5f69e3504375e54d3f323ae244aa13972fa813355"
+chksum_ref="ab158867d386a098bf47e1d632c1013e3267a05ad6360f1d83da6fedd49e33a7"
 chksum_prep
 
 echo "TESTCASE 2c: call should fail, cause -p has wrong parameter"   | tee -a $logfile
 echo "./tcls_key2pem.sh -w 5J1F7GHadZG3sCCKHCwg8Jvys9xUbFsjLnGec4H125Ny1V9nR6V -p abc" >> $logfile
 ./tcls_key2pem.sh -w 5J1F7GHadZG3sCCKHCwg8Jvys9xUbFsjLnGec4H125Ny1V9nR6V -p abc > tmp_tx_cfile
-chksum_ref="d6540deee423f93cf1e40f96b3a7a7e9ebb7032252b1a7d955e09629a147fc72"
+chksum_ref="a6bc46d3fb043166c83256c500e486079bcf6d3bc525c37c15f5d1c29baf6e7b"
 chksum_prep
 
 echo "TESTCASE 2d: call should fail, cause -x has wrong parameter" | tee -a $logfile
 echo "./tcls_key2pem.sh -x abc -p 0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352" >> $logfile
 ./tcls_key2pem.sh -x abc -p 0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352 > tmp_tx_cfile
-chksum_ref="9968e118f84e35b808ddf28529007fa12076fd8219b484ddbb45520b0772ee51"
+chksum_ref="2a6797b8c5f60fb9c6a3cd5606462a3785f349069e2429f40a8b7d8d773bf1af"
 chksum_prep
 
 echo "TESTCASE 2e: call should fail, cause -p with wrong (wif) format" | tee -a $logfile
@@ -129,14 +129,14 @@ chksum_prep
 echo "TESTCASE 2h: call should work, cause -x works with -p <uncompressed> " | tee -a $logfile
 echo "./tcls_key2pem.sh -v -x 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725 -p 0450863ad64a87ae8a2fe83c1af1a8403cb53f53e486d8511dad8a04887e5b23522cd470243453a299fa9e77237716103abc11a1df38855ed6f2ee187e9c582ba6" >> $logfile
 ./tcls_key2pem.sh -v -x 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725 -p 0450863ad64a87ae8a2fe83c1af1a8403cb53f53e486d8511dad8a04887e5b23522cd470243453a299fa9e77237716103abc11a1df38855ed6f2ee187e9c582ba6 > tmp_tx_cfile 
-chksum_ref="72219544dded92eccebb0d3c67b0a8b972fd770ccdbdd4525bb59ce9bf0850fa"
+chksum_ref="69fd939a7babeb89584a035d0de76d54cba837128ac49c7b9f88d53354e8e220"
 chksum_prep
 
 echo "TESTCASE 2i: call should work, cause -x works with -p <compressed>"    | tee -a $logfile
 echo "             with '-vv' given, openssl creates new priv/pub key   "    >> $logfile
 echo "             pairs. So we only checksum the first 60 lines of output." >> $logfile
 ./tcls_key2pem.sh -vv -x 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725 -p 0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352 | head -n60 > tmp_tx_cfile 
-chksum_ref="33cade63795fc8b305942d46f761de9583361ca805b5b3b0fed749e27ca6edd6"
+chksum_ref="e1d088e11e92219d422c3ee48baf1c72c324d065dbc05adb7e23c124e0b94219"
 chksum_prep
 
 echo " " | tee -a $logfile
@@ -151,19 +151,19 @@ echo "from: http://www.cryptosys.net/pki/ecc-bitcoin-raw-transaction.html" >> $l
 echo "TESTCASE 3a: with a hex privkey, should just work... " | tee -a $logfile
 echo "./tcls_key2pem.sh -v -x 0ecd20654c2e2be708495853e8da35c664247040c00bd10b9b13e5e86e6a808d -p 042daa93315eebbe2cb9b5c3505df4c6fb6caca8b756786098567550d4820c09db988fe9997d049d687292f815ccd6e7fb5c1b1a91137999818d17c73d0f80aef9" >> $logfile
 ./tcls_key2pem.sh -v -x 0ecd20654c2e2be708495853e8da35c664247040c00bd10b9b13e5e86e6a808d -p 042daa93315eebbe2cb9b5c3505df4c6fb6caca8b756786098567550d4820c09db988fe9997d049d687292f815ccd6e7fb5c1b1a91137999818d17c73d0f80aef9 > tmp_tx_cfile
-chksum_ref="de52d623558dbac74e67db27149f8b7e07ee6feb4916da826b53a8410234bc95"
+chksum_ref="5f0a3295bc8108816241ca5b1efae4e424d501f73294dd51bbdbae2ba2aa12f5"
 chksum_prep
 
 echo "TESTCASE 3b: with a wif privkey, should just work... " | tee -a $logfile
 echo "./tcls_key2pem.sh -v -w 5HvofFG7K1e2aeWESm5pbCzRHtCSiZNbfLYXBvxyA57DhKHV4U3 -p 042daa93315eebbe2cb9b5c3505df4c6fb6caca8b756786098567550d4820c09db988fe9997d049d687292f815ccd6e7fb5c1b1a91137999818d17c73d0f80aef9" >> $logfile
 ./tcls_key2pem.sh -v -w 5HvofFG7K1e2aeWESm5pbCzRHtCSiZNbfLYXBvxyA57DhKHV4U3 -p 042daa93315eebbe2cb9b5c3505df4c6fb6caca8b756786098567550d4820c09db988fe9997d049d687292f815ccd6e7fb5c1b1a91137999818d17c73d0f80aef9 > tmp_tx_cfile
-chksum_ref="e1cca678d35db62f8afbb4fbbb2b34a106e0d6c56506ecc5b0679ee0f33060a1"
+chksum_ref="a88e8153b468f9e9aa94a4e89999e468674b91cb464bf59700d641a09df7f719"
 chksum_prep
 
 echo "TESTCASE 3c: with a wif-c privkey, should just work... " | tee -a $logfile
 echo "./tcls_key2pem.sh -v -w KwiUwowgrVpRyWY2LhaH3yvSDWyWWRtKzDG8FFC2s38T2f6gX2Jb -p 032DAA93315EEBBE2CB9B5C3505DF4C6FB6CACA8B756786098567550D4820C09DB" >> $logfile
 ./tcls_key2pem.sh -v -w KwiUwowgrVpRyWY2LhaH3yvSDWyWWRtKzDG8FFC2s38T2f6gX2Jb -p 032DAA93315EEBBE2CB9B5C3505DF4C6FB6CACA8B756786098567550D4820C09DB > tmp_tx_cfile
-chksum_ref="ecde8a067227fb66a8e0d652e77e88b8bfc5e6eae03d43a30727bb4c8f15c8cc"
+chksum_ref="16a633b87e29f1fbce9269bc8d6653354c377bfa6c6f1b0b160f6e9966210c12"
 chksum_prep
 
 echo " " | tee -a $logfile
@@ -178,19 +178,19 @@ echo "from: http://bitcoin.stackexchange.com/questions/32628/redeeming-a-raw-tra
 echo "TESTCASE 4a: " | tee -a $logfile
 echo "./tcls_key2pem.sh -v -x 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725 -p 0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352" >> $logfile
 ./tcls_key2pem.sh -v -x 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725 -p 0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352 > tmp_tx_cfile
-chksum_ref="134b7645b4aef6637d9deb1efa13e06a022133a040d4061dc61801d9d4a1d03a"
+chksum_ref="0e915e5f11d0f753bfe8713d8497649ab79c3c2199db28798aa5b9a54f979045"
 chksum_prep
 
 echo "TESTCASE 4b: " | tee -a $logfile
 echo "./tcls_key2pem.sh -v -w 5J1F7GHadZG3sCCKHCwg8Jvys9xUbFsjLnGec4H125Ny1V9nR6V -p 0450863ad64a87ae8a2fe83c1af1a8403cb53f53e486d8511dad8a04887e5b23522cd470243453a299fa9e77237716103abc11a1df38855ed6f2ee187e9c582ba6" >> $logfile
 ./tcls_key2pem.sh -v -w 5J1F7GHadZG3sCCKHCwg8Jvys9xUbFsjLnGec4H125Ny1V9nR6V -p 0450863ad64a87ae8a2fe83c1af1a8403cb53f53e486d8511dad8a04887e5b23522cd470243453a299fa9e77237716103abc11a1df38855ed6f2ee187e9c582ba6 > tmp_tx_cfile
-chksum_ref="53bfcf553cd552664c0358bee10558800aae11fe1298df636488382556310891"
+chksum_ref="f6b85f6b60ff9d482853c0a9bee80f9dd4a11e4dde54df3019f05e15bb6cdb60"
 chksum_prep
 
 echo "TESTCASE 4c: " | tee -a $logfile
 echo "./tcls_key2pem.sh -v -w Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C -p 0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352" >> $logfile
 ./tcls_key2pem.sh -v -w Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C -p 0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352 > tmp_tx_cfile
-chksum_ref="73dcdedf8b68af6036c212b95155d55cfcfc38da67006741af6aeba6d15bdab9"
+chksum_ref="a0cb46f651eef358e5bf4bfb97c425110c748e9f963036fa0e88c33bf95e665f"
 chksum_prep
 
 echo " " | tee -a $logfile

@@ -52,8 +52,8 @@
 ###########################
 # Some variables ...      #
 ###########################
-VERBOSE=0
-VVERBOSE=0
+Verbose=0
+VVerbose=0
 
 tmp_sig_fn=tmp_sig.hex
 tmp_dsha256_fn=tmp_dsah256.hex
@@ -80,8 +80,8 @@ proc_help() {
   echo " -h  show this HELP text"
   echo " -p  public key (UNCOMPRESSED or COMPRESSED, or a BitCoin address)"
   echo " -s  the signature" 
-  echo " -v  display VERBOSE output"
-  echo " -vv display VERY VERBOSE output"
+  echo " -v  display Verbose output"
+  echo " -vv display VERY Verbose output"
   echo " "
   echo "public keys:"
   echo "   UNCOMPRESSED:    65 Bytes HEX (130chars), beginning with '04'"
@@ -94,7 +94,7 @@ proc_help() {
 # procedure to display verbose output #
 #######################################
 v_output() {
-  if [ $VERBOSE -eq 1 ] ; then
+  if [ $Verbose -eq 1 ] ; then
     echo "$1"
   fi
 }
@@ -103,7 +103,7 @@ v_output() {
 # procedure to display even more verbose output #
 #################################################
 vv_output() {
-  if [ $VVERBOSE -eq 1 ] ; then
+  if [ $VVerbose -eq 1 ] ; then
     echo "$1"
   fi
 }
@@ -202,11 +202,11 @@ else
            shift
            shift
            ;;
-      -v)  VERBOSE=1
+      -v)  Verbose=1
            shift
            ;;
-      -vv) VERBOSE=1
-           VVERBOSE=1
+      -vv) Verbose=1
+           VVerbose=1
            shift
            ;;
       *) 
@@ -226,11 +226,11 @@ fi
   echo "### verify a BitCoin message (e.g. a trx). 3 Inputs required:      ###"
   echo "### a bitcoin pubkey (or address), a dsha256 hash, a signature     ###"
   echo "######################################################################"
-  if [ $VERBOSE -eq 1 ] ; then
-    if [ $VVERBOSE -eq 1 ] ; then
-      echo "VVERBOSE and VERBOSE output turned on"
+  if [ $Verbose -eq 1 ] ; then
+    if [ $VVerbose -eq 1 ] ; then
+      echo "VVerbose and Verbose output turned on"
     else 
-      echo "VERBOSE output turned on"
+      echo "Verbose output turned on"
     fi
     echo "bitcoin pubkey: $pubkey"
     echo "dsha256 hash:   $dsha256hash"
@@ -257,12 +257,12 @@ fi
 ################################
 ### Verifying the public key ### 
 ################################
-if [ $VERBOSE -eq 1 ] ; then
+if [ $Verbose -eq 1 ] ; then
   printf "\n### verify public key characteristics"
 fi
 echo $pubkey | awk -f tcls_verify_hexkey.awk
 if [ $? -eq 0 ] ; then
-  if [ $VERBOSE -eq 1 ] ; then
+  if [ $Verbose -eq 1 ] ; then
     printf ", pubkey is valid          - ok\n"
   fi
 else
@@ -273,7 +273,7 @@ fi
 ###############################
 ### Verifying the signature ### 
 ###############################
-if [ $VERBOSE -eq 1 ] ; then
+if [ $Verbose -eq 1 ] ; then
   echo "### verify signature (using tcls_strict_sig_verify.sh)"
   ./tcls_strict_sig_verify.sh -v $signature   
 else
@@ -295,7 +295,7 @@ v_output "    use pre defined ASN.1 strings to concatenate pubkey.hex"
 # must be '03' or '04' for compressed or uncompressed key
 pubkey_1stchar=$( echo $pubkey | cut -b 1-2 )
 if [ "$pubkey_1stchar" == "04" ] ; then
-  if [ $VVERBOSE -eq 1 ] ; then
+  if [ $VVerbose -eq 1 ] ; then
     echo "    a pre_pubstr:"
     data_show $pre_pubstr_uc
     echo "    the pubkey:"
@@ -305,7 +305,7 @@ if [ "$pubkey_1stchar" == "04" ] ; then
   result=$( cat pubkey.hex | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
   printf "$result" > tmp_key2pem
 else
-  if [ $VVERBOSE -eq 1 ] ; then
+  if [ $VVerbose -eq 1 ] ; then
     echo "    a pre_pubstr:"
     data_show $pre_pubstr_c
     echo "    the pubkey:"
@@ -321,7 +321,7 @@ echo "-----BEGIN PUBLIC KEY-----"   >  pubkey.pem
 openssl enc -base64 -in tmp_key2pem >> pubkey.pem
 echo "-----END PUBLIC KEY-----"     >> pubkey.pem
 rm tmp_key2pem
-if [ $VVERBOSE -eq 1 ] ; then
+if [ $VVerbose -eq 1 ] ; then
   cat pubkey.pem | sed -e 's/^/    /'
 fi
 v_output "    openssl asn1parse pubkey"
@@ -341,7 +341,7 @@ fi
 ###############################################
 ### verify signature with generated pub key ### 
 ###############################################
-if [ $VERBOSE -eq 1 ] ; then
+if [ $Verbose -eq 1 ] ; then
   echo "### verify the signature with hash and pub key"
 fi 
 # convert the hex strings to raw data (dump with "hexdump -C <filename>")

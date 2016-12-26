@@ -55,9 +55,9 @@
 ###########################
 # Some variables ...      #
 ###########################
-QUIET=0
-VERBOSE=0
-VVERBOSE=0
+Quiet=0
+Verbose=0
+VVerbose=0
 hex_privkey=''
 wif_privkey=''
 pre_string=''
@@ -183,9 +183,9 @@ proc_help() {
   echo " "
   echo " -h  show this HELP text"
   echo " -p  public key (UNCOMPRESSED or COMPRESSED) in hex format"
-  echo " -q  real QUIET mode, don't display anything"
-  echo " -v  display VERBOSE output"
-  echo " -vv display VERY VERBOSE output"
+  echo " -q  real Quiet mode, don't display anything"
+  echo " -v  display Verbose output"
+  echo " -vv display VERY Verbose output"
   echo " -w  next param is a WIF or WIF-C encoded private key (51 or 52 chars)"
   echo " -x  next param is a HEX encoded private key (32Bytes=64chars)"
   echo " "
@@ -199,7 +199,7 @@ proc_help() {
 # procedure to display verbose output #
 #######################################
 v_output() {
-  if [ $VERBOSE -eq 1 ] ; then
+  if [ $Verbose -eq 1 ] ; then
     echo "$1"
   fi
 }
@@ -208,7 +208,7 @@ v_output() {
 # procedure to display even more verbose output #
 #################################################
 vv_output() {
-  if [ $VVERBOSE -eq 1 ] ; then
+  if [ $VVerbose -eq 1 ] ; then
     echo "$1"
   fi
 }
@@ -267,30 +267,30 @@ else
          shift
          ;;
       -q)
-         if [ $VERBOSE -eq 1 ] ; then
+         if [ $Verbose -eq 1 ] ; then
            echo "you cannot use -q and -v or -vv at the same time. Exiting gracefully ..."
            exit 1
          fi
-         QUIET=1
+         Quiet=1
          shift
          ;;
       -v)
-         if [ $QUIET -eq 1 ] ; then
+         if [ $Quiet -eq 1 ] ; then
            echo "you cannot use -v and -q at the same time. Exiting gracefully ..."
            exit 1
          fi
-         VERBOSE=1
-         echo "VERBOSE output turned on"
+         Verbose=1
+         echo "Verbose output turned on"
          shift
          ;;
       -vv)
-         if [ $QUIET -eq 1 ] ; then
+         if [ $Quiet -eq 1 ] ; then
            echo "you cannot use -vv and -q at the same time. Exiting gracefully ..."
            exit 1
          fi
-         VERBOSE=1
-         VVERBOSE=1
-         echo "VVERBOSE and VERBOSE output turned on"
+         Verbose=1
+         VVerbose=1
+         echo "VVerbose and Verbose output turned on"
          shift
          ;;
       -w) 
@@ -330,7 +330,7 @@ else
   done
 fi
 
-if [ $QUIET -eq 0 ] ; then
+if [ $Quiet -eq 0 ] ; then
   echo " "
   echo "######################################################################"
   echo "### Bitcoin (hex) keys to PEM format (to sign with openssl):       ###"
@@ -528,14 +528,14 @@ openssl enc -base64 -in tmp_key2pem   >> privkey.pem
 echo "-----END EC PRIVATE KEY-----"   >> privkey.pem
 rm tmp_key2pem
 
-if [ $QUIET -eq 0 ] ; then
+if [ $Quiet -eq 0 ] ; then
   cat privkey.pem
 fi
 
 ##########################
 ### Verify PEM privkey ### 
 ##########################
-if [ $VVERBOSE -eq 1 ] ; then
+if [ $VVerbose -eq 1 ] ; then
   echo " "
   echo "openssl asn1parse -in privkey.pem"
   openssl asn1parse -in privkey.pem 
@@ -552,14 +552,14 @@ else
   openssl ec -in privkey.pem -pubout -out pubkey.pem -conv_form compressed > /dev/null 2>&1 
 fi
 
-if [ $VERBOSE -eq 1 ] ; then
+if [ $Verbose -eq 1 ] ; then
   cat pubkey.pem
 fi
 
 ######################################
 ### manually setup a second pubkey ### 
 ######################################
-if [ $VVERBOSE -eq 1 ] ; then
+if [ $VVerbose -eq 1 ] ; then
   echo " "
   echo "### use pre defined ASN.1 strings to concatenate pubkey_m_hex.txt"
   if [ "$pubkey_char" == "04" ] ; then
@@ -594,7 +594,7 @@ fi
 ###################################################
 ### 1: verify/sign with generated priv/pub keys ### 
 ###################################################
-if [ $VERBOSE -eq 1 ] ; then
+if [ $Verbose -eq 1 ] ; then
   echo " "
   echo "############################################################"
   echo "### 1: verifying the signing process with generated keys ###"
@@ -610,7 +610,7 @@ if [ $VERBOSE -eq 1 ] ; then
   echo "verify with pubkey:"
   vv_output "  -verify -pubin -inkey pubkey.pem -sigfile tmp_pkeyutl_sig.hex -in tmp_urtx.sha"
   openssl pkeyutl -verify -pubin -inkey pubkey.pem -sigfile tmp_pkeyutl_sig.hex -in tmp_urtx.sha
-  if [ $VVERBOSE -eq 1 ] ; then
+  if [ $VVerbose -eq 1 ] ; then
     echo "verify with (pre defined ASN.1 strings) assembled pubkey_m.pem:"
     vv_output "  -verify -pubin -inkey pubkey_m.pem -sigfile tmp_pkeyutl_sig.hex -in tmp_urtx.sha"
     openssl pkeyutl -verify -pubin -inkey pubkey_m.pem -sigfile tmp_pkeyutl_sig.hex -in tmp_urtx.sha
@@ -623,7 +623,7 @@ if [ $VERBOSE -eq 1 ] ; then
   echo "verify with pubkey:"
   vv_output "  -verify pubkey.pem -signature tmp_dgst256_sig.hex tmp_urtx.sha"
   openssl dgst -sha256 -verify pubkey.pem -signature tmp_dgst256_sig.hex tmp_urtx.sha
-  if [ $VVERBOSE -eq 1 ] ; then
+  if [ $VVerbose -eq 1 ] ; then
     echo "verify with (pre defined ASN.1 strings) assembled pubkey_m.pem:"
     vv_output "  -verify pubkey_m.pem -signature tmp_dgst256_sig.hex tmp_urtx.sha"
     openssl dgst -sha256 -verify pubkey_m.pem -signature tmp_dgst256_sig.hex tmp_urtx.sha
@@ -633,7 +633,7 @@ fi
 ##########################################################
 ### 2: verify/sign with OPENSSL generated priv/pubkeys ###
 ##########################################################
-if [ $VVERBOSE -eq 1 ] ; then
+if [ $VVerbose -eq 1 ] ; then
   echo " "
   echo "##########################################################"
   echo "### 2: verify/sign with OPENSSL generated priv/pubkeys ###"

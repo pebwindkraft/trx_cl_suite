@@ -48,19 +48,19 @@
 ###########################
 # Some variables ...      #
 ###########################
-QUIET=0
-VERBOSE=0
-VVERBOSE=0
+Quiet=0
+Verbose=0
+VVerbose=0
 
-typeset -r stx_fn=tmp_stx.txt                  # signed trx file after the end of this script
-typeset -r utxhex_tmp_fn=tmp_utx.txt           # the txt assembled, unsigned tx per tx input
-typeset -r utxtxt_tmp_fn=tmp_utx.hex           # the hex assembled, unsigned tx per tx input
-typeset -r sighex_tmp_fn=tmp_sig.hex           # openssl's signature per tx input in hex
+typeset -r stx_fn=tmp_stx.txt                  # signed TX file after the end of this script
+typeset -r utxhex_tmp_fn=tmp_utx.txt           # the txt assembled, unsigned TX per TX input
+typeset -r utxtxt_tmp_fn=tmp_utx.hex           # the hex assembled, unsigned TX per TX input
+typeset -r sighex_tmp_fn=tmp_sig.hex           # openssl's signature per TX input in hex
 typeset -r sigtxt_tmp_if=tmp_tssv_in.txt       # txt input file for tcls_strict_sig_verify
 typeset -r sigtxt_tmp_of=tmp_tssv_out.txt      # txt output file for tcls_strict_sig_verify
-typeset -r utx_sha256_fn=tmp_utx_sha256.hex    # the sha256 hashed tx 
-typeset -r utx_dsha256_fn=tmp_utx_dsha256.hex  # the double sha256 hashed tx
-typeset -r tmp_vfy_fn=tmp_vfy.txt              # for all tx inputs, put sig, hash and pubkey here
+typeset -r utx_sha256_fn=tmp_utx_sha256.hex    # the sha256 hashed TX 
+typeset -r utx_dsha256_fn=tmp_utx_dsha256.hex  # the double sha256 hashed TX
+typeset -r tmp_vfy_fn=tmp_vfy.txt              # for all TX inputs, put sig, hash and pubkey here
 
 typeset -r Version=01000000
 typeset -r TX_IN_Sequence=ffffffff
@@ -104,9 +104,9 @@ proc_help() {
   echo "sign usage:   $0 [-h|-q|-v|-vv] [-f <filename>]|[<raw_trx>] -w|-x <privkey> -p <pubkey>"
   echo " "
   echo " -h  show this HELP text"
-  echo " -q  real QUIET mode, don't display anything"
-  echo " -v  display VERBOSE output"
-  echo " -vv display VERY VERBOSE output"
+  echo " -q  real Quiet mode, don't display anything"
+  echo " -v  display Verbose output"
+  echo " -vv display VERY Verbose output"
   echo " "
   echo " -f  next param is a filename with an unsigned raw transaction"
   echo " -p  next param is a public key (UNCOMPRESSED or COMPRESSED) in hex format"
@@ -134,27 +134,13 @@ indent_data() {
     output=$( echo "$1" | cut -b $ifrom-$ito )
     echo "$indent_string$output"
   done
-
-# if [ ${#1} -gt 150 ] ; then
-#   echo "$1" | cut -b 1-75
-#   output=$( echo "$1" | cut -b 76-146 )
-#   echo "$indent_string$output"
-#   output=$( echo "$1" | cut -b 147- )
-#   echo "$indent_string$output"
-# elif [ ${#1} -gt 75 ] ; then
-#   echo "$1" | cut -b 1-75
-#   output=$( echo "$1" | cut -b 76- )
-#   echo "$indent_string$output"
-# else
-#   echo "$1"
-# fi
 }
 
 #######################################
 # procedure to display verbose output #
 #######################################
 v_output() {
-  if [ $VERBOSE -eq 1 ] ; then
+  if [ $Verbose -eq 1 ] ; then
     indent_data "$1"
   fi
 }
@@ -163,7 +149,7 @@ v_output() {
 # procedure to display even more verbose output #
 #################################################
 vv_output() {
-  if [ $VVERBOSE -eq 1 ] ; then
+  if [ $VVerbose -eq 1 ] ; then
     indent_data "$1"
   fi
 }
@@ -190,12 +176,12 @@ reverse_hex() {
 # procedure to check for necessary tools #
 ##########################################
 check_tool() {
-  if [ $VVERBOSE -eq 1 ]; then
+  if [ $VVerbose -eq 1 ]; then
     printf " %-8s" $1
   fi
   which $1 > /dev/null
   if [ $? -eq 0 ]; then
-    if [ $VVERBOSE -eq 1 ]; then
+    if [ $VVerbose -eq 1 ]; then
       printf " - yes \n" 
     fi
   else
@@ -251,19 +237,19 @@ else
          shift
          ;;
       -q)
-         QUIET=1
+         Quiet=1
          shift
          ;;
       -v)
-         VERBOSE=1
-         echo "VERBOSE output turned on"
+         Verbose=1
+         echo "Verbose output turned on"
          echo " "
          shift
          ;;
       -vv)
-         VERBOSE=1
-         VVERBOSE=1
-         echo "VERY VERBOSE and VERBOSE output turned on"
+         Verbose=1
+         VVerbose=1
+         echo "VERY Verbose and Verbose output turned on"
          echo " "
          shift
          ;;
@@ -296,9 +282,6 @@ else
       *)
          UNSIGNED_TX=$1
          shift
-#        echo "unknown parameter(s), don't know what to do. Exiting gracefully ..."
-#        proc_help
-#        exit 1
          ;;
     esac
   done
@@ -336,7 +319,7 @@ check_tool tr
 ### so let's go ###
 ###################
 
-if [ $QUIET -ne 1 ] ; then
+if [ $Quiet -ne 1 ] ; then
   echo "let's go ..."
 fi
 
@@ -534,7 +517,7 @@ k=1
 echo "##############################################" > $tmp_vfy_fn
 echo "### Bitcoin prep file to verify signatures ###" >> $tmp_vfy_fn
 echo "##############################################" >> $tmp_vfy_fn
-if [ "$VERBOSE" -eq 1 ] ; then 
+if [ "$Verbose" -eq 1 ] ; then 
   echo "# Bitcoin (and so here openssl) works only on binary files. TX hash files" >> $tmp_vfy_fn
   echo "# must be double sha256'd. For each input, need to convert to binary." >> $tmp_vfy_fn
   echo "# The pubkey is: $pubkey " >> $tmp_vfy_fn
@@ -586,7 +569,7 @@ while [ $j -le $TX_IN_Count ]
   ##############################################################################
   v_output "14. TX_IN[$k]: double hash the raw unsigned TX"
   
-  if [ "$VVERBOSE" -eq 1 ] ; then 
+  if [ "$VVerbose" -eq 1 ] ; then 
     echo "TX_IN[$k], the unsigned raw tx:" >> $tmp_vfy_fn
     result=$( cat $utxhex_tmp_fn )
     indent_data "    $result" >> $tmp_vfy_fn
@@ -600,14 +583,14 @@ while [ $j -le $TX_IN_Count ]
   openssl dgst -binary -sha256 >$utx_sha256_fn  <$utxtxt_tmp_fn 
   openssl dgst -binary -sha256 >$utx_dsha256_fn <$utx_sha256_fn 
  
-  if [ "$VVERBOSE" -eq 1 ] ; then 
+  if [ "$VVerbose" -eq 1 ] ; then 
     od -An -t x1 $utx_sha256_fn | tr -d [:blank:] | tr -d "\n" | sed -e 's/^/    /'
   fi
   # echo "#!/bin/sh" >> $tmp_vfy_fn
   echo "# TX_IN[$k], double sha256 and signature:" >> $tmp_vfy_fn
   result=$( od -An -t x1 $utx_dsha256_fn | tr -d [:blank:] | tr -d "\n" )
   echo "echo $result > tx_hash.txt" >> $tmp_vfy_fn 
-  if [ "$VERBOSE" -eq 1 ] ; then 
+  if [ "$Verbose" -eq 1 ] ; then 
     echo $result | sed -e 's/^/    /'
   fi
   
@@ -645,9 +628,9 @@ while [ $j -le $TX_IN_Count ]
   SCRIPTSIG=$( od -An -t x1 $sighex_tmp_fn | tr -d [:blank:] | tr -d "\n" )
   v_output "    $SCRIPTSIG"
   printf $SCRIPTSIG > $sigtxt_tmp_if
-  if [ $VVERBOSE -eq 1 ] ; then
+  if [ $VVerbose -eq 1 ] ; then
     ./$script_ssvfy -v -f $sigtxt_tmp_if -o $sigtxt_tmp_of
-  elif [ $VERBOSE -eq 1 ] ; then 
+  elif [ $Verbose -eq 1 ] ; then 
     ./$script_ssvfy -f $sigtxt_tmp_if -o $sigtxt_tmp_of
   else
     ./$script_ssvfy -q -f $sigtxt_tmp_if -o $sigtxt_tmp_of
@@ -698,7 +681,7 @@ while [ $j -le $TX_IN_Count ]
   vv_output "    ${SCRIPTSIG[$k]}"
   vv_output " "
 
-  if [ $VERBOSE -eq 1 ] ; then 
+  if [ $Verbose -eq 1 ] ; then 
     echo "xxd -r -p <tx_hash.txt >tx_hash.hex" >> $tmp_vfy_fn
     echo "xxd -r -p <tx_sig.txt >tx_sig.hex" >> $tmp_vfy_fn
     echo "openssl pkeyutl <tx_hash.hex -verify -pubin -inkey pubkey.pem -sigfile tx_sig.hex" >> $tmp_vfy_fn

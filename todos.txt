@@ -48,19 +48,6 @@ STEP 5:  need to do a var_int check here ...
 STEP 8:  need to do a var_int check here ...
 STEP 17: when there is a trx with multiple output, need to create a loop
 
-I29: 02Nov2016, svn:
-====================
-naming convention(s): 
-Bitcoin talks about (unsigned) raw transactions. This word raw is often used (e.g. in the pizza tranasaction) as an indicator for files (pizza.raw), which contain only hex data. So this file cannot be printed easily, you need to use 'xxd' or 'hexdump'. So effectivly the file is a hexadecimal file, not a raw file...
-NAMING CONVENTION:
---> 1: files, which need 'xxd' or 'hexdump' need to end with ".hex" (not raw)
---> 2: files that can be displayed with 'cat' shall have the extension ".txt"
---> 3: avoid usage of extension ".raw"
-this needs to be inmplemented into tcls_create.sh, tcls_sign.sh and tcls_verify_sig.sh
-(and later into all other files)
---> script "trx_2txt.sh" has a switch "-r" - this needs to get replaced as well!
-
-
 I30: 04Nov2016, svn:
 ====================
 Integrate the PIZZA Transaction into all testcases:
@@ -71,14 +58,6 @@ testcases_trx_2txt.sh
 ? testcases_tcls_create.sh - it has two outputs, not yet ready ...
 ? testcases_tcls_sign.sh   - I don't have the priv keys, how to?
 testcases_tcls_verify_sig.sh	
-
-
-I31: 05Nov2016, svn:
-====================
-remove the word "raw" from trx_2txt.sh. A raw transaction is simply an unsigned, text readable set of hexchars? see also I29. See also in this help text line:
-usage: ./trx_2txt.sh [-h|-r|-t|-u|-v|-vv] [[raw]trx][...]
-need to search and replace in whole file.
-
 
 I33: 05Nov2016, svn:
 ====================
@@ -110,7 +89,6 @@ Compressed form of above needs to start with 0x02:
   02:d5:a7:69:89:89:7e:e6:72:fd:4a:2f:20:88:c7:
   a2:fd:ab:eb:a4:79:01:e5:48:b4:74:cb:0a:df:af:
   06:46:51
-
 
 
 I34: 08Nov2016, svn:

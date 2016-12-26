@@ -50,18 +50,17 @@ echo "================================================================" | tee -a
 echo "=== TESTCASE 1: checksums of all necessary files             ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 1a: $chksum_cmd tcls_tx2txt.sh" | tee -a $logfile
-echo "================================================================" | tee -a $logfile
-chksum_ref="28b7ba20103585af56ba8d7ef0531c8cfcb7a9e697f8163b10e1e8a6f70080a6"
+chksum_ref="9cc3a57d63b9fac0d6f66e9380170f5a4a81a53f55dd8e808d8f9984a1a3ceca"
 cp tcls_tx2txt.sh tmpfile
 chksum_prep
  
 echo "=== TESTCASE 1b: $chksum_cmd trx_in_sig_script.sh" | tee -a $logfile
-chksum_ref="8ab7ce9f625e9b880f1840ca746e0a8b1eb27d25b971bef787d9e7e33f5eb9a2" 
+chksum_ref="0f8eb4e7e3d969cafbd245c2a79756f0176d228ef1828d01cea802a51b393fc7" 
 cp tcls_in_sig_script.sh tmpfile
 chksum_prep
 
 echo "=== TESTCASE 1c: $chksum_cmd trx_out_pk_script.sh" | tee -a $logfile
-chksum_ref="2e8be50070e42c83ea69e091239137c1ad91bf256cae6c856d7ff122dc0e2f7a" 
+chksum_ref="d5dcf025944a0f5e277bd0d6d3051ad27226dca4bfc91d0bdd25466b4e368a75" 
 cp tcls_out_pk_script.sh tmpfile
 chksum_prep
 
