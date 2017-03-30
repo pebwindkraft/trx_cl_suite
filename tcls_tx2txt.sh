@@ -9,10 +9,11 @@
 # https://blockchain.info/de/rawtx/
 #  cc8a279b0736e6a2cc20b324acc5aa688b3af7b63bbb002f46f6573c1ad84408?format=hex
 #
-# Version	by	date	comment
-#   0.1		svn	01nov16	new release from trx_2txt (which is now discontinued)
-#   0.2		svn	14dec16 created array for a trx, cause OpenBSD cut cannot 
+# Version  by	date	comment
+#   0.1	   svn	01nov16	new release from trx_2txt (which is now discontinued)
+#   0.2	   svn	14dec16 created array for a trx, cause OpenBSD cut cannot 
 #			handle more than ~2000 chars (buffer size in pdksh?)
+#   0.3	   svn	29mar17	add TESTNET functionality (address prefix)
 #
 # Permission to use, copy, modify, and distribute this software for any 
 # purpose with or without fee is hereby granted, provided that the above 
@@ -44,6 +45,7 @@ typeset -i u_flag=0
 var_int=0
 Verbose=0
 VVerbose=0
+TESTNET=0
 
 #################################################################
 ### set -A or declare tx_array - bash and ksh are different ! ###
@@ -58,7 +60,7 @@ fi
 # procedure to display helptext #
 #################################
 proc_help() {
-  echo "usage: $0 [-f|-h|-r|-t|-u|-v|-vv] tx [filename|tx-id]"
+  echo "usage: $0 [-f|-h|-r|-t|-T|-u|-v|-vv] tx [filename|tx-id]"
   echo "  "
   echo "examine a raw TX into separate lines, as specified by:"
   echo "https://en.bitcoin.it/wiki/Protocol_specification#tx"
@@ -67,6 +69,7 @@ proc_help() {
   echo " -h   show this help text"
   echo " -r   examine RAW TX (TX hex data as parameter string)"
   echo " -t   examine TX from blockchain.info (TRANSACTION_ID as parameter string)"
+  echo " -T   Testnet"
   echo " -u   examine UNSIGNED RAW TX (TX hex data as parameter string)"
   echo " -v   display verbose output"
   echo " -vv  display even more verbose output"
@@ -208,15 +211,27 @@ decode_pkscript() {
     case "$len" in
        5) # a bit ugly. logic: first param = "-p2sh", which is a length of 5, then:
           echo "  and translates base58 encoded into this bitcoin address:"
-          sh ./tcls_base58check_enc.sh -q $result
+          if [ $TESTNET -eq 1 ] ; then
+            sh ./tcls_base58check_enc.sh -T -q $result
+          else
+            sh ./tcls_base58check_enc.sh -q $result
+          fi
           ;;
       40) 
           echo "  and translates base58 encoded into this bitcoin address:"
-          sh ./tcls_base58check_enc.sh -q -p2pkh $result
+          if [ $TESTNET -eq 1 ] ; then
+            sh ./tcls_base58check_enc.sh -T -q -p2pkh $result
+          else
+            sh ./tcls_base58check_enc.sh -q -p2pkh $result
+          fi
           ;;
       66|130)
           echo "  and translates base58 encoded into this bitcoin address:"
-          sh ./tcls_base58check_enc.sh -q -p2pk $result
+          if [ $TESTNET -eq 1 ] ; then
+            sh ./tcls_base58check_enc.sh -T -q -p2pk $result
+          else
+            sh ./tcls_base58check_enc.sh -q -p2pk $result
+          fi
           ;;
     esac
 }
@@ -298,6 +313,11 @@ else
            shift 
          fi
          check_trx_len
+         shift 
+         ;;
+      -T)
+         TESTNET=1
+         echo "*** TESTNET !"
          shift 
          ;;
       -u)
@@ -567,10 +587,18 @@ while [ $loopcounter -lt $tx_in_count_dec ]
       echo "  of previous trx, for which you'll need the privkey to sign:"
       decode_pkscript $sig_script
     else
-      if [ "$VVerbose" -eq 1 ] ; then
-        ./tcls_in_sig_script.sh -v $sig_script 
+      if [ "$TESTNET" -eq 1 ] ; then
+        if [ "$VVerbose" -eq 1 ] ; then
+          ./tcls_in_sig_script.sh -T -v $sig_script 
+        else
+          ./tcls_in_sig_script.sh -T -q $sig_script 
+        fi 
       else
-        ./tcls_in_sig_script.sh -q $sig_script 
+        if [ "$VVerbose" -eq 1 ] ; then
+          ./tcls_in_sig_script.sh -v $sig_script 
+        else
+          ./tcls_in_sig_script.sh -q $sig_script 
+        fi 
       fi 
     fi
   fi
