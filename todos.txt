@@ -160,6 +160,38 @@ tcls_create.sh:
 --> assume we have -f and -t, then we can read values from network?   
 
 
+I44: 25dec2016, svn:
+====================
+tcls_base58check_enc.sh
+add testcase file for all testcases in the file "Address_Generation_Test.txt" in the Bitcoin directory. Each line is a step of the key conversion, beginning with priv key, then pubkey, then sha and so on... until base58 encoded Bitcoin address... like this:
+./tcls_base58check_enc.sh -v -p2pk 047747ECECEB2C6692D6CEAAF4A11ED9DB900741730C201F95B8A4EEF20D7DEE2CDEC2802C6EDC880BEE41E9D114A8708260D01AB107B5177DECB4E109C5479223 | grep "^ " | tail -n 9
+
+
+I45: 26dec2016, svn:
+====================
+tcls_sign.sh
+add some testcases based on priv keys from file "Address_Generation_Test.txt" in the Bitcoin directory. The  file contains priv and pub keys ... 
+
+
+I46: 04jan2017, svn:
+====================
+Can I build a transaction review of prev trx? The tree looks like this (left to right):
+
+prev trx      TRX2          TRX1       my wallet
+=================================================
+Input 1 \
+Input 2 ----- UTXO --\
+Input 3 /             \
+                       ---- UTX0 ----> 1JBM...68m 
+                      /
+Input 4 ----- UTXO --/
+
+
+I46: 20mar2017, svn:
+====================
+beautify output of tcls_trx2txt.sh: similiar to the way, the tree output is done in the "dot profile" alias:
+alias tree="find ./ -print | sed -e 's;[^/]*/; /;g;s;/ ;    ;g;s;^ /$;.;;s; /;|-- ;g'"
+
 
 
 #####################################
@@ -180,9 +212,28 @@ send funds into the multisig address D (starts with a "3")...
 make sure all the private keys for your A, B & C addresses are all backed up/stored independently of each other. 
 to take funds out of D, create a transaction using one of A,B or C.. and then co-sign the transaction using one of the other addresses.
 
+file:///Data/BitCoin/Bitcoin_multisig_the_hard_way_P2SH.html
+
+
 E3: Sending
 ===============
 can a signed trx be sent to the net without tools?
 --> https://bitcointalk.org/index.php?topic=1043518.0
 curl -X POST -d tx=010000000158891e8f28100642464417f53845c3953a43e31b35d061bdbf6ca3a64fffabb8000000008c493046022100a9d501a6f59c45a24e65e5030903cfd80ba33910f24d6a505961d64fa5042b4f02210089fa7cc00ab2b5fc15499fa259a057e6d0911d4e849f1720cc6bc58e941fe7e20141041a2756dd506e45a1142c7f7f03ae9d3d9954f8543f4c3ca56f025df66f1afcba6086cec8d4135cbb5f5f1d731f25ba0884fc06945c9bbf69b9b543ca91866e79ffffffff01204e0000000000001976a914d04b020dab70a7dd7055db3bbc70d27c1b25a99c88ac00000000 https://blockchain.info/pushtx
+
+
+E4: creating priv/pub keypairs
+===============================
+create a priv/pubkey pair using arcrandom on OpenBSD?
+similiar to "bitcoin_tools.sh" ?
+
+
+E5: Steganography
+=================
+http://incoherency.co.uk/blog/stories/steganographic-bitcoin-seeds.html
+
+
+E6: BIP39
+=========
+https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki
 

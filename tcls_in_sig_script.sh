@@ -3,8 +3,9 @@
 # Read the bitcoin script_SIG OPCODES from a transaction's TRX_IN 
 # script by Sven-Volker Nowarra 
 # 
-# Version	by	date	comment
-# 0.1		svn	21sep16 initial release, code from trx2txt (discontinued)
+# Version by	date	comment
+# 0.1	  svn	21sep16 initial release, code from trx2txt (discontinued)
+# 0.2	  svn	30mar17 added logic for TESTNET
 # 
 # Copyright (c) 2015, 2016 Volker Nowarra 
 # Complete rewrite of code in June 2016 from following reference:
@@ -55,6 +56,7 @@ sig_string=''
 Quiet=0
 Verbose=0
 VVerbose=0
+TESTNET=0
 param=483045022100A428348FF55B2B59BC55DDACB1A00F4ECDABE282707BA5185D39FE9CDF05D7F0022074232DAE76965B6311CEA2D9E5708A0F137F4EA2B0E36D0818450C67C9BA259D0121025F95E8A33556E9D7311FA748E9434B333A4ECFB590C773480A196DEAB0DEDEE1
 
 #################################
@@ -470,7 +472,11 @@ S19_PK() {
     echo "    * This terminates the Public Key (X9.63 COMPRESSED form)"
     echo "    * corresponding bitcoin address is:"
     rmd160_sha256
-    ./tcls_base58check_enc.sh -q -p2pkh $result
+    if [ $TESTNET -eq 1 ] ; then
+      ./tcls_base58check_enc.sh -T -q -p2pkh $result
+    else
+      ./tcls_base58check_enc.sh -q -p2pkh $result
+    fi
     ret_string=''
 }
 #####################################
@@ -483,7 +489,11 @@ S20_PK() {
     echo "    * This terminates the Public Key (X9.63 UNCOMPRESSED form)"
     echo "    * corresponding bitcoin address is:"
     rmd160_sha256
-    ./tcls_base58check_enc.sh -q -p2pkh $result
+    if [ $TESTNET -eq 1 ] ; then
+      ./tcls_base58check_enc.sh -T -q -p2pkh $result
+    else
+      ./tcls_base58check_enc.sh -q -p2pkh $result
+    fi
     ret_string=''
 }
 #####################################
@@ -613,7 +623,11 @@ S30_MSIG2of2() {
           echo "        This is MultiSig's Public Key (X9.63 COMPRESSED form)"
           printf "        corresponding bitcoin address is: "
           rmd160_sha256
-          ./tcls_base58check_enc.sh -q -p2pkh $result
+          if [ $TESTNET -eq 1 ] ; then
+            ./tcls_base58check_enc.sh -T -q -p2pkh $result
+          else
+            ./tcls_base58check_enc.sh -q -p2pkh $result
+          fi
           msig_redeem_str=$msig_redeem_str$ret_string
           vv_output "       msig_redeem_str=$msig_redeem_str"
           ret_string=''
@@ -623,7 +637,11 @@ S30_MSIG2of2() {
           echo "        This is MultiSig's Public Key (X9.63 UNCOMPRESSED form)"
           printf "        corresponding bitcoin address is: "
           rmd160_sha256
-          ./tcls_base58check_enc.sh -q -p2pkh $result
+          if [ $TESTNET -eq 1 ] ; then
+            ./tcls_base58check_enc.sh -T -q -p2pkh $result
+          else
+            ./tcls_base58check_enc.sh -q -p2pkh $result
+          fi
           msig_redeem_str=$msig_redeem_str$ret_string
           vv_output "       msig_redeem_str=$msig_redeem_str"
           ret_string=''
@@ -638,7 +656,11 @@ S30_MSIG2of2() {
           ret_string=$msig_redeem_str
           printf "        corresponding bitcoin address is: "
           rmd160_sha256
-          ./tcls_base58check_enc.sh -q -p2sh $result 
+          if [ $TESTNET -eq 1 ] ; then
+            ./tcls_base58check_enc.sh -T -q -p2sh $result
+          else
+            ./tcls_base58check_enc.sh -q -p2sh $result
+          fi
           ret_string=''
           msig_redeem_str=''
           break
@@ -699,7 +721,11 @@ S37_OP2() {
           echo "        This is MultiSig's Public Key (X9.63 COMPRESSED form)"
           printf "        corresponding bitcoin address is: "
           rmd160_sha256
-          ./tcls_base58check_enc.sh -q -p2pkh $result
+          if [ $TESTNET -eq 1 ] ; then
+            ./tcls_base58check_enc.sh -T -q -p2pkh $result
+          else
+            ./tcls_base58check_enc.sh -q -p2pkh $result
+          fi
           msig_redeem_str=$msig_redeem_str$ret_string
           vv_output "        msig_redeem_str=$msig_redeem_str"
           ret_string=''
@@ -709,7 +735,11 @@ S37_OP2() {
           echo "        This is MultiSig's Public Key (X9.63 UNCOMPRESSED form)"
           printf "        corresponding bitcoin address is: "
           rmd160_sha256
-          ./tcls_base58check_enc.sh -q -p2pkh $result
+          if [ $TESTNET -eq 1 ] ; then
+            ./tcls_base58check_enc.sh -T -q -p2pkh $result
+          else
+            ./tcls_base58check_enc.sh -q -p2pkh $result
+          fi
           msig_redeem_str=$msig_redeem_str$ret_string
           vv_output "       msig_redeem_str=$msig_redeem_str"
           ret_string=''
@@ -724,7 +754,11 @@ S37_OP2() {
           ret_string=$msig_redeem_str
           printf "        corresponding bitcoin address is: "
           rmd160_sha256
-          ./tcls_base58check_enc.sh -q -p2sh $result
+          if [ $TESTNET -eq 1 ] ; then
+            ./tcls_base58check_enc.sh -T -q -p2sh $result
+          else
+            ./tcls_base58check_enc.sh -q -p2sh $result
+          fi
           ret_string=''
           msig_redeem_str=''
           break
@@ -745,50 +779,49 @@ S99_Unknown() {
   op_data_show
 }
 	  
-##########################
-### AND HERE WE GO ... ###
-##########################
+####################
+### LET'S GO ... ###
+####################
 
-case "$1" in
-  -q)
-     Quiet=1
-     shift
-     ;;
-  -v)
-     Verbose=1
-     shift
-     ;;
-  -vv)
-     Verbose=1
-     VVerbose=1
-     shift
-     ;;
-  -?|-h|--help)
-     echo "usage: trx_in_sig_script.sh [-?|-h|--help|-q] hex_string"
-     echo "  "
-     echo "convert a raw hex string from a bitcoin trx-out into it's OpCodes. "
-     echo "if no parameter is given, the data from a demo trx is used. "
-     echo "  "
-     exit 0
-     ;;
-  *)
-     ;;
-esac
+while [ $# -ge 1 ] 
+ do
+  case "$1" in
+    -q)
+       Quiet=1
+       shift
+       ;;
+    -T)
+       TESTNET=1
+       shift
+       ;;
+    -v)
+       Verbose=1
+       shift
+       ;;
+    -vv)
+       Verbose=1
+       VVerbose=1
+       shift
+       ;;
+    -?|-h|--help)
+       echo "usage: tcls_in_sig_script.sh [-?|-h|--help|-q|-T|-v|-vv] hex_string"
+       echo "  "
+       echo "convert a raw hex string from a bitcoin tx-out into it's OpCodes. "
+       echo "if no hex string is given, the data from a demo tx is used. "
+       echo "  "
+       exit 0
+       ;;
+    *)
+       param=$( echo $1 | tr "[:lower:]" "[:upper:]" )
+       shift
+       ;;
+  esac
+done
 
 if [ $Quiet -eq 0 ] ; then 
   echo "  ##################################################################"
-  echo "  ### trx_in_sig_script.sh: decode SIG_script OPCODES from a trx ###"
+  echo "  ### tcls_in_sig_script.sh: decode SIG_script OPCODES from a TX ###"
   echo "  ##################################################################"
-  # echo "  "
-fi
-
-if [ $# -eq 0 ] ; then 
-  if [ $Quiet -eq 0 ] ; then 
-    echo "no parameter, hence showing example pk_script:"
-    echo "$param"
-  fi
-else 
-  param=$( echo $1 | tr "[:lower:]" "[:upper:]" )
 fi
 
 if [ $VVerbose -eq 1 ] ; then 

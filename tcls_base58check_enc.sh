@@ -9,10 +9,11 @@
 # Complete rewrite of code in Nov/Dec 2015 from following reference:
 #   https://en.bitcoin.it/wiki/Protocol_specification#tx
 # 
-# Version	by	date	comment
-# 0.1		svn	01jun16	initial release
-# 0.2		svn	17jul16	simplified code in step 9
-# 0.3		svn	11nov16	rework for compressed pub keys
+# Version  by   date	comment
+# 0.1      svn	01jun16	initial release
+# 0.2	   svn	17jul16	simplified code in step 9
+# 0.3	   svn	11nov16	rework for compressed pub keys
+# 0.4	   svn	29mar17	include work for test and regtest addresses
 # 
 # Permission to use, copy, modify, and distribute this software for any 
 # purpose with or without fee is hereby granted, provided that the above 
@@ -28,10 +29,15 @@
 # USE OR PERFORMANCE OF THIS SOFTWARE. 
 #
  
+PREFIX_PUBKEY_HASH=00
+PREFIX_TESTNET_PUBKEY_HASH=05
+PREFIX_SCRIPT_HASH=6F
+PREFIX_TESTNET_SCRIPT_HASH=C4
 ECDSA_PK=0
 ECDSA_PKH=0
 P2SH=0
 QUIET=0
+TESTNET=0
 VERBOSE=0
 param=010966776006953D5567439E5E39F86A0D273BEE
 base58str="123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
@@ -53,6 +59,7 @@ proc_help() {
   echo " -p2pkh requires a pubkey hash (40 hex Bytes)"
   echo " -p2sh  parameter string shall be converted to P2SH address"
   echo " -q     quiet, do only show the final address"
+  echo " -T     work for Testnet"
   echo " -v     display verbose output"
   echo "  "
 }
@@ -115,6 +122,10 @@ else
          fi
          shift
          ;;
+      -T)
+         TESTNET=1
+         shift
+         ;;
       -v)
          VERBOSE=1
          if [ $QUIET -eq 1 ] ; then
@@ -142,6 +153,9 @@ if [ $QUIET -eq 0 ] ; then
   echo "  "
   echo "using $param"
   echo " "
+  if [ $TESTNET -eq 0 ] ; then
+    echo "preparing for TESTNET"
+  fi
 fi
 
 len_result=${#param} 
@@ -181,7 +195,11 @@ if [ $ECDSA_PK -eq 1 ] ; then
   v_output "   $result"
 fi
 ####################################
-### 4: add zero at the beginning ###
+### 4: add address prefix (prod and test differ)
+###    hex 00 for Pubkey hash (P2PKH address)
+###    hex 05 for Script hash (P2SH address) 
+###    hex 6F for testnet Pubkey hash (P2PKH address)
+###    hex C4 for testnet Script hash (P2SH address) 
 ####################################
 if [ $ECDSA_PKH -eq 1 ] ; then 
   ### ECDSA Public Key Hash are 20 hex Bytes (40 decimal)
@@ -192,17 +210,27 @@ if [ $ECDSA_PKH -eq 1 ] ; then
     v_output " 20 hex codes, a public key hash"
   else
     echo "*** ERROR: string does not match expected length"
-    echo "           public key hashes start with '01' and have 40 chars"
+    echo "           key hashes have 40 chars"
     exit 1
   fi
 fi
-v_output "4: add 0x00 [or 0x05 for P2SH] at the beginning" 
-if [ $P2SH -eq 1 ] ; then 
-  result="05$param"
+if [ $TESTNET -eq 1 ] ; then
+  v_output "4: add testnet address prefix 0x6F for P2PKH, or 0xC4 for P2SH" 
+  if [ $P2SH -eq 1 ] ; then 
+    result="c4$param"
+  else
+    result="6f$param"
+  fi
 else
-  result="00$param"
+  v_output "4: add address prefix 0x00 for P2PKH, 0x05 for P2SH"
+  if [ $P2SH -eq 1 ] ; then 
+    result="05$param"
+  else
+    result="00$param"
+  fi
 fi
 result4=$result
+
 v_output "   $result"
 
 ### verify result string: check, that string is a 
