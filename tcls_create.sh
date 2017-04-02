@@ -1,5 +1,5 @@
 #!/bin/sh
-# tool to create a raw, unsigned bitcoin transaction 
+# tool to create a raw, unsigned bitcoin transaction or msig addresses and redeem script
 # 
 # Copyright (c) 2015, 2016 Volker Nowarra 
 # Coded in June 2016 following this reference:
@@ -9,6 +9,7 @@
 # Version by      date    comment
 # 0.1	  svn     13jul16 initial release from previous "trx2txt" (discontinued) code
 # 0.2	  svn     20dec16 rework of fee calculation
+# 0.3     svn     05feb17 multisig function included
 # 
 # Permission to use, copy, modify, and distribute this software for any 
 # purpose with or without fee is hereby granted, provided that the above 
@@ -51,36 +52,54 @@ typeset -i prev_amount=0
 typeset -i prev_total_amount=0
 typeset -i f_param_flag=0
 typeset -i m_param_flag=0
+typeset -i r_param_flag=0
 typeset -i t_param_flag=0
+typeset -i T_param_flag=0
 typeset -i std_sig_chars=90     # expected chars that need to be added, to calculate txfee
+
+# multisig vars 
+typeset -i msig_reqsigs=0
+typeset -i msig_reqkeys=0
+msig_cs_pubkeys=''
 
 StepCode=''
 typeset -i StepCode_decimal=0
+
+# and source the global var's config file
+. ./tcls.conf
 
 #################################
 # procedure to display helptext #
 #################################
 proc_help() {
   echo " "
-  echo "usage: $0 [-h|-q|-v|-vv] -m|-t <tx_id> <params> [txfee] [ret_address]"
-  echo "usage: $0 [-h|-q|-v|-vv] -f <filename> <amount> <address> [txfee] [ret_address]"
-  echo " "
-  echo "Create a single input transaction from command line (or multiple inputs with '-f')"
+  echo "usage: $0 [-h|-q|-T|-v|-vv] <options>"
   echo " -h  show this HELP text"
+  echo " -T  use Testnet"
   echo " -v  display Verbose output"
   echo " -vv display VERY Verbose output"
   echo " "
-  echo " -f  create a TX with multiple inputs from file (use -f help for further details)"
-  echo " -m  MANUALLY provide <params> for a single input and output (see below)"
+  echo "Create a transaction from command line where <options> is one of:"
+  echo " -f  create a TX with multiple inputs from a file:"
+  echo "     <filename> <amount> <address> [txfee] [ret_address]"
+  echo " -m  create a MULTISIG address, with n sigs of m keys"
+  echo "     <n> <m> <comma separated list of pubkeys>"
+  echo "     pubkeys are compressed (66) or uncompressed (130) hex chars [33 or 65 Bytes]"
+  echo " -r  manually create a RAW TX, for a single input and output"
+  echo "     <prev tx id> <prev output index> <prev pubkey script> <amount> <address>"
+  echo "     [txfee] [ret_address]"
   echo " -t  <TRANSACTION_ID>: fetch TX-id and pubkey script from blockchain.info"
+  echo "     <prev_tx_id> <prev output index> <amount> <address>"
+  echo "     [txfee] [ret_address]"
   echo " "
-  echo " <params> consists of these details (keep the order!):"
-  echo "  1) <prev output index> : output index from previous TX-ID"
-  echo "  2) <prev pubkey script>: (not with '-t') the PK SCRIPT from previous TX"
-  echo "  3) <amount>            : the amount to spend (decimal, in Satoshi)"
-  echo "                           *** careful: input - output = TX fee !!!"
-  echo "  4) <address>           : the target Bitcoin address"
-  echo " "
+  echo " Description of parameters:"
+  echo "  <prev output index> : output index from previous TX-ID"
+  echo "  <prev pubkey script>: (not with '-t') the PK SCRIPT from previous TX"
+  echo "  <amount>            : the amount to spend (decimal, in Satoshi)"
+  echo "                         *** careful: input - output = TX fee !!!"
+  echo "  <address>           : the target Bitcoin address"
+  echo "  [txfee]             : a self defined value in Satoshis as TX fee (optional)"
+  echo "  [ret_address]       : adress for the change (optional)"
 }
 
 #######################################
@@ -343,6 +362,7 @@ step3to7() {
   ### STEP 4 - TX_IN, the output index we want to redeem from                ###
   ##############################################################################
   v_output "###  4. TX_IN, the output index we want to redeem from"
+  # check that we have a number, not a char...
   StepCode=$( echo "obase=16;$PREV_OutPoint"|bc -l)
   StepCode=$( zero_pad $StepCode 8 )
   StepCode=$( reverse_hex $StepCode )
@@ -440,7 +460,6 @@ step11() {
 ##############################
 ### Calculate the trx fees ###
 ##############################
-calc_txfee() {
 # ... THIS NEEDS FURTHER ANALYSIS !!!
 # trx fees are calculated  with a trx fee per byte, which is changing...
 # Exact length can only be determined during signing process, but here is 
@@ -466,22 +485,145 @@ calc_txfee() {
 # eventually it makes sense, to verify TX_Fee calcs after the signing process?
 # just to double check?
 #
-txfee_pb_adjusted=$txfee_per_byte
-echo $RAW_TX > $c_utx_fn
-TX_chars=$( wc -c $c_utx_fn | awk '{ print $1 }' )
-TX_bytes=$(( $line_items * std_sig_chars + $TX_chars ))
-if [ $TX_bytes -le 1000 ] ; then
-  c_txfee=$(( $txfee_per_byte * $TX_bytes ))
-elif [ $TX_bytes -le 10000 ] ; then
-  txfee_pb_adjusted=$(( $txfee_per_byte / 2 ))
-  c_txfee=$(( $txfee_pb_adjusted * $TX_bytes ))
-elif [ $TX_bytes -le 100000 ] ; then
-  txfee_pb_adjusted=$(( $txfee_per_byte / 3 ))
-  c_txfee=$(( $txfee_pb_adjusted * $TX_bytes ))
-else
-  txfee_pb_adjusted=$(( $txfee_per_byte / 4 ))
-  c_txfee=$(( $txfee_pb_adjusted * $TX_bytes ))
-fi
+calc_txfee() {
+  txfee_pb_adjusted=$txfee_per_byte
+  echo $RAW_TX > $c_utx_fn
+  TX_chars=$( wc -c $c_utx_fn | awk '{ print $1 }' )
+  TX_bytes=$(( $line_items * $std_sig_chars + $TX_chars ))
+  if [ $TX_bytes -le 1000 ] ; then
+    c_txfee=$(( $txfee_per_byte * $TX_bytes ))
+  elif [ $TX_bytes -le 10000 ] ; then
+    txfee_pb_adjusted=$(( $txfee_per_byte / 2 ))
+    c_txfee=$(( $txfee_pb_adjusted * $TX_bytes ))
+  elif [ $TX_bytes -le 100000 ] ; then
+    txfee_pb_adjusted=$(( $txfee_per_byte / 3 ))
+    c_txfee=$(( $txfee_pb_adjusted * $TX_bytes ))
+  else
+    txfee_pb_adjusted=$(( $txfee_per_byte / 4 ))
+    c_txfee=$(( $txfee_pb_adjusted * $TX_bytes ))
+  fi
+}
+
+
+#################################################################
+### Multisig: create msig address and reddemscript, then exit ###
+#################################################################
+# validity rules require that the P2SH redeem script is at most 520 bytes. 
+# As the redeem script is [m pubkey1 pubkey2 ... n OP_CHECKMULTISIG], it 
+# follows that the length of all public keys together plus the number of 
+# public keys must not be over 517. Usually sigs are 73 chars:
+#   For compressed public keys, this means up to n=15
+#     m*73 + n*34 <= 496 (up to 1-of-12, 2-of-10, 3-of-8 or 4-of-6).
+#   For uncompressed ones, up to n=7
+#     m*73 + n*66 <= 496 (up to 1-of-6, 2-of-5, 3-of-4).
+#
+proc_msig() {
+  # 0.) verify, that $opcode_msig_reqkeys is not greater max, and sigs <= keys
+  # 1.) convert msig_reqsigs into OP1-OP15 (dez 81-96, hex 0x51-0x60) for redeemscript
+  # 2.) parse msig_cs_pubkeys, and separate into single public keys
+  # 3.) verify, that we have amount of $msig_reqkeys in $msig_cs_pubkeys
+  # 4.) verify each pubkey for validity 
+  # 5.) get each pubkey's length
+  # 6.) assemble redeemscript (example 2of3)
+  #     <OP_2><len pubkey_A><pubkey_A><len PK_B><PKB><len PK_C><PK_C><OP_3><OP_CHECKMULTISIG>
+  # 7.) create P2SH adress from redeem script
+  #     RIPEMD160(SHA256(redeemscript))
+  #     base58_encode("05", redeemscriptHash)
+  # 8.) check for these max values:
+  #     msig_redeemscript_maxlen=520
+  #     msig_max_uncompressed_keys=7
+  #     msig_max_compressed_keys=15
+
+  i=0
+  len_pubkey=0
+  opcode_msig_reqsigs=0
+  opcode_msig_reqkeys=0
+  v_output " msig: required signatures:      $msig_reqsigs"
+  v_output " msig: required keys:            $msig_reqkeys"
+  v_output " msig: comma separated pubkeys:  $msig_cs_pubkeys"
+
+  # STEP 0: verify we don't have more than x of 15 ...
+  if [ $msig_reqkeys -gt $msig_max_compressed_keys ] ; then
+    echo "*** ERROR: required msig keys ($msig_reqkeys) is greater than possible max value ($msig_max_compressed_keys)."
+    echo "  * Exiting gracefully..."
+    exit 1
+  fi 
+  if [ $msig_reqsigs -gt $msig_reqkeys ] ; then
+    echo "*** ERROR: required signatures ($msig_reqsigs) must be less or equal required keys ($msig_reqkeys)."
+    echo "  * Exiting gracefully..."
+    exit 1
+  fi 
+
+
+  # STEP 1: convert msig_reqsigs in OP_Code
+  # (80 + msig_reqsigs) = Op_code in decimal, convert to hex ...
+  opcode_msig_reqsigs=$( echo "obase=16;$opcode_numericis_offset+$msig_reqsigs" | bc )
+  opcode_msig_reqkeys=$( echo "obase=16;$opcode_numericis_offset+$msig_reqkeys" | bc )
+  redeemscript=$opcode_msig_reqsigs
+
+  # STEP 2: verify, that we have amount of $msig_reqkeys in $msig_cs_pubkeys
+  for pubkey in $(echo $msig_cs_pubkeys | tr "," " "); do
+    i=$(( $i + 1 ))
+  done  
+  if [ $i -ne $msig_reqkeys ] ; then
+    echo "*** Mismatch: comma separated key list does not contain $msig_reqkeys required keys."
+    echo "  * found only $i key(s). Exiting gracefully..."
+    exit 1
+  else
+    v_output " msig: found $i of $msig_reqkeys required keys in comma separated key list - good"
+  fi
+
+  # STEP 3: parse msig_cs_pubkeys
+  for pubkey in $(echo $msig_cs_pubkeys | tr "," " "); do
+
+    # STEP 4: verify each pubkey
+    printf $pubkey | awk -f tcls_verify_hexkey.awk
+    if [ $? -gt 0 ] ; then
+      echo "  * Exiting gracefully..."
+      exit 1
+    fi
+
+    # STEP 5: get each pubkey's length
+    # echo $pubkey
+    # printf "%s" $pubkey | wc -c 
+    len_pubkey=$( printf "%s" $pubkey | wc -c )
+    len_hex=$( echo "obase=16;$len_pubkey/2" | bc )
+
+    # STEP 6: assemble redeemscript
+    redeemscript=$redeemscript$len_hex$pubkey
+  done
+
+  redeemscript=$redeemscript$opcode_msig_reqkeys$opcode_chkmsig
+  vv_output "$redeemscript"
+
+  # STEP 7a: RIPEMD160(SHA256(redeemscript))
+  tmpvar=$( echo $redeemscript | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
+  result=$( printf "$tmpvar" | openssl dgst -sha256 | cut -d " " -f 2 )
+  result=$( echo $result | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
+  result=$( printf "$result" | openssl dgst -rmd160 | cut -d " " -f 2 )
+  param=$result
+
+  # STEP 7b: base58_encode("05", redeemscriptHash)
+  if [ $T_param_flag -eq 0 ] ; then ./tcls_base58check_enc.sh -q -p2sh $result; fi
+  if [ $T_param_flag -eq 1 ] ; then ./tcls_base58check_enc.sh -q -T -p2sh $result; fi
+
+# STEP 8: check against these values:
+# msig_redeemscript_maxlen=520
+# msig_max_uncompressed_keys=7
+# msig_max_compressed_keys=15
+  exit 0
+
+}
+
+
+###########################################################
+### check numeric values of PREV_OutPoint and TX_amount ###
+###########################################################
+chk_numeric() {
+  if ! expr "$1" : '[0-9]*$'>/dev/null; then
+    echo "Non numeric parameter $1 for $2. Please fix. Exiting gracefully ..."
+    exit 1
+  fi
 }
 
 
@@ -527,134 +669,198 @@ else
     case "$1" in
       -f)
          f_param_flag=1
-         if [ $# -lt 4 ] ; then
+         shift 
+         if [ $# -lt 3 ] ; then
            echo "*** you must provide correct number of parameters"
            proc_help
            exit 1
          fi
-         if [ "$2" == ""  ] ; then
+         if [ "$1" == ""  ] ; then
            echo "*** you must provide a FILENAME to the -f parameter!"
            exit 1
          fi
-         filename=$2
-         TX_amount=$3
-         TARGET_Address=$4
-         if [ $# -gt 4 ] ; then
-           # if length of string $5 is more then 8 chars, then it is certainly a return address
-           # can't imagine trx fees of more than a bitcoin...
-           if [ ${#txfee_per_byte} -gt 8 ] ; then
-             echo "RETURN_Address=$5"
-             RETURN_Address=$5
-           else 
+         if [ "$1" == "-m" ] || [ "$1" == "-r" ] || [ "$1" == "-t" ] ; then
+           echo "*** you cannot use -f with -m or -r or -t at the same time."
+           echo "    Exiting gracefully ... "
+           exit 1
+         fi
+         filename=$1
+         shift 
+         chk_numeric $1 TX_amount
+         TX_amount=$1
+         shift 
+         TARGET_Address=$1
+         shift 
+         # if there is only one parameter left, it can be tx_fee or return_address
+         # if length of param is less then 9 chars, then it is for sure tx_fee. 
+         # TX fees shouldn't have 9 digits of satoshis (aka more than a bitcoin)...
+         # otherwise it is the return address, and trxfee needs to get calculated automatically.
+         if [ $# -eq 1 ] ; then
+           if [ ${#txfee_per_byte} -lt 9 ] ; then
              txfee_param_flag=1
-             txfee_per_byte=$5
+             txfee_per_byte=$1
+             shift
+           else
+             RETURN_Address=$1
+             shift
            fi
-           shift 
          fi
-         if [ $# -eq 5 ] ; then
-           RETURN_Address=$5
-           shift 
+         if [ $# -eq 2 ] ; then
+           txfee_param_flag=1
+           txfee_per_byte=$1
+           RETURN_Address=$2
+           shift
+           shift
          fi
-         shift 
-         shift 
-         shift 
-         shift 
+         if [ $# -gt 0 ] ; then
+           echo "*** already detected last parameter as return address, don't know what to do"
+           echo "    with the following parameter(s). Exiting gracefully ... "
+           exit 0
+         fi
          ;;
       -m)
          m_param_flag=1
-         if [ $# -lt 6 ] ; then
+         shift 
+         if [ "$1" == "-f" ] || [ "$1" == "-r" ] || [ "$1" == "-t" ] ; then
+           echo "*** you cannot use -m with -f or -r or -t at the same time."
+           echo "    Exiting gracefully ... "
+           exit 1
+         fi
+         if [ $# -lt 3 ] ; then
            echo "*** you must provide correct number of parameters"
            proc_help
            exit 1
          fi
-         if [ $t_param_flag -eq 1 ] ; then
-           echo "*** you cannot use -m with -t at the same time."
-           echo "    Exiting gracefully ... "
-           exit 1
-         fi
-         if [ "$2" == ""  ] ; then
-           echo "*** you must provide a Bitcoin TRANSACTION_ID to the -m parameter!"
-           exit 1
-         fi
-         prev_TX=$2
-         PREV_OutPoint=$3
-         PREV_PKScript=$4
-         TX_amount=$5
-         TARGET_Address=$6
-         if [ $# -gt 6 ] ; then
-           # if length of string $7 is more then 8 chars, then it is certainly a return address
-           # can't imagine trx fees of more than a bitcoin...
-           if [ ${#txfee_per_byte} -gt 8 ] ; then
-             echo "RETURN_Address=$7"
-             RETURN_Address=$7
-           else 
-             txfee_param_flag=1
-             txfee_per_byte=$7
-           fi
-           shift
-         fi
-         if [ $# -eq 7 ] ; then
-           RETURN_Address=$7
-           shift
-         fi
+         chk_numeric $1 msig_reqsig
+         msig_reqsigs=$1
          shift 
+         chk_numeric $1 msig_reqkeys
+         msig_reqkeys=$1
          shift 
+         msig_cs_pubkeys=$1
          shift 
-         shift 
-         shift 
-         shift 
+         proc_msig
          ;;
-      -t)
-         t_param_flag=1
+      -r)
+         r_param_flag=1
+         shift 
+         if [ "$1" == "-f" ] || [ "$1" == "-m" ] || [ "$1" == "-t" ] ; then
+           echo "*** you cannot use -r with -f or -m or -t at the same time."
+           echo "    Exiting gracefully ... "
+           exit 0
+         fi
          if [ $# -lt 5 ] ; then
            echo "*** you must provide correct number of parameters"
            proc_help
            exit 0
          fi
-         if [ $m_param_flag -eq 1 ] ; then
-           echo "*** you cannot use -t with -m at the same time!"
+         prev_TX=$1
+         shift 
+         chk_numeric $1 PREV_OutPoint
+         PREV_OutPoint=$1
+         shift 
+         PREV_PKScript=$1
+         shift 
+         chk_numeric $1 TX_amount
+         TX_amount=$1
+         shift 
+         TARGET_Address=$1
+         shift 
+         # if there is only one parameter left, it can be tx_fee or return_address
+         # if length of param is less then 9 chars, then it is for sure tx_fee. 
+         # TX fees shouldn't have 9 digits of satoshis (aka more than a bitcoin)...
+         # otherwise it is the return address, and trxfee needs to get calculated automatically.
+         if [ $# -eq 1 ] ; then
+           if [ ${#txfee_per_byte} -lt 9 ] ; then
+             txfee_param_flag=1
+             txfee_per_byte=$1
+             shift
+           else
+             RETURN_Address=$1
+             shift
+           fi
+         fi
+         if [ $# -eq 2 ] ; then
+           txfee_param_flag=1
+           txfee_per_byte=$1
+           RETURN_Address=$2
+           shift
+           shift
+         fi
+         if [ $# -gt 0 ] ; then
+           echo "*** already detected last parameter as return address, don't know what to do"
+           echo "    with the following parameter(s). Exiting gracefully ... "
+           exit 0
+         fi
+         ;;
+      -t)
+         t_param_flag=1
+         shift 
+         if [ "$1" == "-f" ] || [ "$1" == "-m" ] || [ "$1" == "-r" ] ; then
+           echo "*** you cannot use -t with -f or -m or -r at the same time."
            echo "    Exiting gracefully ... "
            exit 0
          fi
-         if [ "$2" == ""  ] ; then
+         if [ $# -lt 4 ] ; then
+           echo "*** you must provide correct number of parameters"
+           proc_help
+           exit 0
+         fi
+         if [ "$1" == ""  ] ; then
            echo "*** you must provide a Bitcoin TRANSACTION_ID to the -t parameter!"
            exit 0
          fi
-         prev_TX=$2
-         PREV_OutPoint=$3
-         TX_amount=$4
-         TARGET_Address=$5
-         if [ $# -gt 5 ] ; then
-           # if length of string $5 is more then 8 chars, then it is certainly a return address
-           # can't imagine trx fees of more than a bitcoin...
-           if [ ${#txfee_per_byte} -gt 8 ] ; then
-             echo "RETURN_Address=$6"
-             RETURN_Address=$6
-           else 
+         prev_TX=$1
+         shift 
+         chk_numeric $1 PREV_OutPoint
+         PREV_OutPoint=$1
+         shift 
+         chk_numeric $1 TX_amount
+         TX_amount=$1
+         shift 
+         TARGET_Address=$1
+         shift 
+         # if there is only one parameter left, it can be tx_fee or return_address
+         # if length of param is less then 9 chars, then it is for sure tx_fee. 
+         # TX fees shouldn't have 9 digits of satoshis (aka more than a bitcoin)...
+         # otherwise it is the return address, and trxfee needs to get calculated automatically.
+         if [ $# -eq 1 ] ; then
+           if [ ${#txfee_per_byte} -lt 9 ] ; then
              txfee_param_flag=1
-             txfee_per_byte=$6
+             txfee_per_byte=$1
+             shift
+           else
+             RETURN_Address=$1
+             shift
            fi
+         fi
+         if [ $# -eq 2 ] ; then
+           txfee_param_flag=1
+           txfee_per_byte=$1
+           RETURN_Address=$2
+           shift
            shift
          fi
-         if [ $# -eq 6 ] ; then
-           RETURN_Address=$6
-           shift
+         if [ $# -gt 0 ] ; then
+           echo "*** already detected last parameter as return address, don't know what to do"
+           echo "    with the following parameter(s). Exiting gracefully ... "
+           exit 0
          fi
-         shift 
-         shift 
-         shift 
-         shift 
-         shift 
+         ;;
+      -T)
+         T_param_flag=1
+         echo "TESTNET output "
+         shift
          ;;
       -v)
          Verbose=1
-         echo " Verbose output turned on"
+         echo "Verbose output turned on"
          shift
          ;;
       -vv)
          Verbose=1
          VVerbose=1
-         echo " VERY Verbose and Verbose output turned on"
+         echo "VERY Verbose and Verbose output turned on"
          shift
          ;;
       *)
@@ -679,7 +885,9 @@ v_output " TARGET_Address   $TARGET_Address"
 v_output " txfee_per_byte   $txfee_per_byte"
 v_output " RETURN_Address   $RETURN_Address"
 
-# verify operating system, cause 
+#######################################
+### verify operating system, cause: ###
+#######################################
 # Linux wants to have "--posix" for their gawk program ...
 # and curl is called with option "-k" - this avoids checking of certificates!
 http_get_cmd="echo " 
@@ -719,15 +927,8 @@ vv_output "###################"
 vv_output "### so let's go ###"
 vv_output "###################"
 
-# we have at last one line item, when using "-m", or more than one using "-f"
+# we have at last one line item, when using "-r", or more than one using "-f"
 line_items=1
-if [ "$m_param_flag" -eq 1 ] ; then
-  vv_output "prev_TX=$prev_TX"
-  vv_output "PREV_OutPoint=$PREV_OutPoint"
-  vv_output "PREV_PKScript=$PREV_PKScript"
-  vv_output "TX_amount=$TX_amount"
-  vv_output "TARGET_Address=$TARGET_Address"
-fi
 
 ###############################################
 ### Check if network is required and active ###

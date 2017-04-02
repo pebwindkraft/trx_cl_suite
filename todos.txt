@@ -187,10 +187,51 @@ Input 3 /             \
 Input 4 ----- UTXO --/
 
 
-I46: 20mar2017, svn:
+I47: 20mar2017, svn:
 ====================
 beautify output of tcls_trx2txt.sh: similiar to the way, the tree output is done in the "dot profile" alias:
 alias tree="find ./ -print | sed -e 's;[^/]*/; /;g;s;/ ;    ;g;s;^ /$;.;;s; /;|-- ;g'"
+
+
+I48: 27mar2017, svn:
+====================
+need testcases for parameter handling in tcls_create.sh
+there are many optionsi and param counts, which can go wrong.
+Need proper verification!
+
+I49: 27mar2017, svn:
+====================
+maybe an idea for the future:
+A high level algorithm for processing payments on a website via RPC/cli
+
+Say, I'll have a python script. Do I understand correctly, that I'll have to call these:
+1) getnewaddress
+2) getreceivedbyaddress
+That is, I won't need the "gettransaction" and "listreceivedbyaddress" calls.
+
+Getnewaddress sounds sensible and I use that too.
+I use bitcoin.conf notifications to trigger the events however to later query the values using getTransaction
+e.g. when a new tx arrives it runs the script to make sure I'm aware there are incoming funds.
+When a new block is found it verifies the confirmations of those tx's to know if we can be sure it has been received safely.
+TX malleability is something to be aware of though, it's what I lose sleep over because I'm not sure how to easily test this.
+Your approach with get received by address is probably fine, keep us posted how it goes.
+Triggers: There are two options blocknotify and wallet notify I think it is. You can put a shell command as a parameter to invoke php, node or python script.
+
+
+I50: 02apr2017, svn:
+====================
+tcls_tx2txt.sh: the value of the testcase 12 for the pizza transaction is "1000" to high.
+Value should be 5.777 bitcoins, not 5777 bitcoins, or 4.223, not 4223 (see webpage)
+$ echo "ibase=16;00000062530A9F00" | bc 
+422300000000
+$ echo "ibase=16;000000000000000F" | bc 
+15
+
+
+I51: 02apr2017, svn:
+====================
+testcases_tcls_verify_sig.sh: on OPenBSD the testcase 4 fails ...
+
 
 
 

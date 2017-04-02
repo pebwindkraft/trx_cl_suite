@@ -164,7 +164,8 @@ which runs all tests (time consuming). This can be easily compared on all platfo
 ###########################
 ### file tcls_create.sh ###
 ###########################
-Advanced usage! If you understand the idea of cold storage, and creating unsigned transactions, this is for you! The script wil create a raw, unsigned transaction. It is a basis for an online/cold storage combination. On the Internet connected system you would create a raw transaction, copy it to your USB stick, and run the same script file(s) on the cold standby machine to sign there the transaction. Then copy the signed trx back to USB, bring it back to the Internet connected machine, and send the trx to the network. 
+Simple usage: create an unsigned transaction (p2pkh), and sign it later with tcls_sign.sh. Also this script contains the option to create multisig addresses and their redeem scripts.
+Advanced usage: understanding the idea of cold storage, this is for you! The script wil create a raw, unsigned transaction, as a basis for an online/cold storage combination. On the Internet connected system you would create a raw transaction, copy it to your USB stick, and run tcls_sign on the cold standby machine to sign the transaction. Then copy the signed trx back to USB, bring it back to the Internet connected machine, and send the trx to the network. 
 
 Usage example:
 (You will need to know the first three parameters from the previous trx, from which you want to redeem. Start with '-h' to better understand. Also do not try this unless previous transaction is confirmed!)

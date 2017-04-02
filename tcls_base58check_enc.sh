@@ -47,7 +47,7 @@ base58str="123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 #################################
 proc_help() {
   echo "  "
-  echo "usage: base58check_enc.sh [-h|-p2pk|-p2pkh|-p2sh|-q|-v] hex_string"
+  echo "usage: tcls_base58check_enc.sh [-h|-p2pk|-p2pkh|-p2sh|-q|-v] hex_string"
   echo "  "
   echo "convert a public key to a bitcoin address"
   echo "basically implementing steps 1-9 (-pk) or 4-9 (-pkh) from:"
