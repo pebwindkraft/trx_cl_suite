@@ -20,6 +20,8 @@
 typeset -i LOG=0
 logfile=$0.log
 
+create_cmd=tcls_create.sh
+
 chksum_verify() {
 if [ "$1" == "$2" ] ; then
   echo "ok"
@@ -50,7 +52,7 @@ echo "================================================================" | tee -a
 
 echo "=== TESTCASE 1a: $chksum_cmd tcls_create.sh" | tee -a $logfile
 cp tcls_create.sh tmp_cfile
-chksum_ref="3f8aaa3c5aa21f20e0d2261cfe16521bd19967cf33f1fbd38659518f29b4095b" 
+chksum_ref="ef61c9adb740db471d58cff3090145180b292400ffb0fcdae6887da230de3f81" 
 chksum_prep
 
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
@@ -73,26 +75,44 @@ echo "   " | tee -a $logfile
 
 testcase2() {
 echo "================================================================" | tee -a $logfile
-echo "=== TESTCASE 2: parameters testing ...                       ===" | tee -a $logfile
+echo "=== TESTCASE 2: -r parameters testing ...                    ===" | tee -a $logfile
 echo "=== spend from: 16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM            ===" >> $logfile
 echo "=== spend to:   1runeksijzfVxyrpiyCY2LCBvYsSiFsCm            ===" >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 2a: manually create a simple unsigned, raw trx"      | tee -a $logfile
-echo "./tcls_create.sh -m F2B3EB2DEB76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
-./tcls_create.sh -m F2B3EB2DEB76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_cfile
+echo "./$create_cmd -r F2B3EB2DEB76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
+./$create_cmd -r F2B3EB2DEB76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_cfile
 chksum_ref="16d68384b15a9c91837f0be3920143a90aecbc7d692fa59b3c6f7f3e1b8680ff" 
 chksum_prep
 
-echo "=== TESTCASE 2b: same as 2a, with verbose output" | tee -a $logfile
-echo "./tcls_create.sh -v -m F2B3EB2DEB76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
-./tcls_create.sh -v -m F2B3EB2DEB76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_cfile
-chksum_ref="22f9b5271fe4a6412bc85cac59394b08c15fc8657f235f9fbbdf272fe44f937c" 
+echo "=== TESTCASE 2b: -r and -f params - that clashes" | tee -a $logfile
+echo "./$create_cmd -v -r -f 76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
+./$create_cmd -v -r -f 76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_cfile
+chksum_ref="e08f85c949f61eea3877e9be202d0fdc829bc35bcab5d77c522909c935b1406a" 
 chksum_prep
 
-echo "=== TESTCASE 2c: same as 2a, with very verbose output" | tee -a $logfile
-echo "./tcls_create.sh -vv -m F2B3EB2DEB76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
-./tcls_create.sh -vv -m F2B3EB2DEB76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_cfile
-chksum_ref="e8393d97389013ee12fe928629f0eea6c633020372ae996e649f07e4662ddda4" 
+echo "=== TESTCASE 2c: -r and -m params - that clashes" | tee -a $logfile
+echo "./$create_cmd -v -r -m 76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
+./$create_cmd -v -r -m 76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_cfile
+chksum_ref="e08f85c949f61eea3877e9be202d0fdc829bc35bcab5d77c522909c935b1406a" 
+chksum_prep
+
+echo "=== TESTCASE 2d: -r and -t params - that clashes" | tee -a $logfile
+echo "./$create_cmd -v -r -t 76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
+./$create_cmd -v -r -t 76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_cfile
+chksum_ref="e08f85c949f61eea3877e9be202d0fdc829bc35bcab5d77c522909c935b1406a" 
+chksum_prep
+
+echo "=== TESTCASE 2e: same as 2a, with verbose output" | tee -a $logfile
+echo "./$create_cmd -v -r F2B3EB2DEB76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
+./$create_cmd -v -r F2B3EB2DEB76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_cfile
+chksum_ref="89cdcc74992c58835644cea4d508df18d7c7351f886df8e187936d0477dff801" 
+chksum_prep
+
+echo "=== TESTCASE 2f: same as 2a, with very verbose output" | tee -a $logfile
+echo "./$create_cmd -vv -r F2B3EB2DEB76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
+./$create_cmd -vv -r F2B3EB2DEB76566E7324307CD47C35EEB88413F971D88519859B1834307ECFEC 1 76a914010966776006953d5567439e5e39f86a0d273bee88ac 99900000 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_cfile
+chksum_ref="e4b74f16410571b4a7039d4d5a1ca4e41e185ad5b79c0d811b5542421a546e36" 
 chksum_prep
 
 echo " " | tee -a $logfile
@@ -100,15 +120,52 @@ echo " " | tee -a $logfile
 
 testcase3() {
 echo "================================================================" | tee -a $logfile
-echo "=== TESTCASE 3: param '-m' testing ...                       ===" | tee -a $logfile
+echo "=== TESTCASE 3: intensive param '-r' testing ...             ===" | tee -a $logfile
 echo "=== spend from: 1MBngSqZbMydscpzSoehjP8kznMaHAzh9y           ===" >> $logfile
 echo "=== spend to:   14zWNsgUMmHhYx4suzc2tZD6HieGbkQi5s           ===" >> $logfile
 echo "================================================================" | tee -a $logfile
-echo "=== TESTCASE 3a: same as testcase 2, different parameters" | tee -a $logfile
-echo "./tcls_create.sh -v -m 96534da2f213367a6d589f18d7d6d1689748cd911f8c33a9aee754a80de166be 0 1976a914dd6cce9f255a8cc17bda8ba0373df8e861cb866e88ac 118307 14zWNsgUMmHhYx4suzc2tZD6HieGbkQi5s" >> $logfile
-./tcls_create.sh -v -m 96534da2f213367a6d589f18d7d6d1689748cd911f8c33a9aee754a80de166be 0 1976a914dd6cce9f255a8cc17bda8ba0373df8e861cb866e88ac 118307 14zWNsgUMmHhYx4suzc2tZD6HieGbkQi5s > tmp_cfile
-chksum_ref="3445013ab1525f1a827ab51d6ab06bf9a2172c9457743c359beba70fe3838a71"
+echo "=== TESTCASE 3a: only 1 param ... " | tee -a $logfile
+echo "$create_cmd -r 96534da2f213367a6d589f18d7d6d1689748cd911f8c33a9aee754a80de166be" >> $logfile
+./$create_cmd -r 96534da2f213367a6d589f18d7d6d1689748cd911f8c33a9aee754a80de166be > tmp_cfile
+chksum_ref="48824211dc50141e136d8d96bff8705da94df9e01a9eb63b2dc1819ef80b316c"
 chksum_prep
+
+echo "=== TESTCASE 3b: only 2 params... " | tee -a $logfile
+echo "$create_cmd -r 96534da2f213367a6d589f18d7d6d1689748cd911f8c33a9aee754a80de166be 0" >> $logfile
+./$create_cmd -r 96534da2f213367a6d589f18d7d6d1689748cd911f8c33a9aee754a80de166be 0 > tmp_cfile
+chksum_ref="7b26ea8611fdd24f6bc31b5bb0750908e82e93d8fd77202fc0c4a2e0692ed705"
+chksum_prep
+
+echo "=== TESTCASE 3c: only 3 params... " | tee -a $logfile
+echo "$create_cmd -r 96534da2f213367a6d589f18d7d6d1689748cd911f8c33a9aee754a80de166be 0 1976a914dd6cce9f255a8cc17bda8ba0373df8e861cb866e88ac" >> $logfile
+./$create_cmd -r 96534da2f213367a6d589f18d7d6d1689748cd911f8c33a9aee754a80de166be 0 1976a914dd6cce9f255a8cc17bda8ba0373df8e861cb866e88ac > tmp_cfile
+chksum_ref="7b26ea8611fdd24f6bc31b5bb0750908e82e93d8fd77202fc0c4a2e0692ed705"
+chksum_prep
+
+echo "=== TESTCASE 3d: only 4 params... " | tee -a $logfile
+echo "$create_cmd -r 96534da2f213367a6d589f18d7d6d1689748cd911f8c33a9aee754a80de166be 0 1976a914dd6cce9f255a8cc17bda8ba0373df8e861cb866e88ac 118307" >> $logfile
+./$create_cmd -r 96534da2f213367a6d589f18d7d6d1689748cd911f8c33a9aee754a80de166be 0 1976a914dd6cce9f255a8cc17bda8ba0373df8e861cb866e88ac 118307 > tmp_cfile
+chksum_ref="7b26ea8611fdd24f6bc31b5bb0750908e82e93d8fd77202fc0c4a2e0692ed705"
+chksum_prep
+
+echo "=== TESTCASE 3e: all params, but TX_IN is char, not numeric... " | tee -a $logfile
+echo "$create_cmd -r 96534da2f213367a6d589f18d7d6d1689748cd911f8c33a9aee754a80de166be A 1976a914dd6cce9f255a8cc17bda8ba0373df8e861cb866e88ac 118307 14zWNsgUMmHhYx4suzc2tZD6HieGbkQi5s" >> $logfile
+./$create_cmd -r 96534da2f213367a6d589f18d7d6d1689748cd911f8c33a9aee754a80de166be A 1976a914dd6cce9f255a8cc17bda8ba0373df8e861cb866e88ac 118307 14zWNsgUMmHhYx4suzc2tZD6HieGbkQi5s > tmp_cfile
+chksum_ref="968a532af30367f572bacd5d06f16cdb19f09966c6b14af87630b0f5dd566fa1"
+chksum_prep
+
+echo "=== TESTCASE 3f: all params, but AMOUNT is char, not numeric... " | tee -a $logfile
+echo "$create_cmd -r 96534da2f213367a6d589f18d7d6d1689748cd911f8c33a9aee754a80de166be 0 1976a914dd6cce9f255a8cc17bda8ba0373df8e861cb866e88ac AMOUNT 14zWNsgUMmHhYx4suzc2tZD6HieGbkQi5s" >> $logfile
+./$create_cmd -r 96534da2f213367a6d589f18d7d6d1689748cd911f8c33a9aee754a80de166be 0 1976a914dd6cce9f255a8cc17bda8ba0373df8e861cb866e88ac AMOUNT 14zWNsgUMmHhYx4suzc2tZD6HieGbkQi5s > tmp_cfile
+chksum_ref="6825e38208a876fe8f0c34671d6fe7353be2b9b990bceef72f80dd698610f0df"
+chksum_prep
+
+echo "=== TESTCASE 3g: all params, all correct, should run ok ... " | tee -a $logfile
+echo "$create_cmd -r 96534da2f213367a6d589f18d7d6d1689748cd911f8c33a9aee754a80de166be 0 1976a914dd6cce9f255a8cc17bda8ba0373df8e861cb866e88ac 118307 14zWNsgUMmHhYx4suzc2tZD6HieGbkQi5s" >> $logfile
+./$create_cmd -r 96534da2f213367a6d589f18d7d6d1689748cd911f8c33a9aee754a80de166be 0 1976a914dd6cce9f255a8cc17bda8ba0373df8e861cb866e88ac 118307 14zWNsgUMmHhYx4suzc2tZD6HieGbkQi5s > tmp_cfile
+chksum_ref="2b861b46da3aaba07fb81bcd9c25aa3a4f50683b48065071b3dc5474b09fd186"
+chksum_prep
+
 echo " " | tee -a $logfile
 }
 
@@ -119,29 +176,29 @@ echo "=== spend from: 1CAue7dQ2ASD6Wj9ZUWJABdC2zteiCe5cK           ===" >> $logf
 echo "=== spend to:   12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM           ===" >> $logfile
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 4a: wrong bitcoin adress hash (x at end)" | tee -a $logfile
-echo "./tcls_create.sh -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdx" >> $logfile
-./tcls_create.sh -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdx > tmp_cfile
+echo "./$create_cmd -r 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdx" >> $logfile
+./$create_cmd -r 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdx > tmp_cfile
 chksum_ref="eacceefa91f51acb6d80486b5992f2d04ad51234ac30b15daa7da80c4d414227" 
 chksum_prep
 
 echo "=== TESTCASE 4b: same as 4a, with verbose output" | tee -a $logfile
-echo "./tcls_create.sh -v -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdx" >> $logfile
-./tcls_create.sh -v -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdx > tmp_cfile
-chksum_ref="6cfe768c730d4deed112df7ac7bc56480c268767805bfb25abc7f25e0e7e1c60" 
+echo "./$create_cmd -v -r 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdx" >> $logfile
+./$create_cmd -v -r 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdx > tmp_cfile
+chksum_ref="93486ee661625a7f064750acb857b2b93c3076e0f9f99ba9e20fd724ff1b6426" 
 chksum_prep
 
 echo "=== TESTCASE 4c: same as 4a, with very verbose output" | tee -a $logfile
-echo "./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdx" >> $logfile
-./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdx > tmp_cfile
-chksum_ref="7751ba936fb8f85b2abdd611e1fd3ddcb7f588ca53309ba8e35eed8a0b2dbc0a" 
+echo "./$create_cmd -vv -r 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdx" >> $logfile
+./$create_cmd -vv -r 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdx > tmp_cfile
+chksum_ref="3c6420d77fd7d56d8557869a5274aa8c6d0580ef5bde1c98a297f90d77dee5b7" 
 chksum_prep
 
 echo "=== TESTCASE 4d: and now with correct bitcoin adress hash" | tee -a $logfile
 echo "### amount to spend (trx_output, in Satoshis):           100000 ###" >> $logfile 
 echo "### proposed TX-FEE (@ 50 Satoshi/Byte * 321 TX_bytes):   16050 ###" >> $logfile
-echo "./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
-./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
-chksum_ref="594628a8da502cbbcc89f4edbf7dae61c1ba2f17f7635bf587ce1a6d8593ab5e" 
+echo "./$create_cmd -vv -r 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
+./$create_cmd -vv -r 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 100000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
+chksum_ref="9baa155dd84564d64e6519d38e9f306e048a46fee98df1edfe54e8a6f1e31b90" 
 chksum_prep
 echo " " | tee -a $logfile
 }
@@ -154,9 +211,9 @@ echo "=== TESTCASE 5a: zero padding:  invalid bitcoin adress hash " | tee -a $lo
 echo "===              wrong address: 6UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM" >> $logfile
 echo "### amount to spend (trx_output, in Satoshis):           110000 ###" >> $logfile
 echo "### proposed TX-FEE (@ 50 Satoshi/Byte * 321 TX_bytes):   16050 ###" >> $logfile
-echo "./tcls_create.sh -v -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 6UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM" >> $logfile
-./tcls_create.sh -v -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 6UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM > tmp_cfile
-chksum_ref="fb6abffcb97fc60e9beac0ea0e291a59b75c3508d8724f5ea726a2492d253eff"
+echo "./$create_cmd -v -r 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 6UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM" >> $logfile
+./$create_cmd -v -r 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 6UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM > tmp_cfile
+chksum_ref="0d10e976c9f32e6067411bf256f7bbfcc38a6a37d59eb9e52ae5cd7f94277a8c"
 chksum_prep
 
 echo "=== TESTCASE 5b: zero pad of 16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM  " | tee -a $logfile
@@ -164,9 +221,9 @@ echo "===              from: 1CAue7dQ2ASD6Wj9ZUWJABdC2zteiCe5cK" >> $logfile
 echo "===              to:   16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvMK" >> $logfile
 echo "### amount to spend (trx_output, in Satoshis):           110000 ###" >> $logfile
 echo "### proposed TX-FEE (@ 50 Satoshi/Byte * 321 TX_bytes):   16050 ###" >> $logfile
-echo "./tcls_create.sh -v -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM" >> $logfile
-./tcls_create.sh -v -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM > tmp_cfile
-chksum_ref="b73c85b7dbb323bbc1138cfb7c63c3341c5f402220a7795975b85da2ed40de58" 
+echo "./$create_cmd -v -r 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM" >> $logfile
+./$create_cmd -v -r 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM > tmp_cfile
+chksum_ref="9bbd6ec00748aa8ed6ed6b02bb2bff2a6a15def88ce7397e4c40c5de1ee2a36f" 
 chksum_prep
 
 echo "=== TESTCASE 5c: zero pad of 112Zbz... " | tee -a $logfile
@@ -174,9 +231,9 @@ echo "===              from: 1CAue7dQ2ASD6Wj9ZUWJABdC2zteiCe5cK" >> $logfile
 echo "===              to:   112ZbzFcSpcCoY2EfPNmgxFmv4tVuLSoB4" >> $logfile
 echo "### amount to spend (trx_output, in Satoshis):           110000 ###" >> $logfile
 echo "### proposed TX-FEE (@ 50 Satoshi/Byte * 321 TX_bytes):   16050 ###" >> $logfile
-echo "./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 112ZbzFcSpcCoY2EfPNmgxFmv4tVuLSoB4" >> $logfile
-./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 112ZbzFcSpcCoY2EfPNmgxFmv4tVuLSoB4 > tmp_cfile
-chksum_ref="9dfddb5e7ced9cbfce428387aa2f7c0126cb170cfb7ed0a5f98e84c9c1ac7f63" 
+echo "./$create_cmd -vv -r 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 112ZbzFcSpcCoY2EfPNmgxFmv4tVuLSoB4" >> $logfile
+./$create_cmd -vv -r 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 112ZbzFcSpcCoY2EfPNmgxFmv4tVuLSoB4 > tmp_cfile
+chksum_ref="caf27c80dd19f595f4975b81939acebbaee3d0fb899736155e631987ce7d025d" 
 chksum_prep
 
 echo "=== TESTCASE 5d: zero pad of 12GTF5ARS... " | tee -a $logfile
@@ -184,9 +241,9 @@ echo "===              from: 1CAue7dQ2ASD6Wj9ZUWJABdC2zteiCe5cK" >> $logfile
 echo "===              to:   12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
 echo "### amount to spend (trx_output, in Satoshis):           110000 ###" >> $logfile
 echo "### proposed TX-FEE (@ 50 Satoshi/Byte * 321 TX_bytes):   16050 ###" >> $logfile
-echo "./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
-./tcls_create.sh -vv -m 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
-chksum_ref="7f7a15ba5c35fb61db2ec2bd10f305ad651b4bc68c012a10859849eddceb2933" 
+echo "./$create_cmd -vv -r 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
+./$create_cmd -vv -r 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
+chksum_ref="09054aa3ba6f42c2ee16d6c47df4d4ec8643d25e3ec6dd41092237b1bbbf322c" 
 chksum_prep
 echo " " | tee -a $logfile
 }
@@ -206,8 +263,8 @@ echo "##                  ^^^^^^^^^^^^^^^^^ this must have changed!   " >> $logf
 echo "## and last line should be:"                                      >> $logfile
 echo "## ... ERROR: input insufficient, to cover trx fees, ..."         >> $logfile
 
-echo "./tcls_create.sh -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1099999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
-./tcls_create.sh -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1099999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
+echo "./$create_cmd -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1099999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
+./$create_cmd -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1099999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
 chksum_ref="0000000000000000000000000000000000000000000000000000000000000000" 
 head -n8 tmp_cfile > tmp_cfile1
 grep "proposed TX-FEE (@ 50 Satoshi/Byte" tmp_cfile
@@ -225,47 +282,47 @@ chksum_prep
 echo "=== TESTCASE 6b: nearly same as 6a, different value" | tee -a $logfile
 echo "===   from: 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM"      >> $logfile
 echo "===   to:   12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM"      >> $logfile
-echo "./tcls_create.sh -v -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1099999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
-./tcls_create.sh -v -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1099999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile1
+echo "./$create_cmd -v -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1099999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
+./$create_cmd -v -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1099999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile1
 head -n32 tmp_cfile1 > tmp_cfile
 echo "## need to remove last three lines, cause parameter "     >> $logfile
 echo "## for txfee can change on network. Last line should be:" >> $logfile
 echo "## ... ERROR: input insufficient, to cover trx fees, ..." >> $logfile
-chksum_ref="accc730dbcea1894d33abf4e06f0fc82e4082bf41ee57265045e948b51e815b6" 
+chksum_ref="9f2c963d825c87473f11587d19766d9e7266c1840639720665705da9d4c4530c" 
 chksum_prep
 
 echo "=== TESTCASE 6c: same as 6b, with parameter for TRXFEE" | tee -a $logfile
 echo "===   proposed TX-FEE (@ 77 Satoshi/Byte * 319 tx_bytes): 24563"  >> $logfile
 echo "===   *** possible value to return address:                 437"  >> $logfile
 echo "===   *** without return address, txfee will be:          25000"  >> $logfile
-echo "./tcls_create.sh -v -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1075000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 77" >> $logfile
-./tcls_create.sh -v -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1075000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 77 > tmp_cfile
-chksum_ref="385fc00053fece576bb115a3b458be233a31797597e0f9d21b3fcb563e72b7b6" 
+echo "./$create_cmd -v -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1075000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 77" >> $logfile
+./$create_cmd -v -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 1075000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 77 > tmp_cfile
+chksum_ref="0a76d674c5be19509b6b47f83b90e61f457653b71946b761b145d2e45c00a72e" 
 chksum_prep
 
 echo "=== TESTCASE 6d: same as 6b, with parameter for a return address" | tee -a $logfile
 echo "===   proposed TX-FEE (@ 50 Satoshi/Byte * 387 tx_bytes): 19350 " >> $logfile
 echo "===   value to return address:                             2873 " >> $logfile
 echo "===   return address: 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm         " >> $logfile
-echo "./tcls_create.sh -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 999999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 50 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
-./tcls_create.sh -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 999999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 50 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_cfile
+echo "./$create_cmd -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 999999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 50 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
+./$create_cmd -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 999999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 50 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_cfile
 chksum_ref="eaf421a2d7237bdb44f0d21e876129333b85d636deefebe55c71d5ae27bf7634" 
 chksum_prep
 
 echo "=== TESTCASE 6e: same as 6d, VERBOSE output" | tee -a $logfile
 echo "=== proposed TX-FEE (@ 50 Satoshi/Byte * 387 TX_bytes):  19350" >> $logfile
 echo "=== value to return address:                             80651" >> $logfile
-echo "./tcls_create.sh -v -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 999999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 50 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
-./tcls_create.sh -v -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 999999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 50 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_cfile
-chksum_ref="1a96eac28610bd07ba3b29794efda351b451116823d856a2249bbe710cd65dc0" 
+echo "./$create_cmd -v -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 999999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 50 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
+./$create_cmd -v -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 999999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 50 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_cfile
+chksum_ref="2d798e44350b4357d30816f33eb065897dad90bfc59ad2dc84cc3c4e3339102a" 
 chksum_prep
 
 echo "=== TESTCASE 6f: same as 6d, VERY VERBOSE output" | tee -a $logfile
 echo "=== proposed TX-FEE (@ 50 Satoshi/Byte * 387 TX_bytes):  19350" >> $logfile
 echo "=== value to return address:                             80651" >> $logfile
-echo "./tcls_create.sh -vv -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 999999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 50 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
-./tcls_create.sh -vv -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 999999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 50 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_cfile
-chksum_ref="4b9f361e654d9b32f8f78ab566934103eaa36944417dc5684dfdb58d0d1e5cbb" 
+echo "./$create_cmd -vv -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 999999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 50 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
+./$create_cmd -vv -t 1de803fe2e3795f7b92d5acc113d3e452939ec003ce83309386ce4213c6812bc 0 999999 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM 50 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_cfile
+chksum_ref="7c01a23419772b000818bc5b34093e7c7b20850ebd91b6472a228300dc185149" 
 chksum_prep
 
 echo " " | tee -a $logfile
@@ -281,27 +338,27 @@ echo "===              desired amount to spend (in Satoshis):   70000 " >> $logf
 echo "94fae0ac28792796063f23f4a4ba4f977a9599d1579c5aae7ce6dda4f8a6b1bb 1044 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 19235" > tmp_3inputs.txt
 echo "a3e719b12275357b15fc5decd9088a0964fe860d49f026f2152e71f681ac3fa4 1073 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 16197" >> tmp_3inputs.txt
 echo "874cd4c4e1683c43a98a9daa0926bea37c10616f165ac35481e8181bfd449c65 480 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 23940" >> tmp_3inputs.txt
-echo "./tcls_create.sh -v -f tmp_3inputs.txt 70000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM" >> $logfile
-./tcls_create.sh -v -f tmp_3inputs.txt 70000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM > tmp_cfile
-chksum_ref="94cc1bb0533503f1e8a2950d44f30d55e94a73f02eb2fc592069aea8022d028a" 
+echo "./$create_cmd -v -f tmp_3inputs.txt 70000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM" >> $logfile
+./$create_cmd -v -f tmp_3inputs.txt 70000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM > tmp_cfile
+chksum_ref="e8837815cf2f44e47f4f57ba9288c608825a90b8ed0adedc9b302946e9573c72" 
 chksum_prep
 
 echo "=== TESTCASE 7b: wrong output address (x at the end)" | tee -a $logfile
 echo "94fae0ac28792796063f23f4a4ba4f977a9599d1579c5aae7ce6dda4f8a6b1bb 1044 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 19235" > tmp_3inputs.txt
 echo "a3e719b12275357b15fc5decd9088a0964fe860d49f026f2152e71f681ac3fa4 1073 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 16197" >> tmp_3inputs.txt
 echo "874cd4c4e1683c43a98a9daa0926bea37c10616f165ac35481e8181bfd449c65 480 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 23940" >> tmp_3inputs.txt
-echo "./tcls_create.sh -v -f tmp_3inputs.txt 50000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcx" >> $logfile
-./tcls_create.sh -v -f tmp_3inputs.txt 50000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcx > tmp_cfile
-chksum_ref="b50050aecdd7912711379be7a6b0e7f27f6fed754bfb4d482f7e69891d37853b" 
+echo "./$create_cmd -v -f tmp_3inputs.txt 50000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcx" >> $logfile
+./$create_cmd -v -f tmp_3inputs.txt 50000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcx > tmp_cfile
+chksum_ref="07c42ee6283a3c9faa2f56460b67168558ea524852db1c3f0e847d91fb5cf93f" 
 chksum_prep
 
 echo "=== TESTCASE 7c: wrong length of trx hash (63 chars)" | tee -a $logfile
 echo "4fae0ac28792796063f23f4a4ba4f977a9599d1579c5aae7ce6dda4f8a6b1bb 1044 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 39235" > tmp_3inputs.txt
 echo "3e719b12275357b15fc5decd9088a0964fe860d49f026f2152e71f681ac3fa4 1073 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 16197" >> tmp_3inputs.txt
 echo "74cd4c4e1683c43a98a9daa0926bea37c10616f165ac35481e8181bfd449c65 480 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 23940" >> tmp_3inputs.txt
-echo "./tcls_create.sh -v -f tmp_3inputs.txt 50000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM" >> $logfile
-./tcls_create.sh -v -f tmp_3inputs.txt 50000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM > tmp_cfile
-chksum_ref="a897e29a953d52f6ecec68141921179cdddc817cc0e17f7a8411fe90479ed89e" 
+echo "./$create_cmd -v -f tmp_3inputs.txt 50000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM" >> $logfile
+./$create_cmd -v -f tmp_3inputs.txt 50000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM > tmp_cfile
+chksum_ref="5ab2b820286469f40a4d61039d8060662eec04af4b18629304350db11e7c832a" 
 chksum_prep
 
 echo "=== TESTCASE 7d: insufficient trx fee" | tee -a $logfile
@@ -310,18 +367,18 @@ echo "=== Achieving negative value with this txfee:               -900" >> $logf
 echo "94fae0ac28792796063f23f4a4ba4f977a9599d1579c5aae7ce6dda4f8a6b1bb 1044 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 39255" > tmp_3inputs.txt
 echo "a3e719b12275357b15fc5decd9088a0964fe860d49f026f2152e71f681ac3fa4 1073 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 19999" >> tmp_3inputs.txt
 echo "874cd4c4e1683c43a98a9daa0926bea37c10616f165ac35481e8181bfd449c65 480 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 27996" >> tmp_3inputs.txt
-echo "./tcls_create.sh -v -f tmp_3inputs.txt 50000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM 50" >> $logfile
-./tcls_create.sh -v -f tmp_3inputs.txt 50000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM 50 > tmp_cfile
-chksum_ref="5525bc63a07541680fa4c8b50ece4c77b3cada2c1f65d723b5d4a7fff8cc141f" 
+echo "./$create_cmd -v -f tmp_3inputs.txt 50000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM 50" >> $logfile
+./$create_cmd -v -f tmp_3inputs.txt 50000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM 50 > tmp_cfile
+chksum_ref="82c682cb1ee96315cbe8a259cb4b758891b6cca36b4b914c90f3c5df7b5c6a0f" 
 chksum_prep
 
 echo "=== TESTCASE 7e: wrong return address (x at the end)" | tee -a $logfile
 echo "94fae0ac28792796063f23f4a4ba4f977a9599d1579c5aae7ce6dda4f8a6b1bb 1044 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 39235" > tmp_3inputs.txt
 echo "a3e719b12275357b15fc5decd9088a0964fe860d49f026f2152e71f681ac3fa4 1073 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 26197" >> tmp_3inputs.txt
 echo "874cd4c4e1683c43a98a9daa0926bea37c10616f165ac35481e8181bfd449c65 480 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 23940" >> tmp_3inputs.txt
-echo "./tcls_create.sh -v -f tmp_3inputs.txt 50000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM 50 16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvx" >> $logfile
-./tcls_create.sh -v -f tmp_3inputs.txt 50000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM 50 16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvx > tmp_cfile
-chksum_ref="b0a39d51873d2a1e8a564708c84c02a0ea73e92d640f71303aa849c717e102a8"
+echo "./$create_cmd -v -f tmp_3inputs.txt 50000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM 50 16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvx" >> $logfile
+./$create_cmd -v -f tmp_3inputs.txt 50000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM 50 16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvx > tmp_cfile
+chksum_ref="19ee58e77feac4682f97826e1920b311697ac36de59fc94d6a0f37fc4d9e4032"
 chksum_prep
 
 echo "=== TESTCASE 7f: a spend from 1JmPRD_unspent.txt     " | tee -a $logfile
@@ -334,9 +391,9 @@ echo "48d2c9c76dc282eb7075a0fce543b9d615c0c2d5b78b41603c2d6cf46e2e77b0 1 76a914c
 echo "811848214a52c823f53eaaa302eaddb7dd2b03874174c9202d291ac35868fb74 1 76a914c2df275d78e506e17691fd6f0c63c43d15c897fc88ac 500000" >> tmp_4inputs.txt
 echo "bb745b565d23c2041022392469114cbd94d29d941e1c6860c609b5ed6ee321cc 0 76a914c2df275d78e506e17691fd6f0c63c43d15c897fc88ac 113000" >> tmp_4inputs.txt
 echo "e84959a7148737df867d6c83f3683abeb977c297729ccbd609d54ee0879491ea 0 76a914c2df275d78e506e17691fd6f0c63c43d15c897fc88ac 120000" >> tmp_4inputs.txt
-echo "./tcls_create.sh -vv -f tmp_4inputs.txt 821000 13GnHB51piDBf1avocPL7tSKLugK4F7U2B 32" >> $logfile
-./tcls_create.sh -vv -f tmp_4inputs.txt 821000 13GnHB51piDBf1avocPL7tSKLugK4F7U2B 32 > tmp_cfile
-chksum_ref="00997cbee37708aae398fef2bfd54b71e92bbca8db63f8b4c35281c4b57f4eef"
+echo "./$create_cmd -vv -f tmp_4inputs.txt 821000 13GnHB51piDBf1avocPL7tSKLugK4F7U2B 32" >> $logfile
+./$create_cmd -vv -f tmp_4inputs.txt 821000 13GnHB51piDBf1avocPL7tSKLugK4F7U2B 32 > tmp_cfile
+chksum_ref="787c058f095184c96ac04db604650623eddd86f351bdc9991da9ad2c20e5a1fb"
 chksum_prep
 
 echo " " | tee -a $logfile
@@ -353,9 +410,9 @@ echo "=== *** without return address, txfee will be:             38152" >> $logf
 echo "94fae0ac28792796063f23f4a4ba4f977a9599d1579c5aae7ce6dda4f8a6b1bb 1044 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 49265" > tmp_3inputs.txt
 echo "a3e719b12275357b15fc5decd9088a0964fe860d49f026f2152e71f681ac3fa4 1073 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 18887" >> tmp_3inputs.txt
 echo "874cd4c4e1683c43a98a9daa0926bea37c10616f165ac35481e8181bfd449c65 480 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 50000" >> tmp_3inputs.txt
-echo "./tcls_create.sh -vv -f tmp_3inputs.txt 80000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM" >> $logfile
-./tcls_create.sh -vv -f tmp_3inputs.txt 80000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM > tmp_cfile
-chksum_ref="d99321235a822a832b28c0b4ed83cd5537dc48830a30d3c84c37662a032de610" 
+echo "./$create_cmd -vv -f tmp_3inputs.txt 80000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM" >> $logfile
+./$create_cmd -vv -f tmp_3inputs.txt 80000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM > tmp_cfile
+chksum_ref="15e0484997d13462b3d89fb87c7265ee0a0082f6b7477b5976622f78d11c3ee9" 
 chksum_prep
 
 echo "=== TESTCASE 8b: 5 inputs to a trx" | tee -a $logfile
@@ -367,9 +424,9 @@ echo "a3e719b12275357b15fc5decd9088a0964fe860d49f026f2152e71f681ac3fa4 1073 76A9
 echo "874cd4c4e1683c43a98a9daa0926bea37c10616f165ac35481e8181bfd449c65 480 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 26940" >> tmp_5inputs.txt
 echo "722a2ad4daa66382abe4c54676cfe1299ac52a239b4b79b6c6f66e5c5fefe32c 475 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 6886" >> tmp_5inputs.txt
 echo "0d87c9c4146452dd8f97f646b52a9dda5a6645d068aca5f1a2a214d37507c5b5 989 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 19099" >> tmp_5inputs.txt
-echo "./tcls_create.sh -v -f tmp_5inputs.txt 110180 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM" >> $logfile
-./tcls_create.sh -v -f tmp_5inputs.txt 110180 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM > tmp_cfile
-chksum_ref="493619bd44434005101c991f60f991afadd3ac706f1e1e2f6875c00122934736"
+echo "./$create_cmd -v -f tmp_5inputs.txt 110180 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM" >> $logfile
+./$create_cmd -v -f tmp_5inputs.txt 110180 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM > tmp_cfile
+chksum_ref="b9250529fa0d2e2ebc547be4231da7fd5594655c40e758d3292397a73999c31b"
 chksum_prep
 
 echo "=== TESTCASE 8c: 23 inputs to a trx" | tee -a $logfile
@@ -401,8 +458,8 @@ echo "c19479c4147c359b9c48fcaeabee5ac77cc7b6ca68f86803d48b051f84804a2f 1174 76A9
 echo "64d0d67f0df58f8001b555b3fd02863e3e5a9e1bd69976fd722ee579426ec1f6 592 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 27972" >> tmp_23inputs.txt
 echo "8ff75867f8ef344d6ce97053296d21c79ac85b6431aebb5f6abd2eba628b9094 573 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 19729" >> tmp_23inputs.txt
 echo "2aaaaaaaaaaaaaad6ce97053296d21c79ac85b6431aebb5f6abd2eba628b9094 111 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 5501" >> tmp_23inputs.txt
-echo "./tcls_create.sh -f tmp_23inputs.txt 450000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM" >> $logfile
-./tcls_create.sh -f tmp_23inputs.txt 450000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM > tmp_cfile
+echo "./$create_cmd -f tmp_23inputs.txt 450000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM" >> $logfile
+./$create_cmd -f tmp_23inputs.txt 450000 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM > tmp_cfile
 chksum_ref="b75f494e24cac4b7f4717fe1f3cb434070cdac57d183e10be3c6dec304104a82" 
 chksum_prep
 
@@ -467,11 +524,83 @@ echo "835a00e11146d0130489f7be116da9e836b3adbfa5b375b50dba57785b13cbd5 591 76A91
 echo "fbf1d6df19021c6dddad3f35d19b6da3b485fbaa84d9ca77f9580ebdb232eea8 1166 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 15293" >> tmp_53inputs.txt
 echo "f46d6ad7b7bef16e65aecae962d96b731a2b638eeb9835382e8bfad8b6224b93 424 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 16020" >> tmp_53inputs.txt
 echo "a3b13803b6bce97cfb5d37008d13e686fc5c8ffeca0078e2f49f9da2165576a6 1250 76A914A438060482FCD835754EA4518C70CC2085AF48FA88AC 25287" >> tmp_53inputs.txt
-echo "./tcls_create.sh -f tmp_53inputs.txt 1017840 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM" >> $logfile
-./tcls_create.sh -f tmp_53inputs.txt 1017840 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM > tmp_cfile
+echo "./$create_cmd -f tmp_53inputs.txt 1017840 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM" >> $logfile
+./$create_cmd -f tmp_53inputs.txt 1017840 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM > tmp_cfile
 chksum_ref="2d886644b8cc1ad574a4e6f4d79848e3f489572daaa56614c25f77ada506aec6" 
 chksum_prep
 
+echo " " | tee -a $logfile
+}
+
+testcase9() {
+echo "================================================================" | tee -a $logfile
+echo "=== TESTCASE 9: -m parameters testing ...                    ===" | tee -a $logfile
+echo "================================================================" | tee -a $logfile
+echo "=== TESTCASE 9a: msig, 2of3, only 1 address"                      | tee -a $logfile
+echo "./$create_cmd -m 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
+./$create_cmd -m 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_cfile
+chksum_ref="d620c60622281751fcdaf04626979282391c6334ef561c60304301abbf883d20"
+chksum_prep
+
+echo "=== TESTCASE 9b: msig, 2of3, only 2 addresses" | tee -a $logfile 
+echo "./$create_cmd -m 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM" >> $logfile 
+./$create_cmd -m 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM > tmp_cfile
+chksum_ref="da05d426f21e377f44ef369e2d40ef94aec44921d17e94358800e54a93ff5085"
+chksum_prep
+
+echo "=== TESTCASE 9c: msig, 2of16, invalid, max=15" | tee -a $logfile
+echo "./$create_cmd -m 2 16 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
+./$create_cmd -m 2 16 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
+chksum_ref="5b677a956e465008b297f1b490df5fe033de9749674fba11a4ed99445c6963ee"
+chksum_prep
+
+echo "=== TESTCASE 9d: msig, 3of2, invalid, 3of2 does not work :-)" | tee -a $logfile
+echo "./$create_cmd -v -m 3 2 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
+./$create_cmd -v -m 3 2 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
+chksum_ref="5fdd9da7e6fb314c8a6cf6eb411d318c5f33cdd643593feabd47056278f1a643"
+chksum_prep
+
+echo "=== TESTCASE 9e: -m and -f params - that clashes!" | tee -a $logfile
+echo "./$create_cmd -v -m -f 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
+./$create_cmd -v -m -f 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
+chksum_ref="8ebfe6c69bb568961ae66917a9bc2d037e52d76981a8b38eafddd569ff322e8d"
+chksum_prep
+
+echo "=== TESTCASE 9f: -m and -r params - that clashes!" | tee -a $logfile
+echo "./$create_cmd -v -m -r 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
+./$create_cmd -v -m -r 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
+chksum_ref="8ebfe6c69bb568961ae66917a9bc2d037e52d76981a8b38eafddd569ff322e8d"
+chksum_prep
+
+echo "=== TESTCASE 9g: -m and -t params - that clashes!" | tee -a $logfile
+echo "./$create_cmd -v -m -t 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
+./$create_cmd -v -m -t 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
+chksum_ref="8ebfe6c69bb568961ae66917a9bc2d037e52d76981a8b38eafddd569ff322e8d"
+chksum_prep
+
+echo "=== TESTCASE 9h: msig, 2of3, but wrong bitcoin pubkeys" | tee -a $logfile
+echo "./$create_cmd -m 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
+./$create_cmd -m 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
+chksum_ref="a153effcf31d88179ba8c85ebb4af9e99637f783e823086e852d8741e5cfa36e"
+chksum_prep
+
+echo "=== TESTCASE 9i: msig 2of3, compressed pubkeys, ok ..." | tee -a $logfile
+echo "./$create_cmd -v -m 2 3 03834bd129bf0a2e03d53b74bc2eef8d9a5faed93f37b4938ae7127d430804a3cf,03fae2fa202fbfd9d0a8650f537df154158761ce9ad2460793aed74b946babb9f4,038cbc733032dcbed878c727840bef9c2aeb01447e1701c372c46a2ef00f48e02c" >> $logfile
+./$create_cmd -v -m 2 3 03834bd129bf0a2e03d53b74bc2eef8d9a5faed93f37b4938ae7127d430804a3cf,03fae2fa202fbfd9d0a8650f537df154158761ce9ad2460793aed74b946babb9f4,038cbc733032dcbed878c727840bef9c2aeb01447e1701c372c46a2ef00f48e02c > tmp_cfile
+chksum_ref="2b914f4d0ce00987d72fb0beeaa2d160cf222a7fe6e2767974416e8d07652ea4"
+chksum_prep
+
+echo "=== TESTCASE 9j: msig 2of3, uncompressed pubkeys, ok ..." | tee -a $logfile
+echo "./$create_cmd -v -m 2 3 04a882d414e478039cd5b52a92ffb13dd5e6bd4515497439dffd691a0f12af9575fa349b5694ed3155b136f09e63975a1700c9f4d4df849323dac06cf3bd6458cd,046ce31db9bdd543e72fe3039a1f1c047dab87037c36a669ff90e28da1848f640de68c2fe913d363a51154a0c62d7adea1b822d05035077418267b1a1379790187,0411ffd36c70776538d079fbae117dc38effafb33304af83ce4894589747aee1ef992f63280567f52f5ba870678b4ab4ff6c8ea600bd217870a8b4f1f09f3a8e83" >> $logfile
+./$create_cmd -v -m 2 3 04a882d414e478039cd5b52a92ffb13dd5e6bd4515497439dffd691a0f12af9575fa349b5694ed3155b136f09e63975a1700c9f4d4df849323dac06cf3bd6458cd,046ce31db9bdd543e72fe3039a1f1c047dab87037c36a669ff90e28da1848f640de68c2fe913d363a51154a0c62d7adea1b822d05035077418267b1a1379790187,0411ffd36c70776538d079fbae117dc38effafb33304af83ce4894589747aee1ef992f63280567f52f5ba870678b4ab4ff6c8ea600bd217870a8b4f1f09f3a8e83 > tmp_cfile
+chksum_ref="39f4e457526885ac2a254dfbc71ff698b7d20c39d1b6bce9ee490ab8a72b31e7"
+chksum_prep
+
+echo "=== TESTCASE 9k: msig with testnet 2of3, ok ..." | tee -a $logfile
+echo "./$create_cmd -T -v -m 2 3 03834bd129bf0a2e03d53b74bc2eef8d9a5faed93f37b4938ae7127d430804a3cf,03fae2fa202fbfd9d0a8650f537df154158761ce9ad2460793aed74b946babb9f4,038cbc733032dcbed878c727840bef9c2aeb01447e1701c372c46a2ef00f48e02c" >> $logfile
+./$create_cmd -T -v -m 2 3 03834bd129bf0a2e03d53b74bc2eef8d9a5faed93f37b4938ae7127d430804a3cf,03fae2fa202fbfd9d0a8650f537df154158761ce9ad2460793aed74b946babb9f4,038cbc733032dcbed878c727840bef9c2aeb01447e1701c372c46a2ef00f48e02c > tmp_cfile
+chksum_ref="31584ad5ecdad57b70ee72b0f8b08b3ff4cb45bcaa30cf0e1ca3bb6cad33d5fe"
+chksum_prep
 echo " " | tee -a $logfile
 }
 
@@ -485,6 +614,7 @@ all_testcases() {
   testcase6 
   testcase7 
   testcase8 
+  testcase9 
 }
 
 #####################

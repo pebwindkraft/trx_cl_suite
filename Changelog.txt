@@ -19,4 +19,9 @@ yymmmdd
 16dec03 svn   tcls_tx2txt.sh         added possibility to load TX data from file
 16dec14 svn   tcls_tx2txt.sh         loading TX data into array, to fix (OpenBSD) pdksh issue
                                      where parameters exceed 2048 bytes
-
+17mar19 svn   tcls_tx2txt.sh         prepare to work with testnet data
+              tcls_create.sh  
+              tcls_base58check_enc.sh
+              tcls_in_sig_script.sh
+17mar20 svn   tcls_create            prepare multisig: create msig address & redeem script
+17apr02 svn   testcase_tcls*         update all checksums after msig preps before
