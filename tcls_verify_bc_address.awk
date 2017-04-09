@@ -24,8 +24,9 @@ BEGIN {
 ##########################################################################
 ### AND HERE WE GO ...                                                 ###
 ##########################################################################
+# adress length: https://en.bitcoin.it/wiki/Address --> 26-35!!
 {
-if (length($0) == "33" || length($0) == "34" || length($0) == "51" || length($0) == "52")
+if (length($0) >= "26" && length($0) <= "35" || length($0) == "51" || length($0) == "52")
   { 
   # loop through the bitcoin adress, fetch each char
   while ( bc_address_offset <= length($0) ) {

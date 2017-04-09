@@ -3,9 +3,10 @@
 # Read the bitcoin PK_script OPCODES from a transaction's TRX_OUT
 # script by Sven-Volker Nowarra 
 #
-# Version	by	date	comment
-# 0.1		svn	02jun16	initial release
-# 0.2		svn	22dec16	added status for multisig...
+# Version  by     date    comment
+# 0.1	   svn    02jun16 initial release
+# 0.2	   svn    22dec16 added status for multisig...
+# 0.3	   svn    07apr16 prepare for testnet address usage
 # 
 # Copyright (c) 2015, 2016 Volker Nowarra 
 # Complete rewrite of code in June 2016 from following reference:
@@ -40,12 +41,17 @@ typeset -i offset=0
 typeset -i cur_opcode_dec=0
 
 ret_string=''
-Quiet=0
+q_param_flag=0
+T_param_flag=0
 param=76A9146AF1D17462C6146A8A61217E8648903ACD3335F188AC
 
 case "$1" in
   -q)
-     Quiet=1
+     q_param_flag=1
+     shift
+     ;;
+  -T)
+     T_param_flag=1
      shift
      ;;
   -?|-h|--help)
@@ -60,7 +66,7 @@ case "$1" in
      ;;
 esac
 
-if [ $Quiet -eq 0 ] ; then 
+if [ $q_param_flag -eq 0 ] ; then 
   echo "################################################################"
   echo "### tcls_out_pk_script.sh: read PK_script OPCODES from a trx ###"
   echo "################################################################"
@@ -68,7 +74,7 @@ if [ $Quiet -eq 0 ] ; then
 fi
 
 if [ $# -eq 0 ] ; then 
-  if [ $Quiet -eq 0 ] ; then 
+  if [ $q_param_flag -eq 0 ] ; then 
     echo "no parameter, hence showing example pk_script:"
     echo "$param"
   fi
@@ -299,6 +305,22 @@ S13_OP_1() {
 #####################################
 S14_OP_DATA33() {
   op_data_show
+  # convert bitcoin pubkey (hex chars) to bitcoin address 
+  str_ptr=$(( offset - 33 ))
+  str_end=$(( offset - 1 ))
+  output=""
+  # printf 'str_ptr=%d, str_end=%d \n' "$str_ptr" "$str_end" 
+  while [ $str_ptr -le $str_end ]
+   do
+    output=$output${opcode_ar[str_ptr]}
+    str_ptr=$(( str_ptr + 1 ))
+  done 
+  printf "%s" "        bitcoin address:"
+  if [ $T_param_flag -eq 1 ] ; then
+    sh ./tcls_base58check_enc.sh -T -q -p2pk $output
+  else
+    sh ./tcls_base58check_enc.sh -q -p2pk $output
+  fi
   S13_OP_1
 }
 #####################################

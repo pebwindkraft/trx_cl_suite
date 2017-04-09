@@ -40,21 +40,23 @@ filename=''
 typeset -r c_utx_fn=tmp_c_utx.txt   # create unsigned, raw tx file (for later signing)
 typeset -r prawtx_fn=tmp_rawtx.txt  # partial raw tx file, used to extract data
 
-typeset -i txfee_per_byte=50
-typeset -i txfee_param_flag=0
-typeset -i txfee=0
+typeset -i amount=0
+typeset -i txfee_param_flag=0   # to calculate trx fee
+typeset -i txfee=0              # to calculate trx fee
 typeset -i c_txfee=0            # calculated trx fee
 typeset -i d_txfee=0            # delta trx fee
 typeset -i f_txfee=0            # file trx fee
-typeset -i amount=0
-typeset -i TX_amount=0
-typeset -i prev_amount=0
-typeset -i prev_total_amount=0
-typeset -i f_param_flag=0
-typeset -i m_param_flag=0
-typeset -i r_param_flag=0
-typeset -i t_param_flag=0
-typeset -i T_param_flag=0
+typeset -i TX_amount=0          # to calculate trx fee
+typeset -i prev_amount=0        # to calculate trx fee
+typeset -i prev_total_amount=0  # to calculate trx fee
+
+# flags used when calling the script with different parameters
+typeset -i c_param_flag=0       # create a new TX
+typeset -i f_param_flag=0       # create TX with inputs from file
+typeset -i m_param_flag=0       # multisig adress and redeemscripthash
+typeset -i r_param_flag=0       # TX with redeemscripthash instead of address
+typeset -i t_param_flag=0       # fetch TX Input data from blockchain
+typeset -i T_param_flag=0       # Testnet
 typeset -i std_sig_chars=90     # expected chars that need to be added, to calculate txfee
 
 # multisig vars 
@@ -64,6 +66,10 @@ msig_cs_pubkeys=''
 
 StepCode=''
 typeset -i StepCode_decimal=0
+typeset -i P2PKH_leading1_cnt=0
+address_1st_char=""
+PK_Out_Script=""
+adress_hash=""
 
 # and source the global var's config file
 . ./tcls.conf
@@ -73,24 +79,23 @@ typeset -i StepCode_decimal=0
 #################################
 proc_help() {
   echo " "
-  echo "usage: $0 [-h|-q|-T|-v|-vv] <options>"
+  echo "usage: $0 [-h|-r|-T|-v|-vv] <options>"
   echo " -h  show this HELP text"
+  echo " -r  create a TX with redeemscripthash (P2SH) instead of <address>"
   echo " -T  use Testnet"
   echo " -v  display Verbose output"
   echo " -vv display VERY Verbose output"
   echo " "
   echo "Create a transaction from command line where <options> is one of:"
-  echo " -f  create a TX with multiple inputs from a file:"
-  echo "     <filename> <amount> <address> [txfee] [ret_address]"
-  echo " -m  create a MULTISIG address, with n sigs of m keys"
-  echo "     <n> <m> <comma separated list of pubkeys>"
-  echo "     pubkeys are compressed (66) or uncompressed (130) hex chars [33 or 65 Bytes]"
-  echo " -r  manually create a RAW TX, for a single input and output"
-  echo "     <prev tx id> <prev output index> <prev pubkey script> <amount> <address>"
-  echo "     [txfee] [ret_address]"
-  echo " -t  <TRANSACTION_ID>: fetch TX-id and pubkey script from blockchain.info"
-  echo "     <prev_tx_id> <prev output index> <amount> <address>"
-  echo "     [txfee] [ret_address]"
+  echo " -c <prev tx id> <prev output index> <prev pubkey script> <amount>"
+  echo "      <address> [txfee] [ret_address]"
+  echo " -f <filename> <amount> <address> [txfee] [ret_address]"
+  echo "      read inputs from a file, use -f help for more details"
+  echo " -m <n> <m> <comma separated list of pubkeys (66 or 130 hex chars)>" 
+  echo "      create a MULTISIG address and corresponding redeem script"
+  echo " -t <prev_tx_id> <prev output index> <amount> <address>"
+  echo "      [txfee] [ret_address]"
+  echo "      fetch previous pubkey script from blockchain.info"
   echo " "
   echo " Description of parameters:"
   echo "  <prev output index> : output index from previous TX-ID"
@@ -177,46 +182,6 @@ check_tool() {
   fi
 }
 
-#######################################
-# procedure to check even length of h #
-#######################################
-leading_zeros() {
-  # get the length of the string h, and if not 'even', add a beginning 
-  # zero. Background: we need to convert the hex characters to a hex value, 
-  # and need to have an even amount of characters... 
-  len=${#h}
-  s=$(( $len % 2 ))
-  if [ $s -ne 0 ] ; then
-    h=$( echo "0$h" )
-  fi
-  len=${#h}
-  # echo "after mod 2 calc, h=$h"
-} 
-
-#####################################################
-# procedure to calculate the checksum of an address #
-#####################################################
-get_chksum() {
-  # this is not working properly on other UNIXs, made it more portable:
-  # chksum_f8=$( xxd -p -r <<<"00$h" |
-  #     openssl dgst -sha256 -binary |
-  #     openssl dgst -sha256 -binary |
-  #     xxd -p -c 80 |
-  #     head -c 8 |
-  #     tr [:lower:] [:upper:] )
-  # Step 4 - add network byte
-  chksum_f8=$( echo "00$h" | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
-  printf $chksum_f8 > tmp_plusnetworkbyte.txt
-  # Step 5 - hash 256
-  openssl dgst -sha256 -binary tmp_plusnetworkbyte.txt > tmp_sha256.hex
-  rm tmp_plusnetworkbyte.txt
-  # Step 6 - another hash 256
-  openssl dgst -sha256 -binary tmp_sha256.hex > tmp_dsha256.hex
-  # Step 7 - get first 4 Bytes (8 chars) as the checksum
-  chksum_f8=$( od -An -t x1 tmp_dsha256.hex | tr -d [[:blank:]] | tr -d "\n" | 
-               cut -b 1-8 | tr [:lower:] [:upper:] )
-}
-
 ###############################################
 ### Check length of provided trx characters ###
 ###############################################
@@ -289,62 +254,131 @@ get_trx_values() {
   fi
 }
 
+##################################################
+# procedure to check even length of address_hash #
+##################################################
+# https://bitcointalk.org/index.php?topic=1026.0
+leading_zeros() {
+  # get the length of the string h, and if not 'even', add a beginning 
+  # zero. Background: we need to convert the hex characters to a hex value, 
+  # and need to have an even amount of characters... 
+  len=${#address_hash}
+  s=$(( $len % 2 ))
+  if [ $s -ne 0 ] ; then
+    address_hash=$( echo "0$address_hash" )
+  fi
+  len=${#address_hash}
+  # echo "after mod 2 calc, address_hash=$address_hash"
+} 
+
+###################################################################
+# procedure to calculate the checksum of an hex values of address #
+###################################################################
+get_chksum() {
+  # this is not working properly on other UNIXs, made it more portable:
+  # variable h = address_hash
+  # chksum_f8=$( xxd -p -r <<<"00$h" |
+  #     openssl dgst -sha256 -binary |
+  #     openssl dgst -sha256 -binary |
+  #     xxd -p -c 80 |
+  #     head -c 8 |
+  #     tr [:lower:] [:upper:] )
+  #
+  # This becomes a bit ugly here: we need to convert address_hash to  
+  # hex values, so that openssl can work on it (more precisely: bitcoin 
+  # works with binary data, that is sha256'd). Without "xxd" the use 
+  # of sed will convert data in "\0x00" type hex values, that can be 
+  # written to as file. 
+  # There must be a better way of doing this :-)
+  #
+  # vv_output " address_hash before double sha256: $address_hash"
+  chksum_f8=$( printf "%s" $address_hash | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
+  # Step 5 - hash 256
+  printf $chksum_f8 > tmp_plusnetworkbyte.txt
+  openssl dgst -sha256 -binary tmp_plusnetworkbyte.txt > tmp_sha256.hex
+  rm tmp_plusnetworkbyte.txt
+  # Step 6 - another hash 256
+  openssl dgst -sha256 -binary tmp_sha256.hex > tmp_dsha256.hex
+  # Step 7 - get first 4 Bytes (8 chars) as the checksum
+  chksum_f8=$( od -An -t x1 tmp_dsha256.hex | tr -d [[:blank:]] | tr -d "\n" | 
+               cut -b 1-8 | tr [:lower:] [:upper:] )
+}
+
 ##################################
 ### Check bitcoin address hash ###
 ##################################
+#
+# bitcoin-tools.sh has this logic, which only works in bash. I changed
+# it to be a bit more POISX compliant (also work in ksh). 
+# in this example variable $1 is the target address
+# decodeBase58() {
+#     echo -n "$1" | sed -e's/^\(1*\).*/\1/' -e's/1/00/g' | tr -d '\n'
+#     dc -e "$dcr 16o0$(sed 's/./ 58*l&+/g' <<<$1)p" |
+#     while read n; do echo -n ${n/\\/}; done
+# }
+#
 chk_bc_address_hash() {
-  echo $s | awk -f tcls_verify_bc_address.awk > /dev/null
+  echo $TARGET_Address | awk -f tcls_verify_bc_address.awk > /dev/null
   if [ $? -eq 1 ] ; then
     echo "*** ERROR: invalid address: $s"
     echo "    exiting gracefully ..."
     exit 1
   fi 
   
-  s=$( echo $s | awk -f tcls_verify_bc_address.awk )
+  s=$( echo $TARGET_Address | awk -f tcls_verify_bc_address.awk )
   vv_output "$s"
   s=$( echo $s | sed 's/[0-9]*/ 58*&+ /g' )
   vv_output "$s"
-  h=$( echo "16o0d $s +f" | dc )
-  vv_output "$h"
-  
-  # separating the hash value (last 8 chars) of this string
-  len=${#h}
-  from=$(( $len - 7 ))
-  chksum_l8=$( echo $h | cut -b $from-$len )
-  # vv_output "chksum_l8 (last 8 chars): $chksum_l8"
-  
-  # checksum verification: 
-  # remove last 8 chars ('the checksum'), double sha256 the string, and the 
-  # first 8 chars should match the value from $chksum_l8. 
-  to=$(( $len - 8 ))
-  h=$( echo $h | cut -b 1-$to )
-  
-  # First find the length of the string, and if not 'even', add a beginning 
-  # zero. Background: we need to convert the hex characters to a hex value, 
-  # and need to have an even amount of characters... 
+  #          16o -> base is 16 for output
+  #           | 0d -> duplicate stack
+  #           | |   put out all the base58 remainders
+  #           | |   | sum everything up and "f" prints the content of the stack
+  #           | |   | |
+  address_hash=$( echo "16o0d $s +f" | dc )
   leading_zeros
-  get_chksum
-  if [ "$chksum_f8" != "$chksum_l8" ] ; then
-    # try max 10 iterations for leading zeros ...
-    i=0
-    while [ $i -lt 10 ] 
+  vv_output " address_hash after leading 0s:     $address_hash"
+
+  # checksum verification: 
+  # get last 8 chars of address_hash (the reference checksum)
+  # remove last 8 chars, double sha256 the string, 
+  # and the first 8 chars should match the reference checksum
+  len=${#address_hash}
+  from=$(( $len - 7 ))
+  chksum_l8=$( echo $address_hash | cut -b $from-$len )
+  to=$(( $len - 8 ))
+  address_hash=$( echo $address_hash | cut -b 1-$to )
+  vv_output " address_hash without last 8 chars: $address_hash, chksum=$chksum_l8"
+
+
+  # only for P2PKH adresses, verify leading "1s" 
+  # https://bitcointalk.org/index.php?topic=1026.0
+  # --> each additional leading 1 in an original address needs a "00" hex at the beginning
+  if [ $T_param_flag=0 ] && [ $r_param_flag=0 ] ; then 
+    # P2PKH_leading1_cnt was calculated in step11 ...
+    while [ $P2PKH_leading1_cnt -gt 1 ] 
      do
-      h=$( echo "0$h" )
-      leading_zeros
-      echo "h=$h, f8=$chksum_f8, l8=$chksum_l8"
-      get_chksum
-      if [ "$chksum_f8" == "$chksum_l8" ] ; then
-        vv_output "calculated chksum of $h: $chksum_f8 == $chksum_l8"
-        i=10
-        break
-      fi
-      i=`expr $i + 1`
+      P2PKH_leading1_cnt=`expr $P2PKH_leading1_cnt - 1`
+      address_hash=$( echo "00$address_hash" )
     done
-    if [ "$chksum_f8" != "$chksum_l8" ] ; then
-      echo "*** calculated chksum of $h: $chksum_f8 != $chksum_l8"
-      echo "*** looks like an invalid bitcoin address"
-      exit 1
-    fi
+    vv_output " address_hash after leading1_cnt:   $address_hash"
+  fi
+  PK_Out_Script=$address_hash
+   
+  # only for P2PKH adresses, get network bytes in front ... 
+  if [ $T_param_flag=0 ] ; then 
+    address_hash=$( echo "00$address_hash" )
+  else
+    address_hash=$( echo "6f$address_hash" )
+  fi
+  vv_output " address_hash + version Byte:       $address_hash"
+  get_chksum
+
+  if [ "$chksum_l8" != "$chksum_f8" ] ; then
+    vv_output " chksum_l8 (last 8 chars):  $chksum_l8"
+    vv_output " chksum_f8 (first 8 chars): $chksum_f8"
+    echo "*** ERROR: checksum mismatch for target address $TARGET_Address"
+    echo "  * Exiting gracefully..."
+    exit 1
   fi
 }
 
@@ -422,13 +456,24 @@ step9() {
   trx_concatenate
 }
 
+
 ##############################################################################
 ### STEP 10 - TX_OUT, LENGTH: Number of bytes in the PK script (var_int)   ###
 ##############################################################################
-# pubkey script length, we use 0x19 here ...
+# pubkey script length
 step10() {
   v_output "### 10. TX_OUT, LENGTH: Number of bytes in the PK script (var_int)"
-  StepCode="19"
+  if [ $r_param_flag -eq 1 ] ; then
+    # P2SH Public Key Script requried
+    # see step11: StepCode for P2SH = "A9 14 <20 Bytes> 87"
+    # decimal 23 Bytes = 17 hex
+    StepCode="17"
+  else
+    # P2PKH Public Key Script requried
+    # see step11: StepCode for P2PKH = "76 A9 14 <20 Bytes> 88 AC"
+    # decimal 25 Bytes = 19 hex
+    StepCode="19"
+  fi
   trx_concatenate
 }
 
@@ -436,24 +481,57 @@ step10() {
 ### STEP 11 - TX_OUT, PUBLIC KEY SCRIPT: the OP Codes of the PK script     ###
 ##############################################################################
 # convert parameter TARGET_Address to the pubkey script.
-# the P2PKH script is preceeded with "76A914" and ends with "88AC":
-#
-# bitcoin-tools.sh has this logic, which only works in bash. I changed
-# it to be a bit more POISX compliant (also work in ksh). 
-# decodeBase58() {
-#     echo -n "$1" | sed -e's/^\(1*\).*/\1/' -e's/1/00/g' | tr -d '\n'
-#     dc -e "$dcr 16o0$(sed 's/./ 58*l&+/g' <<<$1)p" |
-#     while read n; do echo -n ${n/\\/}; done
-# }
-#
+# the P2PKH script is preceeded with "76A914" and ends with "88AC".
+# the P2SH script is preceeded with "a914" and ends with "87".
 step11() {
   v_output "### 11. TX_OUT, PUBLIC KEY SCRIPT: the OP Codes of the PK script"
-  s=$TARGET_Address 
-  chk_bc_address_hash
 
-  StepCode=$h
-  StepCode=$( echo "76A914"$StepCode )
-  StepCode=$( echo $StepCode"88AC")
+  # length of PK scripts is in both cases 20 Bytes, in hex 14...
+  tmpvar="14"
+  if [ $r_param_flag -eq 1 ] ; then
+    # Public Key Script: redeem script hash requried
+    redeemscripthash=$TARGET_Address 
+    if [ ${#redeemscripthash} -lt 20 ] ; then
+      echo "*** -r requires redeemscript hash (20 Bytes). Exiting gracefully ... "
+      exit 1
+    fi
+    StepCode=$( echo $OP_Hash160$tmpvar$redeemscripthash$OP_Equal )
+  else
+    # P2PKH Public Key Script requried
+    # P2PKH on mainnet starts with "1"
+    # P2PKH on testnet starts with "m" or "n"
+    address_1st_char=$( echo $TARGET_Address | cut -b 1 )
+    if [ "$address_1st_char" == "1" ] ; then
+      # on mainnet and P2PKH addresses:
+      # https://bitcointalk.org/index.php?topic=1026.0
+      # --> each leading 1 in an address needs a "00" hex at the beginning
+      while [ "$address_1st_char" == "1" ]
+       do
+        P2PKH_leading1_cnt=`expr $P2PKH_leading1_cnt + 1`
+        address_1st_char=$( echo $TARGET_Address | cut -b $P2PKH_leading1_cnt )
+      done
+      P2PKH_leading1_cnt=`expr $P2PKH_leading1_cnt - 1`
+    elif [ "$address_1st_char" == "m" ] || [ "$address_1st_char" == "n" ] ; then
+      T_param_flag=1
+    elif [ "$address_1st_char" == "3" ] ; then
+       echo "*** ERROR: this is a mainnet multisig address: $TARGET_Address"
+       echo "    use -r parameter and provide redeem script hash"
+       echo "    exiting gracefully ..."
+       exit
+    elif [ "$address_1st_char" == "2" ] ; then
+       echo "*** ERROR: this is a testnet multisig address: $TARGET_Address"
+       echo "    use -r parameter and provide redeem script hash"
+       echo "    exiting gracefully ..."
+       exit
+    else
+       echo "*** ERROR: could not check address type, unrecognized format for $TARGET_Address"
+       echo "    exiting gracefully ..."
+       exit
+    fi
+  
+    chk_bc_address_hash
+    StepCode=$( echo $OP_dup$OP_Hash160$tmpvar$PK_Out_Script$OP_Equalverify$OP_Checksig )
+  fi
   trx_concatenate
 }
 
@@ -554,7 +632,6 @@ proc_msig() {
     exit 1
   fi 
 
-
   # STEP 1: convert msig_reqsigs in OP_Code
   # (80 + msig_reqsigs) = Op_code in decimal, convert to hex ...
   opcode_msig_reqsigs=$( echo "obase=16;$opcode_numericis_offset+$msig_reqsigs" | bc )
@@ -577,7 +654,7 @@ proc_msig() {
   for pubkey in $(echo $msig_cs_pubkeys | tr "," " "); do
 
     # STEP 4: verify each pubkey
-    printf $pubkey | awk -f tcls_verify_hexkey.awk
+    printf "%s" $pubkey | awk -f tcls_verify_hexkey.awk
     if [ $? -gt 0 ] ; then
       echo "  * Exiting gracefully..."
       exit 1
@@ -593,8 +670,21 @@ proc_msig() {
     redeemscript=$redeemscript$len_hex$pubkey
   done
 
-  redeemscript=$redeemscript$opcode_msig_reqkeys$opcode_chkmsig
-  vv_output "$redeemscript"
+  redeemscript=$redeemscript$opcode_msig_reqkeys$OP_Checkmultisig
+  echo " "
+  echo "The redeemscript:"
+  echo "$redeemscript"
+  echo " "
+  echo "WARNING: YOU MUST NOT LOSE THE REDEEM SCRIPT, especially"
+  echo "if you don’t have a record of which public keys you used"
+  echo "to create the P2SH multisig address. You need the redeem"
+  echo "script to spend any bitcoins sent to the P2SH address."
+  echo "(https://bitcoin.org/en/developer-examples#p2sh-multisig)"
+  echo "The redeem script can be recreated with all public keys "
+  echo "listed in the same order."
+  echo "HINT: once you've spent from a P2SH address, the redeem "
+  echo "script is permanently visible in the blockchain."
+  echo " "
 
   # STEP 7a: RIPEMD160(SHA256(redeemscript))
   tmpvar=$( echo $redeemscript | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
@@ -602,8 +692,10 @@ proc_msig() {
   result=$( echo $result | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
   result=$( printf "$result" | openssl dgst -rmd160 | cut -d " " -f 2 )
   param=$result
+  echo "$result"
 
   # STEP 7b: base58_encode("05", redeemscriptHash)
+  echo "The P2SH address:"
   if [ $T_param_flag -eq 0 ] ; then ./tcls_base58check_enc.sh -q -p2sh $result; fi
   if [ $T_param_flag -eq 1 ] ; then ./tcls_base58check_enc.sh -q -T -p2sh $result; fi
 
@@ -667,85 +759,11 @@ else
   while [ $# -ge 1 ] 
    do
     case "$1" in
-      -f)
-         f_param_flag=1
-         shift 
-         if [ $# -lt 3 ] ; then
-           echo "*** you must provide correct number of parameters"
-           proc_help
-           exit 1
-         fi
-         if [ "$1" == ""  ] ; then
-           echo "*** you must provide a FILENAME to the -f parameter!"
-           exit 1
-         fi
-         if [ "$1" == "-m" ] || [ "$1" == "-r" ] || [ "$1" == "-t" ] ; then
-           echo "*** you cannot use -f with -m or -r or -t at the same time."
-           echo "    Exiting gracefully ... "
-           exit 1
-         fi
-         filename=$1
-         shift 
-         chk_numeric $1 TX_amount
-         TX_amount=$1
-         shift 
-         TARGET_Address=$1
-         shift 
-         # if there is only one parameter left, it can be tx_fee or return_address
-         # if length of param is less then 9 chars, then it is for sure tx_fee. 
-         # TX fees shouldn't have 9 digits of satoshis (aka more than a bitcoin)...
-         # otherwise it is the return address, and trxfee needs to get calculated automatically.
-         if [ $# -eq 1 ] ; then
-           if [ ${#txfee_per_byte} -lt 9 ] ; then
-             txfee_param_flag=1
-             txfee_per_byte=$1
-             shift
-           else
-             RETURN_Address=$1
-             shift
-           fi
-         fi
-         if [ $# -eq 2 ] ; then
-           txfee_param_flag=1
-           txfee_per_byte=$1
-           RETURN_Address=$2
-           shift
-           shift
-         fi
-         if [ $# -gt 0 ] ; then
-           echo "*** already detected last parameter as return address, don't know what to do"
-           echo "    with the following parameter(s). Exiting gracefully ... "
-           exit 0
-         fi
-         ;;
-      -m)
-         m_param_flag=1
-         shift 
-         if [ "$1" == "-f" ] || [ "$1" == "-r" ] || [ "$1" == "-t" ] ; then
-           echo "*** you cannot use -m with -f or -r or -t at the same time."
-           echo "    Exiting gracefully ... "
-           exit 1
-         fi
-         if [ $# -lt 3 ] ; then
-           echo "*** you must provide correct number of parameters"
-           proc_help
-           exit 1
-         fi
-         chk_numeric $1 msig_reqsig
-         msig_reqsigs=$1
-         shift 
-         chk_numeric $1 msig_reqkeys
-         msig_reqkeys=$1
-         shift 
-         msig_cs_pubkeys=$1
-         shift 
-         proc_msig
-         ;;
-      -r)
-         r_param_flag=1
+      -c)
+         c_param_flag=1
          shift 
          if [ "$1" == "-f" ] || [ "$1" == "-m" ] || [ "$1" == "-t" ] ; then
-           echo "*** you cannot use -r with -f or -m or -t at the same time."
+           echo "*** you cannot use -c with -f or -m or -t at the same time."
            echo "    Exiting gracefully ... "
            exit 0
          fi
@@ -793,11 +811,89 @@ else
            exit 0
          fi
          ;;
+      -f)
+         f_param_flag=1
+         shift 
+         if [ $# -lt 3 ] ; then
+           echo "*** you must provide correct number of parameters"
+           proc_help
+           exit 1
+         fi
+         if [ "$1" == ""  ] ; then
+           echo "*** you must provide a FILENAME to the -f parameter!"
+           exit 1
+         fi
+         if [ "$1" == "-c" ] || [ "$1" == "-m" ] || [ "$1" == "-t" ] ; then
+           echo "*** you cannot use -f with -c or -m or -t at the same time."
+           echo "    Exiting gracefully ... "
+           exit 1
+         fi
+         filename=$1
+         shift 
+         chk_numeric $1 TX_amount
+         TX_amount=$1
+         shift 
+         TARGET_Address=$1
+         shift 
+         # if there is only one parameter left, it can be tx_fee or return_address
+         # if length of param is less then 9 chars, then it is for sure tx_fee. 
+         # TX fees shouldn't have 9 digits of satoshis (aka more than a bitcoin)...
+         # otherwise it is the return address, and trxfee needs to get calculated automatically.
+         if [ $# -eq 1 ] ; then
+           if [ ${#txfee_per_byte} -lt 9 ] ; then
+             txfee_param_flag=1
+             txfee_per_byte=$1
+             shift
+           else
+             RETURN_Address=$1
+             shift
+           fi
+         fi
+         if [ $# -eq 2 ] ; then
+           txfee_param_flag=1
+           txfee_per_byte=$1
+           RETURN_Address=$2
+           shift
+           shift
+         fi
+         if [ $# -gt 0 ] ; then
+           echo "*** already detected last parameter as return address, don't know what to do"
+           echo "    with the following parameter(s). Exiting gracefully ... "
+           exit 0
+         fi
+         ;;
+      -m)
+         m_param_flag=1
+         shift 
+         if [ "$1" == "-c" ] || [ "$1" == "-f" ] || [ "$1" == "-t" ] ; then
+           echo "*** you cannot use -m with -c or -f or -t at the same time."
+           echo "    Exiting gracefully ... "
+           exit 1
+         fi
+         if [ $# -lt 3 ] ; then
+           echo "*** you must provide correct number of parameters"
+           proc_help
+           exit 1
+         fi
+         chk_numeric $1 msig_reqsig
+         msig_reqsigs=$1
+         shift 
+         chk_numeric $1 msig_reqkeys
+         msig_reqkeys=$1
+         shift 
+         msig_cs_pubkeys=$1
+         shift 
+         proc_msig
+         ;;
+      -r)
+         r_param_flag=1
+         shift 
+         ;;
       -t)
          t_param_flag=1
          shift 
-         if [ "$1" == "-f" ] || [ "$1" == "-m" ] || [ "$1" == "-r" ] ; then
-           echo "*** you cannot use -t with -f or -m or -r at the same time."
+         if [ "$1" == "-c" ] || [ "$1" == "-f" ] || [ "$1" == "-m" ] ; then
+           echo "*** you cannot use -t with -c or -f or -m at the same time."
            echo "    Exiting gracefully ... "
            exit 0
          fi
@@ -927,7 +1023,7 @@ vv_output "###################"
 vv_output "### so let's go ###"
 vv_output "###################"
 
-# we have at last one line item, when using "-r", or more than one using "-f"
+# we have at last one line item, when using "-c", or more than one using "-f"
 line_items=1
 
 ###############################################
@@ -1043,7 +1139,7 @@ trx_concatenate
 ############################
 if [ "$f_param_flag" -eq 1 ] ; then
   # each line item is a references to the previous transaction:
-  # prev_TX      --> the trx number
+  # prev_TX       --> the trx number
   # PREV_OutPoint --> the outpoint, from which to spend 
   # PREV_PKScript --> the corresponding public key script
   # prev_amount   --> and the amount from all inputs
@@ -1094,7 +1190,7 @@ step11
 ############################################
 ### TX_OUT: if there is a return address ###
 ############################################
-# if we have a return address (which is between 28 and 32 chars...), 
+# if we have a return address (which is between 28 and 34 chars...), 
 # then make sure, money gets back to us ... so we add a second address in TX_out
 # but before, we need to calculate txfees, and deduct the return amounts 
 calc_txfee

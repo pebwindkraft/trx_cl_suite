@@ -165,17 +165,57 @@ which runs all tests (time consuming). This can be easily compared on all platfo
 ### file tcls_create.sh ###
 ###########################
 Simple usage: create an unsigned transaction (p2pkh), and sign it later with tcls_sign.sh. Also this script contains the option to create multisig addresses and their redeem scripts.
-Advanced usage: understanding the idea of cold storage, this is for you! The script wil create a raw, unsigned transaction, as a basis for an online/cold storage combination. On the Internet connected system you would create a raw transaction, copy it to your USB stick, and run tcls_sign on the cold standby machine to sign the transaction. Then copy the signed trx back to USB, bring it back to the Internet connected machine, and send the trx to the network. 
 
-Usage example:
+Advanced usage 1: understanding the idea of cold storage, this is for you! The script will create a raw, unsigned transaction, as a basis for an online/cold storage combination. On the Internet connected system you would create a raw transaction, copy it to your USB stick, and run tcls_sign on the cold standby machine to sign the transaction. Then copy the signed trx back to USB, bring it back to the Internet connected machine, and send the trx to the network. 
+
+Advanced usage 2: create a multisig redeemscript, and then the corresponding transaction (2 steps, see 2nd example below).
+
+Usage example 1:
 (You will need to know the first three parameters from the previous trx, from which you want to redeem. Start with '-h' to better understand. Also do not try this unless previous transaction is confirmed!)
 
-  ./tcls_create.sh -m <trx hash> <output> <pubkey script> <amount> <address> 
+  ./tcls_create.sh -c <trx hash> <output> <pubkey script> <amount> <address> 
 
 translates into something like this:
-  ./tcls_create.sh -m c3434be....5c5b7a310cc67 0 76A9141FE307887696CF781DA237DBE2E12DB05C10986A88AC 110000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM
+  ./tcls_create.sh -c c3434be....5c5b7a310cc67 0 76A9141FE307887696CF781DA237DBE2E12DB05C10986A88AC 110000 12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM
 
-Hint: in this version, the create process allows 'only' for one output to a P2PKH structure. Also it allows to create multi input transactions, which can be read from file (use -h for details).
+Usage example 2 (multisig):
+Assume we have a previous transaction:
+
+         VERSION
+          01000000
+         TX_IN COUNT [var_int]: hex=01, decimal=1
+         TX_IN[0]
+          TX_IN[0] OutPoint hash (char[32])
+ (1) -->   A4EF5465835CA422D1666A24083B2893C3E065273...
+          TX_IN[0] OutPoint index (uint32_t)
+ (2) -->   hex=01000000, reversed=00000001, decimal=1
+          TX_IN[0] Script Length (var_int)
+           hex=6B, decimal=107
+          TX_IN[0] Script Sig (uchar[])
+           47304402202E733DD23EB16130C3AA705CD04FFA3...
+          TX_IN[1] Sequence (uint32_t)
+           FFFFFFFF
+         TX_OUT COUNT, hex=01, decimal=1
+          TX_OUT[0] Value (uint64_t)
+ (3) -->   hex=A6EA170000000000, bitcoin=0.01567398
+          TX_OUT[0] PK_Script Length (var_int)
+           hex=17, dec=23
+          TX_OUT[0] pk_script (uchar[])
+ (4) -->   76A914FF57CB19528C04096067B8DB38D18ECD0B37789388AC
+          LOCK_TIME
+         00000000
+
+First we need to create a redeemscripthash:
+./tcls_create.sh -m <n> <m> <comma separated list of pubkeys>
+--> returns multisig address (starting with "3") and redeem script hash (5)
+
+Then we would create the transaction (notice the redeemscripthash at the end):
+./tcls_create.sh -p -c <prev tx id (1)> <prev output index (2)> <prev pubkey script (4)>
+                       <amount (3)> <redeemscripthash (5)> 
+--> creates the transaction (6)
+
+./tcls_sign.sh <raw_trx (6)> -w|-x <privkey> -p <pubkey>
+--> signs the transaction (n times of an "n of m" msig tx, with the corresponding priv/pub key) 
 
 #####################################
 ### file testcases_tcls_create.sh ###
