@@ -34,12 +34,13 @@ https://en.bitcoin.it/wiki/Protocol_rules#.22tx.22_messages
 
 I26: 19Oct2016, svn:
 ====================
-start to think about a config file, having default values like:
+use a config file, having default values like:
 min_trxfee=50
 max_trx_size=100 # kilobytes
 SIG_MIN_LENGTH_CHARS=18
 SIG_MAX_LENGTH_CHARS=146
 ...
+--> apr2017: already in use for tcls_create.sh
 
 I27: 25Oct2016, svn:
 ====================
@@ -48,20 +49,10 @@ STEP 5:  need to do a var_int check here ...
 STEP 8:  need to do a var_int check here ...
 STEP 17: when there is a trx with multiple output, need to create a loop
 
-I30: 04Nov2016, svn:
-====================
-Integrate the PIZZA Transaction into all testcases:
-https://blockchain.info/rawtx/cca7507897abc89628f450e8b1e0c6fca4ec3f7b34cccf55f3f531c659ff4d79
-http://bitcoin.stackexchange.com/questions/32305/how-does-the-ecdsa-verification-algorithm-work-during-transaction/32308#32308
-
-testcases_trx_2txt.sh
-? testcases_tcls_create.sh - it has two outputs, not yet ready ...
-? testcases_tcls_sign.sh   - I don't have the priv keys, how to?
-testcases_tcls_verify_sig.sh	
 
 I33: 05Nov2016, svn:
 ====================
-is this missing in sign.sh or key2pem.sh?
+tcls_sign.sh or tcls_key2pem.sh: is this missing ?
 https://github.com/KittehOrg/KittehIRCClientLib/issues/45
 compressed/uncompressed pubkeys (begin with 0x02 or 0x03):
 Example 1, an uncompressed pubkey (0x04):
@@ -95,10 +86,6 @@ I34: 08Nov2016, svn:
 ====================
 tcls_sign.sh (and others): TRX_IN[i] shall always start with "0", like in script trx_2txt.sh
 
-I35: 09Nov2016, svn:
-====================
-update readme.md files and description and usage …
-
 
 I38: 16nov2016, svn:
 ====================
@@ -113,6 +100,7 @@ this?
    xxd -r -p <pubkey.txt | openssl pkey -pubin -inform der >pubkey.pem
 without xxd it might become slightly different...
    cat pubkey.hex | openssl pkey -pubin -inform der >pubkey.pem
+
 
 I39: 16nov2016, svn:
 ====================
@@ -140,8 +128,10 @@ I40: 16nov2016, svn:
 tcls_key2pem: we are currently checking only negative S-values, the original bitcoin cpp code (master/src/script/interpreter.cpp) avoids negative numbers for R and S. 
 --> need to add negative R-Check as well ...
 
+
 I41: 14dec2016, svn:
 ====================
+tcls_*.sh:
 it is generally not a good idea, to have capital letters as variable names in shell scripts. They might interfere with shell variables! 
 Maybe rework all *.sh files - low priority…
 
@@ -193,12 +183,6 @@ beautify output of tcls_trx2txt.sh: similiar to the way, the tree output is done
 alias tree="find ./ -print | sed -e 's;[^/]*/; /;g;s;/ ;    ;g;s;^ /$;.;;s; /;|-- ;g'"
 
 
-I48: 27mar2017, svn:
-====================
-need testcases for parameter handling in tcls_create.sh
-there are many optionsi and param counts, which can go wrong.
-Need proper verification!
-
 I49: 27mar2017, svn:
 ====================
 maybe an idea for the future:
@@ -218,21 +202,24 @@ Your approach with get received by address is probably fine, keep us posted how 
 Triggers: There are two options blocknotify and wallet notify I think it is. You can put a shell command as a parameter to invoke php, node or python script.
 
 
-I50: 02apr2017, svn:
-====================
-tcls_tx2txt.sh: the value of the testcase 12 for the pizza transaction is "1000" to high.
-Value should be 5.777 bitcoins, not 5777 bitcoins, or 4.223, not 4223 (see webpage)
-$ echo "ibase=16;00000062530A9F00" | bc 
-422300000000
-$ echo "ibase=16;000000000000000F" | bc 
-15
-
-
 I51: 02apr2017, svn:
 ====================
-testcases_tcls_verify_sig.sh: on OPenBSD the testcase 4 fails ...
+testcases_tcls_verify_sig.sh: on OpenBSD the testcase 4 fails ...
 
 
+I52: 03apr2017, svn:
+====================
+tcls_sign.sh: is TX_OUT handled correctly? Looks like there is only one TX_OUT possible?
+what happens, when we create a TX, which has a return address?
+what happens, when we create a TX, which has many TX-OUTs?
+
+
+I55: 07apr2017, svn:
+====================
+testcases_tcls_sign.sh: 
+Testcase 10i (?) in testcases_tcls_create.sh shall be reflected in "tcls_sign.sh", with the same input values, and then signed. The example to compare is here:
+    https://gist.githubusercontent.com/gavinandresen/3966071/raw/
+    1f6cfa4208bc82ee5039876b4f065a705ce64df7/TwoOfThree.sh
 
 
 #####################################

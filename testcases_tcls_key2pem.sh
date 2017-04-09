@@ -55,7 +55,7 @@ chksum_prep
 
 echo "TESTCASE 1b: $chksum_cmd tcls_verify_bc_address.awk" | tee -a $logfile
 cp tcls_verify_bc_address.awk tmp_tx_cfile
-chksum_ref="30f1fabc40cf3725febf28cc267d6a52507033106341f4a0c925ed2df0c55c1e" 
+chksum_ref="c944ff89ff49454ca03b0ea8f3ce8ebbd44e33e8d87ab48ae00ad4d6544099f6" 
 chksum_prep
 
 echo "TESTCASE 1c: $chksum_cmd tcls_verify_hexkey.awk" | tee -a $logfile

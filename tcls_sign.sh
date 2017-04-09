@@ -1,14 +1,14 @@
 #!/bin/sh
-# tool to sign any unsigned raw transaction
+# command line tool to sign an unsigned raw transaction
 # 
 # Copyright (c) 2015, 2016 Volker Nowarra 
 # Coded in June 2016 following this reference:
 #   https://en.bitcoin.it/wiki/Protocol_specification#tx
 #   http://bitcoin.stackexchange.com/questions/3374/how-to-redeem-a-basic-tx
 # 
-#
-# Version	by      date    comment
-# 0.1		svn     26sep16 initial release from trx2txt (which is now discontinued)
+# Version by      date    comment
+# 0.1	  svn     26sep16 initial release from trx2txt (which is now discontinued)
+# 0.2	  svn     04apr17 preparations for multisig tx
 # 
 # Permission to use, copy, modify, and distribute this software for any 
 # purpose with or without fee is hereby granted, provided that the above 
