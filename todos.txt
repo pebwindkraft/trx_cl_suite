@@ -45,10 +45,8 @@ SIG_MAX_LENGTH_CHARS=146
 I27: 25Oct2016, svn:
 ====================
 trx_sign.sh: 
-STEP 5:  need to do a var_int check here ...
-STEP 8:  need to do a var_int check here ...
 STEP 17: when there is a trx with multiple output, need to create a loop
-
+---> this can be closed, see item #52
 
 I33: 05Nov2016, svn:
 ====================
@@ -80,11 +78,6 @@ Compressed form of above needs to start with 0x02:
   02:d5:a7:69:89:89:7e:e6:72:fd:4a:2f:20:88:c7:
   a2:fd:ab:eb:a4:79:01:e5:48:b4:74:cb:0a:df:af:
   06:46:51
-
-
-I34: 08Nov2016, svn:
-====================
-tcls_sign.sh (and others): TRX_IN[i] shall always start with "0", like in script trx_2txt.sh
 
 
 I38: 16nov2016, svn:
@@ -133,7 +126,7 @@ I41: 14dec2016, svn:
 ====================
 tcls_*.sh:
 it is generally not a good idea, to have capital letters as variable names in shell scripts. They might interfere with shell variables! 
-Maybe rework all *.sh files - low priority…
+Maybe rework all *.sh files - low priority...
 
 
 I42: 16nov2016, svn:
@@ -201,6 +194,9 @@ TX malleability is something to be aware of though, it's what I lose sleep over 
 Your approach with get received by address is probably fine, keep us posted how it goes.
 Triggers: There are two options blocknotify and wallet notify I think it is. You can put a shell command as a parameter to invoke php, node or python script.
 
+---> no, for a webpage with an address it is better to use HD wallets: 
+Hierarchical Deterministic Wallets (BIP0032/BIP0044)
+
 
 I51: 02apr2017, svn:
 ====================
@@ -220,6 +216,25 @@ testcases_tcls_sign.sh:
 Testcase 10i (?) in testcases_tcls_create.sh shall be reflected in "tcls_sign.sh", with the same input values, and then signed. The example to compare is here:
     https://gist.githubusercontent.com/gavinandresen/3966071/raw/
     1f6cfa4208bc82ee5039876b4f065a705ce64df7/TwoOfThree.sh
+
+
+
+I56: 23jun2017, svn:
+====================
+tcls_sign.sh: when a tx has more than 100 utxo, the signing process creates an error roughly every 2nd attempt. Looks like this happens for signatures, where a new S-Value must be calculated. The new S-value should be less then N/2. The system creates a new S value, but it's length is then 63 bytes, instead of 64 bytes.
+
+
+I57: 27jun2017, svn:
+====================
+OpenBSD and ./tcls_testcases_verify.sh
+TESTCASE 4:
+./tcls_testcases_verify.sh[234]: xxd: not found
+unable to load Public Key
+./tcls_testcases_verify.sh[234]: xxd: not found
+./tcls_testcases_verify.sh[234]: xxd: not found
+unable to load Public Key
+Error initializing context
+
 
 
 #####################################

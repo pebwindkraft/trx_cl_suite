@@ -396,6 +396,10 @@ check_tool openssl
 check_tool sed
 check_tool tr
 
+echo "###################"
+echo "### so let's go ###"
+echo "###################"
+
 ###############################################
 ### Check if network is required and active ###
 ###############################################
@@ -452,8 +456,10 @@ if [ "$TX_id" ] ; then
   fi
 fi
 
+############################################
+### normalize tx and bring into an array ###
+############################################
 raw_TX=$( echo $raw_TX | tr [:lower:] [:upper:] )
-# bring the data in $raw_TX into an array 
 result=$( echo "$raw_TX" | sed 's/[[:xdigit:]]\{2\}/& /g' )
 if [ "$shell_string" == "bash" ] ; then
   # running this on OpenBSD creates errors, hence a for loop...
@@ -467,10 +473,6 @@ v_output "raw trx is this:"
 # v_output "number of tx_array elements: ${#tx_array[*]}, raw trx is this:"
 result=$( echo ${tx_array[*]} | tr -d " " )
 v_output "$result"
-
-echo "###################"
-echo "### so let's go ###"
-echo "###################"
 
 ##############################################################################
 ### STEP 1 - VERSION (4 Bytes) - Transaction data format version           ###

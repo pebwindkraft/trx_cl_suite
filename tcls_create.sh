@@ -560,7 +560,7 @@ step11() {
 # this can be more than 1, and we need a txfee calc for each UTXO 
 #
 # for a later improvement:
-# eventually it makes sense, to verify TX_Fee calcs after the signing process?
+# eventually it makes sense, to verify TX_Fee calcs AFTER the signing process?
 # just to double check?
 #
 calc_txfee() {
@@ -736,14 +736,23 @@ if [ "$1" == "-f" ] && [ "$2" == "help" ] ; then
   echo " provide the following parameters:"
   echo " -f <filename> <amount> <address> [txfee] [ret_address]"
   echo "    <filename>:    prev trx params line by line separated by blanks, containing:"
-  echo "                   prev_trx-id prev_output-index prev_pubkey-script"
-  echo "    <amount>:      amount in Satoshis for the whole transaction"
+  echo "                   <prev_trx-id> <prev_output-index> <prev_pubkey-script> <prev_amount>"
+  echo "    <amount>:      amount to spend in Satoshis"
   echo "    <address>:     the target address for this transaction"
-  echo "    [txfee]:      numeric amount for trx fees (Satoshi/Byte), default=50 Satoshis/Byte"
-  echo "    [ret_address]: a return address, to avoid spending too much trx fees to miners :-)"
+  echo "    [txfee]:       numeric amount for trx fees (Satoshi/Byte)"
+  echo "    [ret_address]: a return address"
   echo " "
-  echo "    help:"
-  echo "    blockchain.info/de/unspent?active=<address>"
+  echo "    <prev_trx-id> <prev_output-index> <prev_pubkey-script> <prev_amount>, see:"
+  echo "     blockchain.info/de/unspent?active=<address>"
+  echo "    more detailed with bitcoin core CLI:"
+  echo "     listunspent 6 9999999 \"[\\\"<address>\\\"]\""
+  echo "    1) fetch only the lines of interest:"
+  echo "     grep -e txid -e vout -e scriptPubKey -e amount bitcoin_cli_utxo.txt > test1"
+  echo "    2) bring them in record, remove quotes and commas"
+  echo "     awk 'ORS=NR%4?\" \":\"\\\n\" {gsub(/\"|,/, \"\")};1 { print \$2 }' test1 > test2"
+  echo "    3) convert amount into Satoshis:"
+  echo "     LC_ALL=ISO_8859-1 awk '{ \$NF=\$NF*100000000; print }' test2"
+  echo " "
   echo "    *** careful: input - output = trx fee !!!"
   echo " "
   exit 0
@@ -1114,8 +1123,8 @@ if [ "$f_param_flag" -eq 1 ] ; then
     # so when length fields change, cut is "off":
     #   StepCode=$( wc -l test.txt | cut -d " " -f 8 )
     # convert to the decimal wc -l result to hex
-    if [ $StepCode_decimal -gt 254 ] ; then
-      echo "*** not yet prepared to work with very big numbers."
+    if [ $StepCode_decimal -gt 1024 ] ; then
+      echo "*** not yet prepared to work with more than 1000 lines."
       echo "    need to wait for next release - sorry!"
       echo "    exiting gracefully"
       exit 1
@@ -1258,9 +1267,36 @@ fi
 ### checking TRX FEEs ###
 #########################
 calc_txfee
-printf "### proposed TX-FEE (@ $txfee_pb_adjusted Satoshi/Byte * $TX_bytes TX_bytes):"
+tmp_itxfee=$(( $txfee_per_byte * $TX_bytes ))
+if [ $tmp_itxfee -ne $c_txfee ] ; then 
+  printf "### initial  TX-FEE (@ $txfee_per_byte Satoshi/Byte * $TX_bytes TX_bytes):"
+  line_length=$(( ${#txfee_per_byte} + ${#TX_bytes} ))
+  case $line_length in
+   3) printf "        %10d" $tmp_itxfee
+      ;;
+   4) printf "       %10d" $tmp_itxfee
+      ;;
+   5) printf "      %10d" $tmp_itxfee
+      ;;
+   6) printf "     %10d" $tmp_itxfee
+      ;;
+   7) printf "    %10d" $tmp_itxfee
+      ;;
+   8) printf "   %10d" $tmp_itxfee
+      ;;
+   9) printf "  %10d" $tmp_itxfee
+      ;;
+  esac
+  printf " ###\n" $tmp_itxfee
+fi
+  
+printf "### adjusted TX-FEE (@ $txfee_pb_adjusted Satoshi/Byte * $TX_bytes TX_bytes):"
 line_length=$(( ${#txfee_pb_adjusted} + ${#TX_bytes} ))
 case $line_length in
+ 3) printf "        %10d" $c_txfee
+    ;;
+ 4) printf "       %10d" $c_txfee
+    ;;
  5) printf "      %10d" $c_txfee
     ;;
  6) printf "     %10d" $c_txfee
