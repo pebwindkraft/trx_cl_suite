@@ -25,3 +25,11 @@ yymmmdd
               tcls_in_sig_script.sh
 17mar20 svn   tcls_create            prepare multisig: create msig address & redeem script
 17apr02 svn   testcase_tcls*         update all checksums after msig preps before
+17may07 svn   testcase*              changed all files to "tcls_testcase", to avoid confusion
+                                     with "real" test files beginning with "test*"
+17jun02 svn   tcls_create.sh         improved fee output: display desired and proposed fees 
+17jun11 svn   tcls_tx2txt.sh         minor cosmetic change in output display
+17jun16 svn   tcls_sign.sh           remove "cut" and "tr" where possible, cause they allow 
+                                     only for limited string lengths. Especially on BSD types.
+                                     Changed to arrays, similiar like tcls_tx2txt.sh. 
+

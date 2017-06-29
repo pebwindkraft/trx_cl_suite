@@ -3,7 +3,7 @@ GITHUB messes with the text and newlines, please view in "raw" mode...
 #######################################
 ### 1. TX_CL_SUITE -  description: ###
 #######################################
-A suite of shell scripts to work with Bitcoin transactions. Primary goal is to analyze a transaction. Display it in plain text, similiar to the Bitcoin core client or "www.blockchain.info" JSON output, just in plain text. Second goal is to create or sign transactions. 
+A suite of shell scripts to work with Bitcoin transactions. Primary goal is to analyze a transaction. Display it in plain text, similiar to the Bitcoin core client or "www.blockchain.info" JSON output, just in plain text. Second goal is to create or sign transactions (and cold storage usage). 
 This suite is based on the previous „trx2txt“ tool, which is now discontinued.
 
 Scripts are written to run on OpenBSD and OSX and Linux systems at the command shell (ksh, bash). OthereExisting tools on the web (Bitcoin CLI tools and others), are written to work only with BASHv4. In this suite, all scripts are coded with the intention, to be (nearly) POSIX compliant. Tested on OpenBSD korn shell, MAC OSX BASHv3 and SuSE Linux BASHv4. 
@@ -138,7 +138,7 @@ d61967f63c7dd183914a4ae452c9f6ad5d462ce3d277798075b107615c1a8a30
 
 
 #####################################
-### file testcases_tcls_tx2txt.sh ###
+### file tcls_testcases_tx2txt.sh ###
 #####################################
 This shell script supports the development process, and verifies the script output(s).
 1.) creates sha256 checksums of the involved source code scripts
@@ -148,7 +148,7 @@ This shell script supports the development process, and verifies the script outp
 
 Most easily it is used like this:
 
-  ./testcases_tcls_tx2txt.sh 
+  ./tcls_testcases_tx2txt.sh 
 
 which runs all tests (time consuming). This can be easily compared on all platforms. When hash is equal on all (UNIX/POSIX type of) platforms, code is ready to be uploaded to GITHUB (or similiar). 
 
@@ -218,18 +218,18 @@ Then we would create the transaction (notice the redeemscripthash at the end):
 --> signs the transaction (n times of an "n of m" msig tx, with the corresponding priv/pub key) 
 
 #####################################
-### file testcases_tcls_create.sh ###
+### file tcls_testcases_create.sh ###
 #####################################
 This shell script supports the development process, and verifies the script output(s).
-It is setup the exactly same way as 'testcases_tcls_tx2txt.sh'. Details up there ...
+It is setup the exactly same way as 'tcls_testcases_tx2txt.sh'. Details up there ...
 Most easily it is used like this:
 
-  ./testcases_tcls_create.sh 
+  ./tcls_testcases_create.sh 
 
 #########################
 ### file tcls_sign.sh ###
 #########################
-Advanced usage! As per above (tcls_create.sh), this is the script that follows logically the creation of an unsigned raw transaction, and signs it (preferably on a cold storage system). 
+Advanced usage! As per above (tcls_create.sh), this is the script that follows logically after the creation of an unsigned raw transaction, and will sign it (preferably on a cold storage system). 
 
 Usage example:
   ./tcls_sign.sh -v <raw_trx> -w <privkey> -p <pubkey>
@@ -241,13 +241,13 @@ Hint: in this version the sign process allows for many inputs, which can also be
 See ./tcls_sign.sh -h for more info.
 
 ###################################
-### file testcases_tcls_sign.sh ###
+### file tcls_testcases_sign.sh ###
 ###################################
 This shell script supports the development process, and verifies the script output(s).
-It is setup the exactly same way as 'testcases_tcls_tx2txt.sh'. Details up there ...
+It is setup the exactly same way as 'tcls_testcases_tx2txt.sh'. Details up there ...
 Most easily it is used like this:
 
-  ./testcases_tcls_create.sh 
+  ./tcls_testcases_create.sh 
 
 ############################
 ### file tcls_key2pem.sh ### 
@@ -257,13 +257,13 @@ This shell script is necessary when the signing process is executed. The signatu
 Hint: this tool is now extended with strict DER checks for the signature (see below 'tcls_strict_sig_verify.sh').
 
 ######################################
-### file testcases_tcls_key2pem.sh ###
+### file tcls_testcases_key2pem.sh ###
 ######################################
 This shell script supports the development process, and verifies the script output(s).
-It is setup the exactly same way as 'testcases_tcls_tx2txt.sh'. Details up there ...
+It is setup the exactly same way as 'tcls_testcases_tx2txt.sh'. Details up there ...
 Most easily it is used like this:
 
-  ./testcases_tcls_key2pem.sh 
+  ./tcls_testcases_key2pem.sh 
 
 ######################################
 ### file tcls_strict_sig_verify.sh ### 
@@ -287,13 +287,14 @@ tcls_create.sh and tcls_key2pem.sh.
 #########################
 README.md                         - this file :-)
 Changelog.txt                     - view changes over the files 
+tcls.conf                         - a global config file for all scripts 
 tcls_in_sig_state_machine.graphml - graphics source file for the state machine
                                     (java based app: "yEd Graph Editor")
 tcls_in_sig_state_machine.png     - the exported png for script sig part
 tcls_out_pk_state_machine.graphml - graphics source file for the state machine
                                     (java based app: "yEd Graph Editor")
 tcls_out_pk_state_machine.png     - the exported png for PUBKEY script
-tcls_todos.txt                    - what needs to be done (in the future)
+todos.txt                         - what needs to be done (in the future)
 
 Documentation files are not included in the hashing with any testcases.
 

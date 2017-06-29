@@ -153,7 +153,7 @@ if [ $QUIET -eq 0 ] ; then
   echo "  "
   echo "using $param"
   echo " "
-  if [ $TESTNET -eq 0 ] ; then
+  if [ $TESTNET -eq 1 ] ; then
     echo "preparing for TESTNET"
   fi
 fi
