@@ -14,6 +14,7 @@
 #   0.2	   svn	14dec16 created array for a trx, cause OpenBSD cut cannot 
 #			handle more than ~2000 chars (buffer size in pdksh?)
 #   0.3	   svn	29mar17	add TESTNET functionality (address prefix)
+#   0.4	   svn	26jun17	replace 'cut' were possible.
 #
 # Permission to use, copy, modify, and distribute this software for any 
 # purpose with or without fee is hereby granted, provided that the above 
@@ -50,7 +51,13 @@ TESTNET=0
 #################################################################
 ### set -A or declare tx_array - bash and ksh are different ! ###
 #################################################################
-shell_string=$( echo $SHELL | cut -d / -f 3 )
+
+# I am trying to avoid pipes ...
+# shell_string=$( echo $SHELL | cut -d / -f 3 )
+IFS='/' read v1 v2 shell_string <<EOF
+$SHELL
+EOF
+
 if [ "$shell_string" == "bash" ] ; then
   # echo "bash: declaring tx_array"
   declare -a tx_array
@@ -199,9 +206,9 @@ proc_var_int() {
   fi
 }
 
-#################################################
-# procedure to display even more verbose output #
-#################################################
+#########################################
+# procedure to decode the pubkey script #
+#########################################
 decode_pkscript() {
     result=$( sh ./tcls_out_pk_script.sh -q $1 )
     echo " $result"
@@ -386,19 +393,13 @@ if [ $OS == "Linux" ] ; then
   http_get_cmd="curl -sS -L "
 fi
 
-vv_output "##########################################"
-vv_output "### Check if necessary tools are there ###"
-vv_output "##########################################"
+v_output "Check if necessary tools are there"
 check_tool awk
 check_tool bc
 check_tool dc
 check_tool openssl 
 check_tool sed
 check_tool tr
-
-echo "###################"
-echo "### so let's go ###"
-echo "###################"
 
 ###############################################
 ### Check if network is required and active ###
@@ -416,10 +417,8 @@ echo "###################"
 # 4.) pass everything into the variable "raw_TX"
 # 
 if [ "$TX_id" ] ; then
-  echo "###############################################"
-  echo "### Check if network is required and active ###"
-  echo "###############################################"
-  v_output "working with this TX_id: $TX_id"
+  v_output "Check if network is required and active"
+  vv_output " working with this TX_id: $TX_id"
   if [ $OS == "Linux" ] ; then
     nw_if=$( netstat -rn | awk '/^0.0.0.0/ { print $NF }' | head -n1 )
     /sbin/ifstatus $nw_if | grep -q "up"
@@ -428,8 +427,8 @@ if [ "$TX_id" ] ; then
     ifconfig $nw_if | grep -q " active"
   fi
   if [ $? -eq 0 ] ; then
-    v_output "network interface is active, good"
-    v_output "trying to fetch data from blockchain.info"
+    vv_output " network interface is active, good"
+    vv_output " trying to fetch data from blockchain.info"
     raw_TX=$( $http_get_cmd https://blockchain.info/de/rawtx/$TX_id$raw_TX_LINK2HEX )
     if [ $? -ne 0 ] ; then
       echo "*** error - fetching raw_TX data:"
@@ -455,10 +454,11 @@ if [ "$TX_id" ] ; then
     exit 1
   fi
 fi
-
+      
 ############################################
 ### normalize tx and bring into an array ###
 ############################################
+v_output "Normalize tx (lower/upper case)"
 raw_TX=$( echo $raw_TX | tr [:lower:] [:upper:] )
 result=$( echo "$raw_TX" | sed 's/[[:xdigit:]]\{2\}/& /g' )
 if [ "$shell_string" == "bash" ] ; then
@@ -469,11 +469,14 @@ if [ "$shell_string" == "bash" ] ; then
 else [ "$shell_string" == "ksh" ] 
   set -A tx_array $result
 fi
-v_output "raw trx is this:"
 # v_output "number of tx_array elements: ${#tx_array[*]}, raw trx is this:"
 result=$( echo ${tx_array[*]} | tr -d " " )
+
+v_output " "
+v_output "### raw tx is this:"
 v_output "$result"
 
+echo "### so let's go"
 ##############################################################################
 ### STEP 1 - VERSION (4 Bytes) - Transaction data format version           ###
 ##############################################################################

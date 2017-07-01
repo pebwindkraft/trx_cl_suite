@@ -6,6 +6,7 @@
 # Version by	date	comment
 # 0.1	  svn	21sep16 initial release, code from trx2txt (discontinued)
 # 0.2	  svn	30mar17 added logic for TESTNET
+# 0.3	  svn	27jun17 replace "echo xxx | cut -b ..." with ss_array
 # 
 # Copyright (c) 2015, 2016 Volker Nowarra 
 # Complete rewrite of code in June 2016 from following reference:
@@ -43,7 +44,7 @@
 #  SIGHASH_ANYONECANPAY = 0x80
 # 
 
-typeset -i msig_offset=1
+typeset -i ss_array_ptr=0
 typeset -i sig_offset=0
 typeset -i cur_opcode_dec
 offset=1
@@ -89,35 +90,35 @@ rmd160_sha256() {
   result=$( printf "$result" | openssl dgst -rmd160 | cut -d " " -f 2 )
 }
 
-#######################################################################
-### procedure to show parameter string properly separted with colon ###
-#######################################################################
-data_show() {
-  output=
-  data_len=${#1}
-  data_from=1
-  data_to=0
-  # echo "data_show(), data_len=$data_len, parameter:"
-  # echo "$1"
+####################################################################
+### procedure to show redeem script properly separted with colon ###
+####################################################################
+show_redeem_script() {
+  result=$( echo "00$1" | sed 's/[[:xdigit:]]\{2\}/& /g' )
+  if [ "$shell_string" == "bash" ] ; then
+    declare -a rs_array
+    rs_array_ptr=0
+    for TX_Char in $result; do rs_array[$rs_array_ptr]=$TX_Char; ((rs_array_ptr++)); done
+  else 
+    set -A rs_array $result
+  fi
+  rs_array_ptr=1 
   printf "        "
-  while [ $data_to -le $data_len ]
+  while [ $rs_array_ptr -lt ${#rs_array[*]} ]
    do
-    data_to=$(( data_to + 16 ))
-    output=$( echo $1 | cut -b $data_from-$data_to )
-    if [ $data_to -eq 32 ]  || [ $data_to -eq 64 ]  || [ $data_to -eq 96 ] || \
-       [ $data_to -eq 128 ] || [ $data_to -eq 160 ] || [ $data_to -eq 192 ] ; then  
-      printf "%s\n        " $output
+    opcode=${rs_array[$rs_array_ptr]} 
+    # modulus 8 and modulus 16 to beautify output:
+    if [ $(( $rs_array_ptr % 16 )) -eq 0 ]; then
+      printf "%s\n        " $opcode
+    elif [ $(( $rs_array_ptr % 8 )) -eq 0 ]; then
+      printf "%s:" $opcode
     else
-      if [ $data_to -gt $data_len ] ; then  
-        printf "%s" $output
-      else
-        printf "%s:" $output
-      fi
+      printf "%s" $opcode
     fi
-    data_from=$(( $data_to + 1 ))
+    rs_array_ptr=$(( $rs_array_ptr + 1 ))
   done 
   printf "\n"
-  # echo "    data_len=$data_len, data_to=$data_to"
+  # echo "*** rs_array_ptr=$rs_array_ptr"
 }
 
 ############################################################
@@ -128,9 +129,10 @@ op_data_show() {
   output=
   while [ $n -le $cur_opcode_dec ]
    do
-    to=$(( offset + 1 ))
-    opcode=$( echo $param | cut -b $offset-$to )
+    opcode=${ss_array[$ss_array_ptr]} 
+    ss_array_ptr=$(( $ss_array_ptr + 1 ))
     output=$output$opcode
+    sig_string=$sig_string$opcode
     ret_string=$ret_string$opcode
     if [ $n -eq 8 ]  || [ $n -eq 24 ] || [ $n -eq 40 ] || \
        [ $n -eq 56 ] || [ $n -eq 72 ] || [ $n -eq 88 ] || [ $n -eq 104 ] ; then 
@@ -154,13 +156,11 @@ op_data_show() {
 ### GET NEXT CODE ###
 #####################
 get_next_opcode() {
-  to=$(( offset + 1 ))
-  cur_opcode=$( echo $param | cut -b $offset-$to )
-  # echo "from=$offset, to=$to, opcode=$cur_opcode"
+  cur_opcode=$( printf ${ss_array[$ss_array_ptr]} )
+  ss_array_ptr=$(( $ss_array_ptr + 1 ))
   cur_hexcode="0x"$cur_opcode
   cur_opcode_dec=$( echo "ibase=16;$cur_opcode" | bc )
-  # v_output "offset=$offset, opcode=$cur_opcode, opcode_dec=$cur_opcode_dec"
-  offset=$(( offset + 2 ))
+  sig_string=$sig_string$cur_opcode
 }
 
 #####################################
@@ -171,13 +171,13 @@ S1_SIG_LEN_0x47() {
   get_next_opcode
   case $cur_opcode in
     30) echo "    $cur_opcode: OP_SEQUENCE_0x30: type tag indicating SEQUENCE, begin sigscript"
+        sig_string=$cur_opcode
         S5_Sigtype
         ;;
-    52) echo "    $cur_opcode: OP_2"
-        # in case we go for msig, then length of msig 
-        # is length of previous char - which was 0x47 Bytes (hex47=71dec, --> 142 chars)
+    52) echo "    $cur_opcode: OP_2, we go multisig"
+        # in case we go for msig, then length of msig is length of 
+        # previous char - which was 0x47 Bytes (hex47=71dec, --> 142 chars)
         msig_len=142
-        echo "    ######## we go multisig #########"
         ret_string=''
         msig_redeem_str=$cur_opcode
         S30_MSIG2of2
@@ -194,6 +194,7 @@ S2_SIG_LEN_0x48() {
   get_next_opcode
   case $cur_opcode in
     30) echo "    $cur_opcode: OP_SEQUENCE_0x30: type tag indicating SEQUENCE, begin sigscript"
+        sig_string=$cur_opcode
         S12_Sigtype
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
@@ -337,10 +338,6 @@ S10_SIG_S() {
 ### STATUS 11 (S11_SIG)           ###
 #####################################
 S11_SIG() {
-    sig_start=$(( 3 + $sig_offset ))
-    sig_end=$(( $to - 2 ))
-    sig_offset=$(( $sig_end + 2 ))
-    sig_string=$( echo $param | cut -b $sig_start-$sig_end )
     if [ $Verbose -eq 1 ] ; then
       ./tcls_strict_sig_verify.sh -v $sig_string
     else
@@ -452,10 +449,6 @@ S17_SIG_S() {
 ### STATUS 18 (S18_SIG)           ###
 #####################################
 S18_SIG() {
-    sig_start=$(( 3 + $sig_offset ))
-    sig_end=$(( $to - 2 ))
-    sig_offset=$(( $sig_end + 2 ))
-    sig_string=$( echo $param | cut -b $sig_start-$sig_end )
     if [ $Verbose -eq 1 ] ; then
       ./tcls_strict_sig_verify.sh -v $sig_string
     else
@@ -504,6 +497,7 @@ S21_SIG_LEN_0x49() {
   get_next_opcode
   case $cur_opcode in
     30) echo "    $cur_opcode: OP_SEQUENCE_0x30: type tag indicating SEQUENCE, begin sigscript"
+        sig_string=$cur_opcode
         S22_Sigtype
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
@@ -544,6 +538,7 @@ S24_SIG_LEN_0x3C() {
   get_next_opcode
   case $cur_opcode in
     30) echo "    $cur_opcode: OP_SEQUENCE_0x30: type tag indicating SEQUENCE, begin sigscript"
+        sig_string=$cur_opcode
         S25_Sigtype
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
@@ -608,12 +603,9 @@ S28_SIG_X() {
 #####################################
 S30_MSIG2of2() {
   vv_output "S30_MSIG2of2()"
-  S30_to=$(( $offset + msig_len ))
-  if [ $S30_to -gt $opcodes_len ] ; then
-    S30_to=$opcodes_len 
-  fi
-  vv_output "S30_MSIG2of2(), offset=$offset, S30_to=$S30_to, opcodes_len=$opcodes_len"
-  while [ $offset -le $S30_to ]  
+  rs_loopcounter=1
+  # two of two msig, expecting 2 pubkeys, OP_2 and OP_CHECKMULTISIG
+  while [ $rs_loopcounter -le 4 ]  
    do
     get_next_opcode
     msig_redeem_str=$msig_redeem_str$cur_opcode
@@ -629,7 +621,7 @@ S30_MSIG2of2() {
             ./tcls_base58check_enc.sh -q -p2pkh $result
           fi
           msig_redeem_str=$msig_redeem_str$ret_string
-          vv_output "       msig_redeem_str=$msig_redeem_str"
+          # vv_output "        msig_redeem_str=$msig_redeem_str"
           ret_string=''
           ;;
       41) echo "    $cur_opcode: OP_DATA_0x41: uncompressed pub key"
@@ -643,16 +635,14 @@ S30_MSIG2of2() {
             ./tcls_base58check_enc.sh -q -p2pkh $result
           fi
           msig_redeem_str=$msig_redeem_str$ret_string
-          vv_output "       msig_redeem_str=$msig_redeem_str"
+          # vv_output "        msig_redeem_str=$msig_redeem_str"
           ret_string=''
           ;;
       52) echo "    $cur_opcode: OP_2: push 2 Bytes onto stack"
-          echo "        Multisig needs 2 pubkeys ?"
+          echo "        Multisig needs 2 pubkeys"
           ;;
-      AE) echo "    $cur_opcode: OP_CHECKMULTISIG, terminating multisig"
-          echo "        ####### Multisignature end ######"
-          data_show $msig_redeem_str
-          vv_output "   $msig_redeem_str"
+      AE) echo "    $cur_opcode: OP_CHECKMULTISIG, terminating multisig, REDEEM Script:"
+          show_redeem_script $msig_redeem_str
           ret_string=$msig_redeem_str
           printf "        corresponding bitcoin address is: "
           rmd160_sha256
@@ -668,6 +658,7 @@ S30_MSIG2of2() {
       *)  echo "    $cur_opcode: unknown OpCode"
           ;;
     esac
+    rs_loopcounter=$(( rs_loopcounter + 1 ))
   done
 }
 ############################
@@ -750,7 +741,7 @@ S37_OP2() {
       AE) echo "    $cur_opcode: OP_CHECKMULTISIG, terminating multisig"
           echo "        ####### Multisignature end ######"
           vv_output "    $msig_redeem_str"
-          data_show $msig_redeem_str
+          show_redeem_script $msig_redeem_str
           ret_string=$msig_redeem_str
           printf "        corresponding bitcoin address is: "
           rmd160_sha256
@@ -831,14 +822,35 @@ if [ $VVerbose -eq 1 ] ; then
   echo "  Multisig is much more complicated :-)"
 fi
 
+#################################################################
+### set -A or declare ss_array - bash and ksh are different ! ###
+#################################################################
+result=$( echo "$param" | sed 's/[[:xdigit:]]\{2\}/& /g' )
+shell_string=$( echo $SHELL | cut -d / -f 3 )
+if [ "$shell_string" == "bash" ] ; then
+  declare -a ss_array
+  # running this on OpenBSD creates errors, hence a for loop...
+  # ss_array=($result)
+  # IFS=' ' read -a ss_array <<< "${result}"
+  for TX_Char in $result; do ss_array[$n]=$TX_Char; ((n++)); done
+elif [ "$shell_string" == "ksh" ] ; then 
+  set -A ss_array $result
+else
+  echo "*** ERROR: could not identify shell, exiting gracefully..."
+  echo " "
+  exit 1
+fi
+
 #####################################
 ### STATUS 0 - INIT               ###
 #####################################
   opcodes_len=${#param}
-  while [ $offset -le $opcodes_len ]  
+  # echo "array length= ${#ss_array[*]}"
+  while [ $ss_array_ptr -lt ${#ss_array[*]} ]
    do
     get_next_opcode
-    vv_output "S0_INIT, opcode=$cur_opcode"
+    # vv_output "S0_INIT, opcode=$cur_opcode, ss_array_ptr=$ss_array_ptr "
+    vv_output "S0_INIT, opcode=$cur_opcode" 
     
     case $cur_opcode in
       00) echo "    $cur_opcode: OP_DATA_0x00:     unknown data code - ignore"
@@ -870,7 +882,6 @@ fi
           ;;
     esac
 
-    # EMERGENCY EXIT :-)
     # https://bitcointalk.org/index.php?topic=585639.0
     # A tx is invalid if any of the following are true
     # Block Size is >1,000 KB (this is a block level check but obviously a tx 
@@ -881,11 +892,6 @@ fi
     # The size of the value being pushed in a script is >520 bytes (effectively 
     # limits P2SH scripts to 520 bytes as the redeemScript is pushed to the stack).
     #
-    if [ $offset -gt 520 ] ; then
-      echo "emergency exit, output scripts should not reach this size?"
-      echo "          offset=$offset, scriptlen=$opcodes_len"
-      exit 1
-    fi
   done
 
 

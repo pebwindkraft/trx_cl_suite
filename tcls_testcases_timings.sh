@@ -17,7 +17,25 @@
 # NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE
 # USE OR PERFORMANCE OF THIS SOFTWARE.
 #
-
+# ########################################################################################
+# profiling the shell scripts, using strace:
+#
+#   strace -f -o strace.log <program> 
+# 
+# Output is a file called "strace.log"containing every single system call issued by 
+# the script and any forked programs. 
+# then grep for the execve() system call and gather the counts of the programs executed, 
+# (excluding “execve resumed” events which aren’t actual execve() calls):
+# 
+#   grep execve strace.txt | sed 's/.*execve/execve/' | \
+#     cut -d\" -f2 | grep -v resumed | sort | uniq -c | sort -g
+# 
+# The resulting output looks like this:
+# ...
+# 157 /bin/tail
+# 227 /usr/bin/cut
+# 
+# ########################################################################################
 
 rawtx_fn=tmp_rawtx.txt
 typeset -i i=0

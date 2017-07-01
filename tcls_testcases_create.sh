@@ -238,7 +238,7 @@ echo "./$create_cmd -v -c 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d363
 ./$create_cmd -v -c 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 1111KiuFyqUXJFji8KQnoHC5Rtqa5d5e > tmp_cfile
 echo "./tcls_tx2txt.sh -vv -f tmp_c_utx.txt -u" >> $logfile
 ./tcls_tx2txt.sh -vv -f tmp_c_utx.txt -u >> tmp_cfile
-chksum_ref="a439f619e761ffde251a889fdbebf1edda011d23dc695abb9871bd30c7472dba"
+chksum_ref="02156c1fe47e2cf18ee9b7b4ff2feeb3517c9955a1a409dce0bed7350bb0e54c"
 chksum_prep
 
 echo "=== TESTCASE 5f: 1111LexYVhKvaQY69Paj774F9gnjhDrr " | tee -a $logfile
@@ -246,7 +246,7 @@ echo "./$create_cmd -vv -c 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36
 ./$create_cmd -vv -c 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 1111LexYVhKvaQY69Paj774F9gnjhDrr > tmp_cfile
 echo "./tcls_tx2txt.sh -vv -f tmp_c_utx.txt -u" >> $logfile
 ./tcls_tx2txt.sh -vv -f tmp_c_utx.txt -u >> tmp_cfile
-chksum_ref="9909158628ba74bc965a43d9127d7384e95d068e281f4570f49473db1fc6522d"
+chksum_ref="ef458fbe660f988ff6feb367339645efd25bd562b416fbd6ad190adedded9c1c"
 chksum_prep
 
 echo "=== TESTCASE 5g: 111113CRATaaDmCcWzokzTGhM886kj2bs" | tee -a $logfile
@@ -254,7 +254,7 @@ echo "./$create_cmd -vv -c 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36
 ./$create_cmd -vv -c 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 111113CRATaaDmCcWzokzTGhM886kj2bs > tmp_cfile
 echo "./tcls_tx2txt.sh -vv -f tmp_c_utx.txt -u" >> $logfile
 ./tcls_tx2txt.sh -vv -f tmp_c_utx.txt -u >> tmp_cfile
-chksum_ref="5cd1af58fd42efd8eec9fb3a5b0ac3530dd43cb829cac40972aabc3b76ad3495"
+chksum_ref="bdd5dad56d6a8f3ef8129d85884c3549d9ba869b8f6814bf8ac23c8ae7176b96"
 chksum_prep
 
 echo "=== TESTCASE 5h: 1111111111111111111114oLvT2 " | tee -a $logfile
@@ -262,7 +262,7 @@ echo "./$create_cmd -vv -c 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36
 ./$create_cmd -vv -c 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 110000 1111111111111111111114oLvT2 > tmp_cfile
 echo "./tcls_tx2txt.sh -vv -f tmp_c_utx.txt -u" >> $logfile
 ./tcls_tx2txt.sh -vv -f tmp_c_utx.txt -u >> tmp_cfile
-chksum_ref="4470f449b78871d7612d8a3c03d8d478cf6b0ab0242305ce9b78cd303c34757a" 
+chksum_ref="8ae89d769148ead7e8f68a7865b34d015193364dbcf3b7e1aa2c3cf4d5faabd3" 
 chksum_prep
 
 echo " " | tee -a $logfile
