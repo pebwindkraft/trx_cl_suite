@@ -15,6 +15,7 @@
 #			handle more than ~2000 chars (buffer size in pdksh?)
 #   0.3	   svn	29mar17	add TESTNET functionality (address prefix)
 #   0.4	   svn	26jun17	replace 'cut' were possible.
+#   0.5	   svn	20sep17	integrate proper decoding of SEGWIT tx :-)
 #
 # Permission to use, copy, modify, and distribute this software for any 
 # purpose with or without fee is hereby granted, provided that the above 
@@ -40,9 +41,10 @@ raw_TX_LINK=https://blockchain.info/de/rawtx/cc8a279b0736e6a2cc20b324acc5aa688b3
 raw_TX_LINK2HEX="?format=hex"
 raw_TX_DEFAULT=010000000253603b3fdb9d5e10de2172305ff68f4b5227310ba6bd81d4e1bf60c0de6183bc010000006a4730440220128487f04a591c43d7a6556fff9158999b46d6119c1a4d4cf1f5d0ac1dd57a94022061556761e9e1b1e656c0a70aa7b3e83454cd61662df61ebdc31e43196b5e0c10012102b12126a716ce7bbb84703bcfbf0afa80283c75a7304a48cd311a5027efd906c2ffffffff0e52c4701577287b6dd02f422c2a8033fa0b4614f75fa9f0a5c4ab69634b5ba7000000006b483045022100a428348ff55b2b59bc55ddacb1a00f4ecdabe282707ba5185d39fe9cdf05d7f0022074232dae76965b6311cea2d9e5708a0f137f4ea2b0e36d0818450c67c9ba259d0121025f95e8a33556e9d7311fa748e9434b333a4ecfb590c773480a196deab0dedee1ffffffff0290257300000000001976a914fca68658b537382e27a85522d292e1ad9543fe0488ac98381100000000001976a9146af1d17462c6146a8a61217e8648903acd3335f188ac00000000
 
-typeset -i r_flag=0
-typeset -i t_flag=0
-typeset -i u_flag=0
+typeset -i sw_flag=0	# when handling a segwit tx
+typeset -i r_flag=0	# handling of -r param
+typeset -i t_flag=0	# handling of -t param
+typeset -i u_flag=0	# handling of -u param
 var_int=0
 Verbose=0
 VVerbose=0
@@ -492,7 +494,7 @@ tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
 echo " $result"
 
 ##############################################################################
-### STEP 2 - TX_IN COUNT, Number of Inputs (var_int)                       ###
+### STEP 2 - TX_IN COUNT, Number of Inputs (var_int), or SEGWIT marker     ###
 ##############################################################################
 ### Size: 1 or more chars, data type var_int
 
@@ -501,7 +503,41 @@ proc_var_int
 tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
 tx_in_count_hex=$( echo $var_int | tr -d " " )
 tx_in_count_dec=$( echo "ibase=16; $tx_in_count_hex"|bc) 
+
+# SEGWIT MARKER ?
+if [ $tx_in_count_dec -eq 0 ] ; then
+  if [ "$Verbose" -eq 1 ] ; then
+    echo " "
+    echo "SEGWIT (BIP141): this is a segwit tx, marker=$tx_in_count_hex" 
+  else
+    echo " $tx_in_count_hex" 
+  fi
+  tx_array_bytes=1
+  proc_var_int
+  tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
+  tx_in_count_hex=$( echo $var_int | tr -d " " )
+  tx_in_count_dec=$( echo "ibase=16; $tx_in_count_hex"|bc) 
+  if [ $tx_in_count_dec -eq 1 ] ; then
+    if [ "$Verbose" -eq 1 ] ; then
+      echo "       (BIP141): flag=$tx_in_count_hex" 
+    else
+      echo "  $tx_in_count_hex" 
+    fi
+    sw_flag=1	# here we are sure to have a segwit tx, mark it accordingly
+    tx_array_bytes=1
+    proc_var_int
+    tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
+    tx_in_count_hex=$( echo $var_int | tr -d " " )
+    tx_in_count_dec=$( echo "ibase=16; $tx_in_count_hex"|bc) 
+  else
+    echo "### error: unknown combination of marker and flag fields"
+    echo "exiting gracefully ..."
+    exit 0
+  fi
+fi
+
 if [ "$Verbose" -eq 1 ] ; then
+  echo " "
   echo "TX_IN COUNT [var_int]: hex=$tx_in_count_hex, decimal=$tx_in_count_dec"
 else
   echo " $tx_in_count_hex"
@@ -512,7 +548,7 @@ while [ $loopcounter -lt $tx_in_count_dec ]
   ### TX_IN, a data structure of one or more transaction inputs ###
   #################################################################
   ### Size: 41+, Data type tx_in[]   
-  v_output "TX_IN[$loopcounter]"
+  v_output " TX_IN[$loopcounter]"
   # TX_IN consists of the following fields:
   # Size Description       Data type Comments
   # 36   previous_output   outpoint, the previous output trx reference
@@ -528,7 +564,7 @@ while [ $loopcounter -lt $tx_in_count_dec ]
   ### STEP 3 - TX_IN, previous output transaction hash: 32Bytes ###
   #################################################################
   ### Size: 32, Data type char[32]
-  v_output " TX_IN[$loopcounter] OutPoint hash (char[32])"
+  v_output "  TX_IN[$loopcounter] OutPoint hash (char[32])"
   tx_array_bytes=32
   result=$( get_TX_section )
   tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
@@ -547,7 +583,7 @@ while [ $loopcounter -lt $tx_in_count_dec ]
   # and convert into decimal, and then Satoshis ...
   trx_value_dec=$( echo "ibase=16; $result"|bc) 
   if [ "$Verbose" -eq 1 ] ; then
-    echo " TX_IN[$loopcounter] OutPoint index (uint32_t)"
+    echo "  TX_IN[$loopcounter] OutPoint index (uint32_t)"
     echo "  hex=$trx_value_hex, reversed=$result, decimal=$trx_value_dec"
   else 
     echo "  $trx_value_hex"
@@ -561,10 +597,10 @@ while [ $loopcounter -lt $tx_in_count_dec ]
   proc_var_int
   tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
   script_length_hex=$var_int
-  script_length_dez=$( echo "ibase=16; $script_length_hex"|bc) 
+  script_length_dec=$( echo "ibase=16; $script_length_hex"|bc) 
   if [ "$Verbose" -eq 1 ] ; then
-    echo " TX_IN[$loopcounter] Script Length (var_int)"
-    echo "  hex=$script_length_hex, decimal=$script_length_dez"
+    echo "  TX_IN[$loopcounter] Script Length (var_int)"
+    echo "  hex=$script_length_hex, decimal=$script_length_dec"
   else
     echo "  $script_length_hex"
   fi
@@ -575,18 +611,20 @@ while [ $loopcounter -lt $tx_in_count_dec ]
   ### Size: 1, Data type u_int 
   # For unsigned raw transactions, this is temporarily filled with the scriptPubKey 
   # of the output. First a one-byte varint which denotes the length of the scriptSig 
-  v_output " TX_IN[$loopcounter] Script Sig (uchar[])"
-  tx_array_bytes=$script_length_dez
-  # echo "tx_array_ptr=$tx_array_ptr, tx_array_bytes=$tx_array_bytes"
-  sig_script=$( get_TX_section )
-  tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
-  echo "  $sig_script "
+  if [ "$script_length_dec" -ne 0 ] ; then
+    v_output "  TX_IN[$loopcounter] Script Sig (uchar[])"
+    tx_array_bytes=$script_length_dec
+    # echo "tx_array_ptr=$tx_array_ptr, tx_array_bytes=$tx_array_bytes"
+    sig_script=$( get_TX_section )
+    tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
+    echo "  $sig_script "
+  fi
 
   ##############################################################################
   ### STEP 7 - TX_IN, signature script, uchar[] - variable length            ###
   ##############################################################################
   ### Size: 20+, Data type uchar[] 
-  if [ "$VVerbose" -eq 1 ] && [ "$script_length_dez" -ne 0 ] ; then
+  if [ "$VVerbose" -eq 1 ] && [ "$script_length_dec" -ne 0 ] ; then
     if [ $u_flag -eq 1 ] ; then
       echo "  Working on an unsigned raw TX. This is the pubkey script "
       echo "  of previous trx, for which you'll need the privkey to sign:"
@@ -609,16 +647,15 @@ while [ $loopcounter -lt $tx_in_count_dec ]
   fi
 
   ##############################################################################
-  ### STEP 8 - TX_IN, SEQUENCE: This is currently always set to 0xffffffff   ###
+  ### STEP 8 - TX_IN, SEQUENCE: normally 0xffffffff, also others possible... ###
   ##############################################################################
   ### Size: 4, Data type u_int32
-  v_output " TX_IN[$loopcounter] Sequence (uint32_t)"
+  v_output "  TX_IN[$loopcounter] Sequence (uint32_t)"
   tx_array_bytes=4
   sequence_nr=$( get_TX_section )
   tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
-  if [ "$sequence_nr" == "FEFFFFFF" ] || [ "$sequence_nr" == "FFFFFFFF" ] ; then
+  if [ "$sequence_nr" == "EEFFFFFF" ] || [ "$sequence_nr" == "FEFFFFFF" ] || [ "$sequence_nr" == "FFFFFFFF" ] ; then
       echo "  $sequence_nr"
-      echo " "
   else
     echo "*** error: expected standard sequence number (0xFFFFFFFF), found $sequence_nr"
     exit 1
@@ -626,6 +663,7 @@ while [ $loopcounter -lt $tx_in_count_dec ]
 
   loopcounter=$(($loopcounter + 1))
 done
+echo " "
 
 ##############################################################################
 ### STEP 9 - TX_OUT, Number of Transaction outputs (var_int)               ###
@@ -638,19 +676,18 @@ done
 ### To spend the UTXO, one needs to provide x and y satisfying the script, a feat 
 ### practically impossible without a corresponding private key. 
 
-v_output " "
 tx_array_bytes=1
 proc_var_int
 tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
-tx_out_count_dez=$( echo "ibase=16; $var_int"|bc) 
+tx_out_count_dec=$( echo "ibase=16; $var_int"|bc) 
 if [ "$Verbose" -eq 1 ] ; then
-  echo "TX_OUT COUNT, hex=$var_int, decimal=$tx_out_count_dez"
+  echo "TX_OUT COUNT, hex=$var_int, decimal=$tx_out_count_dec"
 else
   echo " $var_int"
 fi
 
 loopcounter=0
-while [ $loopcounter -lt $tx_out_count_dez ]
+while [ $loopcounter -lt $tx_out_count_dec ]
 do
   ##############################################################################
   ### TX_OUT, a data structure of 1 or more transaction outputs or destinations 
@@ -660,7 +697,7 @@ do
   ###  1+  pk_script length var_int    Length of the pk_script
   ###  ?   pk_script        uchar[]    Usually contains the public key as a Bitcoin 
   ###                                  script setting up conditions to claim this output. 
-  v_output "TX_OUT[$loopcounter]"
+  v_output " TX_OUT[$loopcounter]"
 
   ##############################################################################
   ### STEP 10 - TX_OUT, AMOUNT: 8 Bytes hex for the amount                   ###
@@ -671,22 +708,22 @@ do
   tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
   reverse=$( reverse_hex $trx_value_hex )
 
-  trx_value_dez=$(echo "ibase=16; $reverse"|bc) 
+  trx_value_dec=$(echo "ibase=16; $reverse"|bc) 
   # try to get it in bitcoin notation
   # OpenBSD ksh and Linux bash behave different, if value is 0
-  if [ $trx_value_dez -eq 0 ] ; then
+  if [ $trx_value_dec -eq 0 ] ; then
     trx_value_bitcoin=0
   else
-    len=${#trx_value_dez}
+    len=${#trx_value_dec}
     if [ $len -lt 8 ] ; then
-      trx_value_bitcoin="0"$(echo "scale=8; $trx_value_dez / 100000000;" | bc)
+      trx_value_bitcoin="0"$(echo "scale=8; $trx_value_dec / 100000000;" | bc)
     else
-      trx_value_bitcoin=$(echo "scale=8; $trx_value_dez / 100000000;" | bc)
+      trx_value_bitcoin=$(echo "scale=8; $trx_value_dec / 100000000;" | bc)
     fi
   fi
   if [ "$Verbose" -eq 1 ] ; then
-    echo " TX_OUT[$loopcounter] Value (uint64_t)"
-    echo "  hex=$trx_value_hex, reversed_hex=$reverse, dec=$trx_value_dez, bitcoin=$trx_value_bitcoin"
+    echo "  TX_OUT[$loopcounter] Value (uint64_t)"
+    echo "  hex=$trx_value_hex, reversed_hex=$reverse, dec=$trx_value_dec, bitcoin=$trx_value_bitcoin"
   else
     echo "  $trx_value_hex"
   fi
@@ -699,10 +736,10 @@ do
   proc_var_int
   tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
   pk_script_length_hex=$var_int
-  pk_script_length_dez=$( echo "ibase=16; $pk_script_length_hex"|bc) 
+  pk_script_length_dec=$( echo "ibase=16; $pk_script_length_hex"|bc) 
   if [ "$Verbose" -eq 1 ] ; then
-    echo " TX_OUT[$loopcounter] PK_Script Length (var_int)"
-    echo "  hex=$pk_script_length_hex, dec=$pk_script_length_dez"
+    echo "  TX_OUT[$loopcounter] PK_Script Length (var_int)"
+    echo "  hex=$pk_script_length_hex, dec=$pk_script_length_dec"
   else
     echo "  $pk_script_length_hex"
   fi
@@ -711,20 +748,90 @@ do
   ### STEP 12 - TX_OUT, PUBLIC KEY SCRIPT: the OP Codes of the PK script     ###
   ##############################################################################
   ### Size: 1 or more chars, data type uchar[] 
-  v_output " TX_OUT[$loopcounter] pk_script (uchar[])"
-  tx_array_bytes=$pk_script_length_dez
+  v_output "  TX_OUT[$loopcounter] pk_script (uchar[])"
+  tx_array_bytes=$pk_script_length_dec
   pk_script=$( get_TX_section )
   tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
   echo "  $pk_script"
 
-  if [ "$VVerbose" -eq 1 ] && [ $pk_script_length_dez -ne 0 ] ; then
+  if [ "$VVerbose" -eq 1 ] && [ $pk_script_length_dec -ne 0 ] ; then
     decode_pkscript $pk_script
   fi
   loopcounter=$(($loopcounter + 1))
 done
 
+##############################################################################
+### STEP 13 - SEGWIT data                                                  ###
+##############################################################################
+# BIP141:
+# A witness field starts with a <code>var_int</code> to indicate the number of 
+# stack items for the txin. 
+# It is followed by stack items, with each item starts with a 
+# <code>var_int</code> to indicate the length. Witness data is NOT script.
+
+
+if [ $sw_flag -eq 1 ] ; then
+  # set the witness_cnt to 0, to go through number of witness data scripts
+  echo " "
+  witness_cnt=0
+  while [ $witness_cnt -lt $tx_in_count_dec ]
+   do
+    # SEGWIT FOR TXINs:
+    tx_array_bytes=1
+    proc_var_int
+    tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
+    witness_data_hex=$( echo $var_int | tr -d " " )
+    witness_data_dec=$( echo "ibase=16; $witness_data_hex"|bc) 
+    if [ "$Verbose" -eq 1 ] ; then
+      echo "WITNESS TXIN[$witness_cnt] stack elements: hex=$witness_data_hex, decimal=$witness_data_dec"
+    else
+      echo " $witness_data_hex"
+    fi
+    # set the loopcounter to 0, to go through number of witness data scripts
+    loopcounter=0
+    while [ $loopcounter -lt $witness_data_dec ]
+     do
+      if [ $witness_data_dec -ne 0 ] ; then
+        #######################
+        ### copy of STEP 5  ###
+        #######################
+        ### Size: 1 or more chars, data type var_int
+        tx_array_bytes=1
+        proc_var_int
+        tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
+        data_length_hex=$var_int
+        data_length_dec=$( echo "ibase=16; $data_length_hex"|bc) 
+      
+        if [ "$Verbose" -eq 1 ] ; then
+          if [ "$VVerbose" -eq 1 ] ; then
+            echo " WITNESS[$loopcounter] data length (var_int), \c"
+            echo "hex=$data_length_hex, decimal=$data_length_dec, data(uchar[]):"
+          else
+            echo " WITNESS data[$loopcounter]:"
+          fi
+        fi
+     
+        #############################################
+        ### copy of STEP 6 - signature script ... ###
+        #############################################
+        ### Size: 1, Data type u_int 
+        tx_array_bytes=$data_length_dec
+        witness_data=$( get_TX_section )
+        tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
+        if [ "$VVerbose" -eq 1 ] ; then
+          echo "  $witness_data"
+        else
+          echo "  $data_length_hex$witness_data"
+        fi
+      fi
+      loopcounter=$(($loopcounter + 1))
+    done
+    witness_cnt=$(($witness_cnt + 1))
+  done
+fi
+  
 ###################################################################################
-### STEP 13 - LOCK_TIME: block number or timestamp, at which this trx is locked ###
+### STEP 14 - LOCK_TIME: block number or timestamp, at which this trx is locked ###
 ###################################################################################
 ### Size: 4, Data type uint32_t  
 ###      Value        Description
