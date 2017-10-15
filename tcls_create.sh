@@ -326,7 +326,7 @@ get_chksum() {
 ##################################
 ### Check bitcoin address hash ###
 ##################################
-#
+# see also here: https://bitcointalk.org/index.php?topic=1543429.0
 # bitcoin-tools.sh has this logic, which only works in bash. I changed
 # it to be a bit more POISX compliant (also work in ksh). 
 # in this example variable $1 is the target address
@@ -1076,7 +1076,7 @@ if [ $? -eq 0 ]; then
   vv_output " - yes"
   # when there was no parameter given for txfee:
   if [ $txfee_param_flag -eq 0 ] ; then
-    BF21_txfee_per_byte=$( $http_get_cmd https://bitcoinfees.21.co/api/v1/fees/recommended | awk ' BEGIN {FS="[:}]"} { print $4 }' )
+    BF21_txfee_per_byte=$( $http_get_cmd https://bitcoinfees.21.co/api/v1/fees/recommended | head -n1 | awk ' BEGIN {FS="[:}]"} { print $4 }' )
   fi
   # if we create a trx, and param -t was given, then a 
   # Bitcoin TRANSACTION_ID should be in variable "utxo_TX_ID":
@@ -1300,17 +1300,17 @@ if [ $txfee_param_flag -eq 0 ] ; then
   printf "### bitcoinfees.21.co (@ $BF21_txfee_per_byte Satoshi/Byte * $TX_bytes TX_bytes):"
   line_length=$(( ${#txfee_per_byte} + ${#TX_bytes} ))
   case $line_length in
-   3) printf "     %10d" $BF21_txfee
+   3) printf "      %10d" $BF21_txfee
       ;;
-   4) printf "    %10d" $BF21_txfee
+   4) printf "     %10d" $BF21_txfee
       ;;
-   5) printf "   %10d" $BF21_txfee
+   5) printf "    %10d" $BF21_txfee
       ;;
-   6) printf "  %10d" $BF21_txfee
+   6) printf "   %10d" $BF21_txfee
       ;;
-   7) printf " %10d" $BF21_txfee
+   7) printf "  %10d" $BF21_txfee
       ;;
-   8) printf "%10d" $BF21_txfee
+   8) printf " %10d" $BF21_txfee
       ;;
   esac
   printf " ###\n" $BF21_txfee
