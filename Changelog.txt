@@ -6,30 +6,32 @@
 # https://en.bitcoin.it/wiki/Protocol_specification#tx
 #
 # 
-date    by    file                   comment
-yymmmdd
-16sep12 svn   all :-)                initial release
-16sep12 svn   all                    created a new version out of trx2txt, cause it is more
-                                     than simply trx to txt. It became a complete tool suite
-                                     "trx2txt" suite is discontinued with this release.
-16oct02 svn   all files              further updated all naming convention, also inside files
-16oct23 svn   all testcases          harmonized output of all testcases files
-16nov11 svn   tcls_sign.sh           updated to be able to use multiple inputs
-16nov30 svn   tcls_create/sign.sh    fixed assembly of TX to create correct hash, and sign=ok
-16dec03 svn   tcls_tx2txt.sh         added possibility to load TX data from file
-16dec14 svn   tcls_tx2txt.sh         loading TX data into array, to fix (OpenBSD) pdksh issue
-                                     where parameters exceed 2048 bytes
-17mar19 svn   tcls_tx2txt.sh         prepare to work with testnet data
+date    by    file                   todo comment
+yymmmdd 
+16sep12 svn   all :-)                ??? initial release
+16sep12 svn   all                    ??? created a new version out of trx2txt, cause it is more
+                                         than simply trx to txt. It became a complete tool suite
+                                         "trx2txt" suite is discontinued with this release.
+16oct02 svn   all files              ??? further updated all naming convention, also inside files
+16oct23 svn   all testcases          ??? harmonized output of all testcases files
+16nov11 svn   tcls_sign.sh           I27 updated to be able to use multiple inputs
+16nov30 svn   tcls_create/sign.sh    ??? fixed assembly of TX to create correct hash, and sign=ok
+16dec03 svn   tcls_tx2txt.sh         I43 added possibility to load TX data from file
+16dec14 svn   tcls_tx2txt.sh         ??? loading TX data into array, to fix (OpenBSD) pdksh issue
+                                         where parameters exceed 2048 bytes
+17feb05 svn   tcls.conf              I26 xxx
+17mar19 svn   tcls_tx2txt.sh         ??? compare to work with testnet data
               tcls_create.sh  
               tcls_base58check_enc.sh
               tcls_in_sig_script.sh
-17mar20 svn   tcls_create            prepare multisig: create msig address & redeem script
-17apr02 svn   testcase_tcls*         update all checksums after msig preps before
-17may07 svn   testcase*              changed all files to "tcls_testcase", to avoid confusion
+17mar20 svn   tcls_create            ??? prepare multisig: create msig address & redeem script
+17apr02 svn   testcase_tcls*         ??? update all checksums after msig preps before
+17may07 svn   testcase*              ??? changed all files to "tcls_testcase", to avoid confusion
                                      with "real" test files beginning with "test*"
-17jun02 svn   tcls_create.sh         improved fee output: display desired and proposed fees 
-17jun11 svn   tcls_tx2txt.sh         minor cosmetic change in output display
-17jun16 svn   tcls_sign.sh           remove "cut" and "tr" where possible, cause they allow 
+17jun02 svn   tcls_create.sh         ??? improved fee output: display desired and proposed fees 
+17jun11 svn   tcls_tx2txt.sh         ??? minor cosmetic change in output display
+17jun16 svn   tcls_sign.sh           ??? remove "cut" and "tr" where possible, cause they allow 
                                      only for limited string lengths. Especially on BSD types.
                                      Changed to arrays, similiar like tcls_tx2txt.sh. 
-
+17jun28 svn   tcls_tx2txt.sh         I59 minor cosmetic change in outputs, to prepare for Segwit
+17aug08 svn   tcls_tx2txt.sh         I59 SegWIT tx !!! 

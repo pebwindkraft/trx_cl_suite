@@ -42,12 +42,6 @@ SIG_MAX_LENGTH_CHARS=146
 ...
 --> apr2017: already in use for tcls_create.sh
 
-I27: 25Oct2016, svn:
-====================
-trx_sign.sh: 
-STEP 17: when there is a trx with multiple output, need to create a loop
----> this can be closed, see item #52
-
 I33: 05Nov2016, svn:
 ====================
 tcls_sign.sh or tcls_key2pem.sh: is this missing ?
@@ -305,6 +299,54 @@ https://blockchain.info/tx/d276abe15791941649c3ca8425d79167cc1cf801f83aa99753fe7
 0100000001d0e67013c4c8512cb7e4cfbb64bcea38d854cab6db36b6af0113109ce489ee7201000000fdfd000048304502210096df80136e578ce721589d61cb2efcf5e4748c6a3a6ab7e34d0fc12e3e748e2c02201049e22331794a5d99856105b096e3adb60b053562ad40ef6fe28b8bb70ca8f40147304402203f49e5198e7b14aeb59c26dc42a4207ede9d0d4a291e2ae6f2eb1809fbdba21a022030e74e63e752296499e18f772e00d26c206972029f3b8c0b7d50298a1734241f014c69522103459d20315debcb8b4c47c5f0ff356c7764ea3b103487487a1ed2bbcac3f18bc221023b0fd344dbd13d25663adc5a31d269ceac90b6dfc3ac8af8d5b31aa10ba366fc21032233fc2b5916568cd5177e9b88feda049195418cbadb2c6741e8df8967ec84ab53aeffffffff030000000000000000106a0e69643a64616e6f6d6172722e69647c150000000000001976a9146ada8b2f3ce136abedd949e749ccf5574d867d5b88ac557d0c000000000017a9148e1719fb937c598ddd0760118b5455fc4f31891b8700000000
 
 
+I62: tcls_create.sh
+===================
+https://www.reddit.com/r/Bitcoin/comments/74375h/i_have_a_p2sh_multisig_redeem_script_that_is_over/
+multisig must not be over 520 bytes
+
+
+I63: tcls_create.sh
+===================
+when in Africa, the curl call cannot go through. See:
+https://bitcoin.stackexchange.com/questions/60296/getting-current-bitcoin-fees-from-command-line
+include a switch that goes around usage of bitcoinfees.21.co
+and set a default value? 
+or ask user to provide s.th.?
+
+
+I64: tcls_create.sh
+===================
+possible extension/thoughts for cold storage:
+Create multi-sig wallet offline
+
+Goal: Never expose private keys to the internet.
+
+    Go offline
+    Format 2 USB devices
+    Save portable Linux distro to one USB device and Chrome, Copay, Ledger to other device
+    Start computer using portable Linux distro
+    Install applications
+    Remove the USB devices from the computer
+    Create a 2/4 multisig wallet.
+    Choose 2 people that I trust wont collude
+    Save 1 key on a Ledger device for a trusted person
+    Save 1 key on a Ledger device for another trusted person
+    Save 1 key on Ledger device for me
+    Write down the last key on paper
+
+Dead man's switch
+
+Goal: If any two people lose access to their devices or die simultaneously, access to the coins is not lost
+
+Goal: If one person loses their key, is a victim of theft or goes rouge, the coins are not lost.
+
+    Setup a server that holds the private key I wrote down on paper.
+    Discard the paper I wrote the private key to.
+    Instruct the server to listen from pings with a certain signature and count the time since the last ping.
+    Run an application every time I start my computer that pings the server.
+    Instruct the server to sms me a warning if it has not been pinged for 1 month.
+    Instruct the server to sms me the private key if it has not been pinged for 2 month.
+    Instruct the server to sms the truster persons the private key if it has not been pinged for 3 month.
 
 
 

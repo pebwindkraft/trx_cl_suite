@@ -804,7 +804,7 @@ if [ $sw_flag -eq 1 ] ; then
       
         if [ "$Verbose" -eq 1 ] ; then
           if [ "$VVerbose" -eq 1 ] ; then
-            echo " WITNESS[$loopcounter] data length (var_int), \c"
+            printf " WITNESS[$loopcounter] data length (var_int), "
             echo "hex=$data_length_hex, decimal=$data_length_dec, data(uchar[]):"
           else
             echo " WITNESS data[$loopcounter]:"
