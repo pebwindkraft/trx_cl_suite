@@ -17,7 +17,7 @@
     <node id="n0">
       <data key="d6">
         <y:ShapeNode>
-          <y:Geometry height="45.0" width="100.0" x="70.0" y="547.5"/>
+          <y:Geometry height="45.0" width="100.0" x="70.0" y="517.5"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="3.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="16" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="22.84375" modelName="custom" textColor="#000000" visible="true" width="29.1484375" x="35.42578125" y="11.078125">Init<y:LabelModel>
@@ -119,7 +119,7 @@
     <node id="n6">
       <data key="d6">
         <y:ShapeNode>
-          <y:Geometry height="45.0" width="100.0" x="445.0000000000001" y="217.5"/>
+          <y:Geometry height="45.0" width="100.0" x="445.00000000000017" y="457.5"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="94.31640625" x="2.841796875" y="13.43359375">S6_OP_DATA65<y:LabelModel>
@@ -136,7 +136,7 @@
     <node id="n7">
       <data key="d6">
         <y:ShapeNode>
-          <y:Geometry height="45.0" width="100.0" x="1060.0000000000005" y="247.49999999999997"/>
+          <y:Geometry height="45.0" width="100.0" x="1060.0000000000005" y="487.5"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="3.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="16" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="22.84375" modelName="custom" textColor="#000000" visible="true" width="42.25" x="28.875" y="11.078125000000028">P2PK<y:LabelModel>
@@ -204,7 +204,7 @@
     <node id="n11">
       <data key="d6">
         <y:ShapeNode>
-          <y:Geometry height="45.0" width="100.0" x="445.00000000000017" y="277.5"/>
+          <y:Geometry height="45.0" width="100.0" x="445.0000000000002" y="517.5"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="101.904296875" x="-0.9521484375" y="13.43359375">S11_OP_DATA33<y:LabelModel>
@@ -221,7 +221,7 @@
     <node id="n12">
       <data key="d6">
         <y:ShapeNode>
-          <y:Geometry height="45.0" width="100.0" x="250.0" y="547.5"/>
+          <y:Geometry height="45.0" width="100.0" x="250.0" y="397.5"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="61.181640625" x="19.4091796875" y="13.43359375">S13_OP_1<y:LabelModel>
@@ -238,7 +238,7 @@
     <node id="n13">
       <data key="d6">
         <y:ShapeNode>
-          <y:Geometry height="45.0" width="100.0" x="445.0000000000003" y="397.5"/>
+          <y:Geometry height="45.0" width="100.0" x="445.0000000000003" y="247.5"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="101.904296875" x="-0.9521484375" y="13.43359375">S14_OP_DATA33<y:LabelModel>
@@ -255,7 +255,7 @@
     <node id="n14">
       <data key="d6">
         <y:ShapeNode>
-          <y:Geometry height="45.0" width="100.0" x="1060.0000000000005" y="547.5"/>
+          <y:Geometry height="45.0" width="100.0" x="1060.0000000000005" y="397.5"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="3.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="16" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="22.84375" modelName="custom" textColor="#000000" visible="true" width="76.9140625" x="11.54296875" y="11.078125">MULTISIG<y:LabelModel>
@@ -272,7 +272,7 @@
     <node id="n15">
       <data key="d6">
         <y:ShapeNode>
-          <y:Geometry height="45.0" width="100.0" x="445.0000000000001" y="457.5"/>
+          <y:Geometry height="45.0" width="100.0" x="445.0000000000001" y="307.5"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="101.904296875" x="-0.9521484375" y="13.43359375">S15_OP_DATA65<y:LabelModel>
@@ -289,7 +289,7 @@
     <node id="n16">
       <data key="d6">
         <y:ShapeNode>
-          <y:Geometry height="45.0" width="100.0" x="1060.0000000000005" y="637.5"/>
+          <y:Geometry height="45.0" width="100.0" x="1060.0000000000005" y="607.5"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="3.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="16" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="22.84375" modelName="custom" textColor="#000000" visible="true" width="107.4921875" x="-3.74609375" y="11.078125">S24_NullData<y:LabelModel>
@@ -306,7 +306,7 @@
     <node id="n17">
       <data key="d6">
         <y:ShapeNode>
-          <y:Geometry height="45.0" width="100.0" x="1060.0000000000005" y="697.5"/>
+          <y:Geometry height="45.0" width="100.0" x="1060.0000000000005" y="667.5"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="3.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="16" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="22.84375" modelName="custom" textColor="#000000" visible="true" width="87.109375" x="6.4453125" y="11.078125">UNKNOWN<y:LabelModel>
@@ -323,7 +323,7 @@
     <node id="n18">
       <data key="d6">
         <y:ShapeNode>
-          <y:Geometry height="45.0" width="100.0" x="850.0000000000005" y="547.5"/>
+          <y:Geometry height="45.0" width="100.0" x="850.0000000000005" y="397.5"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="83.30078125" x="8.349609375" y="13.43359375">S18_OP_1-16<y:LabelModel>
@@ -340,7 +340,7 @@
     <node id="n19">
       <data key="d6">
         <y:ShapeNode>
-          <y:Geometry height="45.0" width="100.0" x="445.0000000000003" y="517.5"/>
+          <y:Geometry height="45.0" width="100.0" x="445.0000000000003" y="367.5"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="84.431640625" x="7.7841796875" y="13.43359375">S16_OP_0x4C<y:LabelModel>
@@ -357,7 +357,7 @@
     <node id="n20">
       <data key="d6">
         <y:ShapeNode>
-          <y:Geometry height="45.0" width="100.0" x="610.0" y="517.5"/>
+          <y:Geometry height="45.0" width="100.0" x="610.0" y="367.5"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="custom" textColor="#000000" visible="true" width="71.587890625" x="14.2060546875" y="13.43359375">S17_Length<y:LabelModel>
@@ -381,7 +381,7 @@
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
-          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="six_pos" modelPosition="thead" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="49.890625" x="39.984375" y="-477.6328125">OP_DUP<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
+          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="six_pos" modelPosition="thead" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="49.890625" x="39.984375" y="-447.6328125">OP_DUP<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
           </y:EdgeLabel>
           <y:BendStyle smoothed="true"/>
         </y:PolyLineEdge>
@@ -442,11 +442,11 @@
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
-            <y:Point x="1020.0000000000005" y="239.99999999999994"/>
+            <y:Point x="1020.0000000000005" y="480.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
-          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="two_pos" modelPosition="head" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="84.30859375" x="199.90820312500023" y="-20.13281250000003">OP_CHECKSIG<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
+          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="two_pos" modelPosition="head" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="84.30859375" x="199.90820312500034" y="-20.1328125">OP_CHECKSIG<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
           </y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
@@ -456,12 +456,12 @@
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
-            <y:Point x="180.0" y="270.0"/>
-            <y:Point x="210.0" y="240.0"/>
+            <y:Point x="150.0" y="510.0"/>
+            <y:Point x="178.69599217986314" y="480.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
-          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="six_pos" modelPosition="thead" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="74.265625" x="236.1274871826173" y="-327.723388671875">OP_DATA65<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
+          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="six_pos" modelPosition="head" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="74.265625" x="-70.51823425292969" y="-1.98175048828125">OP_DATA65<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
           </y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
@@ -501,7 +501,7 @@
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
-          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="six_pos" modelPosition="thead" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="81.09765625" x="231.90366363525408" y="-387.64862060546875">OP_HASH160<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
+          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="six_pos" modelPosition="thead" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="81.09765625" x="231.73359680175798" y="-357.651611328125">OP_HASH160<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
           </y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
@@ -510,13 +510,10 @@
     <edge id="e10" source="n0" target="n11">
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
-            <y:Point x="210.0" y="330.0"/>
-            <y:Point x="240.0" y="300.0"/>
-          </y:Path>
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
-          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="six_pos" modelPosition="thead" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="74.265625" x="232.28950500488298" y="-267.94647216796875">OP_DATA33<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
+          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="six_pos" modelPosition="thead" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="74.265625" x="190.60937500000023" y="-20.1328125">OP_DATA33<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
           </y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
@@ -525,10 +522,13 @@
     <edge id="e11" source="n0" target="n12">
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
+          <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
+            <y:Point x="150.0" y="450.0"/>
+            <y:Point x="180.0" y="420.0"/>
+          </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
-          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="two_pos" modelPosition="head" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="33.54296875" x="23.228515625" y="-20.1328125">OP_1<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
+          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="six_pos" modelPosition="thead" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="55.662109375" x="56.795867919921875" y="-117.88177490234375">OP_1-16<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
           </y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
@@ -538,8 +538,8 @@
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
-            <y:Point x="180.0" y="630.0"/>
-            <y:Point x="210.0" y="660.0"/>
+            <y:Point x="180.0" y="600.0"/>
+            <y:Point x="210.0" y="630.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
@@ -553,9 +553,9 @@
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
-            <y:Point x="150.0" y="660.0"/>
-            <y:Point x="195.26398429833168" y="701.9931305201178"/>
-            <y:Point x="1020.0" y="701.9931305201178"/>
+            <y:Point x="150.0" y="630.0"/>
+            <y:Point x="195.26398429833168" y="671.9931305201178"/>
+            <y:Point x="1020.0" y="671.9931305201178"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
@@ -569,9 +569,9 @@
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
-            <y:Point x="120.0" y="690.0"/>
-            <y:Point x="164.17369970559372" y="734.7360157016683"/>
-            <y:Point x="1020.0" y="734.7360157016683"/>
+            <y:Point x="120.0" y="660.0"/>
+            <y:Point x="164.17369970559372" y="704.7360157016683"/>
+            <y:Point x="1020.0" y="704.7360157016683"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
@@ -585,11 +585,11 @@
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
-            <y:Point x="1020.0000000000005" y="299.99999999999994"/>
+            <y:Point x="1020.0000000000005" y="540.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
-          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="two_pos" modelPosition="head" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="84.30859375" x="199.90820312500034" y="-20.132812500000057">OP_CHECKSIG<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
+          <y:EdgeLabel alignment="center" configuration="AutoFlippingLabel" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.1328125" modelName="two_pos" modelPosition="head" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" visible="true" width="84.30859375" x="199.90820312500034" y="-20.1328125">OP_CHECKSIG<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/>
           </y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
@@ -612,7 +612,7 @@ OP_CHK_Multisig<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSid
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="30.0" sy="0.0" tx="0.0" ty="0.0">
-            <y:Point x="360.0" y="540.0"/>
+            <y:Point x="360.0" y="390.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
@@ -651,12 +651,12 @@ OP_PushData1 <y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide=
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
-            <y:Point x="570.0" y="420.0"/>
-            <y:Point x="600.0" y="390.0"/>
-            <y:Point x="600.0" y="377.04416094210006"/>
-            <y:Point x="587.1638861629048" y="360.0"/>
-            <y:Point x="330.0" y="360.0"/>
-            <y:Point x="300.0" y="390.0"/>
+            <y:Point x="570.0" y="270.0"/>
+            <y:Point x="600.0" y="240.0"/>
+            <y:Point x="600.0" y="227.04416094210006"/>
+            <y:Point x="587.1638861629048" y="210.0"/>
+            <y:Point x="330.0" y="210.0"/>
+            <y:Point x="300.0" y="240.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
@@ -668,12 +668,12 @@ OP_PushData1 <y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide=
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
-            <y:Point x="570.0" y="480.0"/>
-            <y:Point x="600.0" y="450.0"/>
-            <y:Point x="600.0" y="375.3680078508341"/>
-            <y:Point x="586.1746810598627" y="360.0"/>
-            <y:Point x="330.0" y="360.0"/>
-            <y:Point x="300.0" y="390.0"/>
+            <y:Point x="570.0" y="330.0"/>
+            <y:Point x="600.0" y="300.0"/>
+            <y:Point x="600.0" y="225.3680078508341"/>
+            <y:Point x="586.1746810598627" y="210.0"/>
+            <y:Point x="330.0" y="210.0"/>
+            <y:Point x="300.0" y="240.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
@@ -685,12 +685,12 @@ OP_PushData1 <y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide=
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
-            <y:Point x="720.0" y="540.0"/>
-            <y:Point x="750.0" y="510.0"/>
-            <y:Point x="750.0" y="390.0"/>
-            <y:Point x="720.0" y="360.0"/>
-            <y:Point x="330.0" y="360.0"/>
-            <y:Point x="300.0" y="391.9705593719333"/>
+            <y:Point x="720.0" y="390.0"/>
+            <y:Point x="750.0" y="360.0"/>
+            <y:Point x="750.0" y="240.0"/>
+            <y:Point x="720.0" y="210.0"/>
+            <y:Point x="330.0" y="210.0"/>
+            <y:Point x="300.0" y="241.9705593719333"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
@@ -702,8 +702,8 @@ OP_PushData1 <y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide=
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
-            <y:Point x="330.0" y="508.8762948424379"/>
-            <y:Point x="360.0" y="480.0"/>
+            <y:Point x="330.0" y="358.8762948424379"/>
+            <y:Point x="360.0" y="330.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
@@ -717,8 +717,8 @@ OP_PushData1 <y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide=
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0">
-            <y:Point x="330.0" y="454.8762948424379"/>
-            <y:Point x="360.0" y="420.0"/>
+            <y:Point x="330.0" y="304.8762948424379"/>
+            <y:Point x="360.0" y="270.0"/>
           </y:Path>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>

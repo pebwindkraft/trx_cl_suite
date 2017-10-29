@@ -35,3 +35,7 @@ yymmmdd
                                      Changed to arrays, similiar like tcls_tx2txt.sh. 
 17jun28 svn   tcls_tx2txt.sh         I59 minor cosmetic change in outputs, to prepare for Segwit
 17aug08 svn   tcls_tx2txt.sh         I59 SegWIT tx !!! 
+17aug22 svn   tcls_tx2txt.sh         I67b SegWIT fixed ...
+17Sep27 svn   tcls_tx2txt.sh         I71 fix issues with sequence numbers not being FFFFFFFF
+17Oct29 svn   tcls_in_sig_script.sh  I69 get OpCodes correctly displayed (smart comtracts!)
+
