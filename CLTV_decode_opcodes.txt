@@ -1,0 +1,174 @@
+Redeem script instructions:
+ if
+  <merchant pubkey> checksigverify
+ else
+  <timestamp> checklocktimeverify drop
+ endif
+ <customer pubkey> checksig
+
+===========================
+
+0100000001b7de7f18fc09b18b1b3954d4b44d87aea49aca151da83c999bb4f9affced126b01000000e4483045022100ee41613fe9ee94bcfb5643a2b26112c07c31c343a1dd66d3404c3d44735cd3c6022066f464b3f1b7ced77fd0b9485d49a235cca1747f6507d562214e8d4c514cbc4f014730440220354e112587cb66e7ccae412973193e8090eb8862b996b40d0ee14db7c1af8b130220326aacb12f76d1238c06b27534c14fbee951a7b8a6a067ff1a14aacc6fb5603101514c50632102ac7f5515e35069934600c996d0d9d20f5c49955963d6ee75b35e70a5e75df8fead670457b8c356b175682103694c06c4925b146376818adb883eb1b8e248f2a1581f01ca2e3d8e142dde57ffacffffffff02b90b0000000000001976a914a52d532ce7c67f3b67b5dad195f931fc9e3ccc7f88ac9f860100000000001976a91443e9381bce9ae41efe99218ac038adc847af29ee88ac00000000
+
+sigscript1: 483045022100ee41613fe9ee94bcfb5643a2b26112c07c31c343a1dd66d3404c3d44735cd3c6022066f464b3f1b7ced77fd0b9485d49a235cca1747f6507d562214e8d4c514cbc4f01
+sigscript2: 4730440220354e112587cb66e7ccae412973193e8090eb8862b996b40d0ee14db7c1af8b130220326aacb12f76d1238c06b27534c14fbee951a7b8a6a067ff1a14aacc6fb5603101
+condition:  51 4c 50 63 
+            2102ac7f5515e35069934600c996d0d9d20f5c49955963d6ee75b35e70a5e75df8fead
+            67 04 57b8c356 b1 75 68 
+            2103694c06c4925b146376818adb883eb1b8e248f2a1581f01ca2e3d8e142dde57ff
+            ac
+
+51 OP_1, OP_TRUE
+4C OP_PUSHDATA1	(The next byte contains the number of bytes to be pushed onto the stack.)
+50 (push 50 bytes on stack, decimal 80 Bytes)
+63 OP_IF
+21 (21 hex or 33 decimal opcode bytes is data to be pushed onto the stack)
+   02D79987DA792634D39F5C14741774311AB9421D2775C2BC9A608489DE9277AA83
+AD OP_CHECKSIGVERIFY 
+67 OP_ELSE
+04 (04 hex or 4 decimal opcode bytes is data to be pushed onto the stack)
+   64DA7156
+B1 OP_CHECKLOCKTIMEVERIFY
+75 OP_DROP
+68 OP_ENDIF
+21 (21 hex or 33 decimal opcode bytes is data to be pushed onto the stack)
+   03A5C2C5FE32A8AE5A8F67A314042CDD9EB33BE822C6214D46109654EE269519FA
+AC OP_CHECKSIG
+
+===========================
+
+https://bitcointalk.org/index.php?topic=1300723.20
+I think we have basically nutted it out (https://webbtc.com/script/7fec1a377344333496cca3d67b06d418f199702cf4a9f5fcb8fbb38c5de963ca:0) where the P2SH script is as follows:
+
+Code:
+
+OP_DUP
+OP_SHA256
+c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646
+OP_EQUAL
+OP_IF
+OP_DROP
+OP_DUP
+OP_HASH160
+937fe2ee82229d282edec2606c70e755875334c0
+OP_EQUALVERIFY
+OP_CHECKSIG
+OP_ELSE
+c8f505
+OP_NOP2
+OP_DROP
+OP_DUP
+OP_HASH160
+20fbf78ba8f2f36feaec0efc5b82d5e07fb261a9
+OP_EQUALVERIFY
+OP_CHECKSIG
+OP_ENDIF
+
+
+This tx has been issued on mainnet with the CLTV refund operating as expected: https://blockchain.info/tx/7fec1a377344333496cca3d67b06d418f199702cf4a9f5fcb8fbb38c5de963ca (thanks to @sonicskye for creating the txs).
+
+0100000001b431432852ba4f6fc6bab48354e9e389d68ddfd18adb703f5770f6d1d3bd3bda00000000cc47304402204caf58993eceb55c5df0db0c4d96571327a6678c0acd648c21133ca39034b7d70220093a8b935d651d59330b3e6b0e1ce52c3610bad9f6f1b9cd1ae48e7e6528838e0121021844989a2bd7acd127dd7ed51aa2f4d55b32dbb414de6325ae37e05c1067598d4c6076a820c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f26864687637576a914937fe2ee82229d282edec2606c70e755875334c088ac6703c8f505b17576a91420fbf78ba8f2f36feaec0efc5b82d5e07fb261a988ac68010000000110270000000000001976a91420fbf78ba8f2f36feaec0efc5b82d5e07fb261a988acc9f50500
+
+Note that c8f505 is the CLTV value that will be checked against nLockTime for the CLTV refund redeem and c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646 is the hash of the secret that would need to be pushed for the secret revealing refund.
+
+This version uses public key hashes rather than public keys so that you would only need to provide an "address" to the other user (which will be easier for end users to understand).
+
+So the tx can be redeemed immediately by pushing signature 1, public key 1, secret and P2SH script or either at or after the CLTV block by pushing signature 2, public key 2 and the P2SH script (the OP_DUP and OP_DROPs in the P2SH script take care of the stack imbalance when using the CLTV redeem method). Note that nLockTime with a value >= to the CLTV must be provided for the refund redeem to work.
+
+...
+
+0100000001bbc6c76fd91bee5badfb0746204adba70efceb04f21a270de566827dbc34e84100000000cc47304402204caf58993eceb55c5df0db0c4d96571327a6678c0acd648c21133ca39034b7d70220093a8b935d651d59330b3e6b0e1ce52c3610bad9f6f1b9cd1ae48e7e6528838e012103d30f361b0d5dacba61a56db0903fe32244b5616f950cac1081694e81148dd7594c6076a820c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f26864687637576a91401d7295f243a3a6d26516b54e4e6f51278d376b588ac6703ac9a09b17576a914b6a7c89a6774de8c88d0b7a4043a6645983a479588ac68000000000140420f00000000001976a9148a7dd4d0e29f50f989dd2b97d463d706a7ef0c7b88ac00000000
+
+0100000001bbc6c76fd91bee5badfb0746204adba70efceb04f21a270de566827dbc34e8410000000085002103d30f361b0d5dacba61a56db0903fe32244b5616f950cac1081694e81148dd7594c6076a820c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f26864687637576a91401d7295f243a3a6d26516b54e4e6f51278d376b588ac6703ac9a09b17576a914b6a7c89a6774de8c88d0b7a4043a6645983a479588ac68000000000140420f00000000001976a9148a7dd4d0e29f50f989dd2b97d463d706a7ef0c7b88ac00000000
+
+===========================
+
+Escrow
+If Alice and Bob jointly operate a business they may want to ensure that all funds are kept in 2-of-2 multisig transaction outputs that require the co-operation of both parties to spend. However, they recognise that in exceptional circumstances such as either party getting "hit by a bus" they need a backup plan to retrieve the funds. So they appoint their lawyer, Lenny, to act as a third-party.
+
+With a standard 2-of-3 CHECKMULTISIG at any time Lenny could conspire with either Alice or Bob to steal the funds illegitimately. Equally Lenny may prefer not to have immediate access to the funds to discourage bad actors from attempting to get the secret keys from him by force.
+
+However, with CHECKLOCKTIMEVERIFY the funds can be stored in scriptPubKeys of the form:
+
+    IF
+        <now + 3 months> CHECKLOCKTIMEVERIFY DROP
+        <Lenny's pubkey> CHECKSIGVERIFY
+        1
+    ELSE
+        2
+    ENDIF
+    <Alice's pubkey> <Bob's pubkey> 2 CHECKMULTISIG
+
+At any time the funds can be spent with the following scriptSig:
+
+    0 <Alice's signature> <Bob's signature> 0
+
+After 3 months have passed Lenny and one of either Alice or Bob can spend the funds with the following scriptSig:
+
+    0 <Alice/Bob's signature> <Lenny's signature> 1
+
+===========================
+
+https://www.reddit.com/r/Bitcoin/comments/4kit49/is_it_safe_to_use_cltv_for_recurring_payments/
+
+Is it safe to use the following script to create an output that can be spent anytime by the payer(A) but only after certain time by the merchant(B)?
+
+script:
+
+DUP HASH160 DUP
+<pubKeyHashA> EQUAL
+IF
+    DROP
+ELSE
+    <lockTime> CHECKLOCKTIMEVERIFY DROP
+    <pubKeyHashB> EQUALVERIFY
+ENDIF
+CHECKSIG
+
+scriptSig:
+
+<sig> <pubKey>
+
+To set up a recurring subscription, the payer can create a tx with multiple outputs with different locktime values. He/she can cancel the subscription anytime by pulling the coins from those P2SH addresses.
+
+...
+
+Yes, you can use it now, and that would work. I also like your redeem script, because the scriptsig to redeem it is the same sig+pubkey format. Most CLTV implementations I've seen have the scriptsig require a 0 or 1 for the redeem script IF/ELSE flow. I like the way you've used the hash check to do the IF/ELSE flow.
+
+===========================
+
+# This transaction becomes valid at block 506321
+# The script allows an alternate execution path using 2-of-2 multisig.
+# A separate transaction can be created that will not be time locked.
+  lock_time: 506321
+  input_1:
+  sequence_no: 0xFFFFFFFE
+  scriptsig:
+   OP_TRUE
+  script:
+   OP_IF
+     506321 OP_CHECKLOCKTIMEVERIFY OP_DROP
+   OP_ELSE
+     OP_2 <pubkey_1> <pubkey_2> OP_2 OP_CHECKMULTISIG
+   OP_ENDIF
+
+===========================
+
+# This transaction is valid at block 507381 assuming:
+# 1. The secret for input_2's script matches the expected secret hash
+# 2. Valid signatures and pubkeys are provided for input_2
+# 3. input_2's nSequence time-lock is respected.
+tx_6:  
+  lock_time: 507381
+  input_1:
+    sequence_no: 0xFFFFFFFE
+    script:
+      507381 OP_CHECKLOCKTIMEVERIFY OP_DROP
+  input_2:
+    sequence_no: 0x000000A0
+    scriptsig:
+      <signature> <pubkey> <secret>
+    script
+      OP_HASH160 <secret hash> OP_EQUALVERIFY
+      OP_DUP OP_HASH160 <pub keyhash> OP_EQUALVERIFY OP_CHECKSIG
+

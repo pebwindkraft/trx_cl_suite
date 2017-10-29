@@ -16,6 +16,7 @@
 #   0.3	   svn	29mar17	add TESTNET functionality (address prefix)
 #   0.4	   svn	26jun17	replace 'cut' were possible.
 #   0.5	   svn	20sep17	integrate proper decoding of SEGWIT tx :-)
+#   0.6	   svn	17oct17	rework to display opcodes correctly (for smart contracts)
 #
 # Permission to use, copy, modify, and distribute this software for any 
 # purpose with or without fee is hereby granted, provided that the above 
@@ -654,12 +655,12 @@ while [ $loopcounter -lt $tx_in_count_dec ]
   tx_array_bytes=4
   sequence_nr=$( get_TX_section )
   tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
-  if [ "$sequence_nr" == "EEFFFFFF" ] || [ "$sequence_nr" == "FEFFFFFF" ] || [ "$sequence_nr" == "FFFFFFFF" ] ; then
+#  if [ "$sequence_nr" == "EEFFFFFF" ] || [ "$sequence_nr" == "FEFFFFFF" ] || [ "$sequence_nr" == "FFFFFFFF" ] ; then
       echo "  $sequence_nr"
-  else
-    echo "*** error: expected standard sequence number (0xFFFFFFFF), found $sequence_nr"
-    exit 1
-  fi
+#  else
+#    echo "*** error: expected standard sequence number (0xFFFFFFFF), found $sequence_nr"
+#    exit 1
+#  fi
 
   loopcounter=$(($loopcounter + 1))
 done

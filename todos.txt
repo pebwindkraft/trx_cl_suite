@@ -31,6 +31,28 @@ https://en.bitcoin.it/wiki/Protocol_rules#.22tx.22_messages
     Relay transaction to peers
     For each orphan transaction that uses this one as one of its inputs, run all these steps (including this one) recursively on that orphan
 
+and here from Andreas book in chapter 8:
+Each node verifies every transaction against a long checklist of criteria:
+
+    The transaction’s syntax and data structure must be correct.
+    Neither lists of inputs or outputs are empty.
+    The transaction size in bytes is less than MAX_BLOCK_SIZE.
+    Each output value, as well as the total, must be within the allowed range of values (less than 21m coins, more than 0).
+    None of the inputs have hash=0, N=–1 (coinbase transactions should not be relayed).
+    nLockTime is less than or equal to INT_MAX.
+    The transaction size in bytes is greater than or equal to 100.
+    The number of signature operations contained in the transaction is less than the signature operation limit.
+    The unlocking script (scriptSig) can only push numbers on the stack, and the locking script (scriptPubkey) must match isStandard forms (this rejects "nonstandard" transactions).
+    A matching transaction in the pool, or in a block in the main branch, must exist.
+    For each input, if the referenced output exists in any other transaction in the pool, the transaction must be rejected.
+    For each input, look in the main branch and the transaction pool to find the referenced output transaction. If the output transaction is missing for any input, this will be an orphan transaction. Add to the orphan transactions pool, if a matching transaction is not already in the pool.
+    For each input, if the referenced output transaction is a coinbase output, it must have at least COINBASE_MATURITY (100) confirmations.
+    For each input, the referenced output must exist and cannot already be spent.
+    Using the referenced output transactions to get input values, check that each input value, as well as the sum, are in the allowed range of values (less than 21m coins, more than 0).
+    Reject if the sum of input values is less than sum of output values.
+    Reject if transaction fee would be too low to get into an empty block.
+    The unlocking scripts for each input must validate against the corresponding output locking scripts.
+
 
 I26: 19Oct2016, svn:
 ====================
@@ -238,7 +260,7 @@ P2SH scripts - length limitations:
 https://bitcoin.stackexchange.com/questions/38937/what-was-the-original-rationale-for-limiting-the-maximum-push-size
 
 
-I59: Segwit :-)
+I59: Segwit :-) - Done
 ===============
 https://bitcoincore.org/en/segwit_wallet_dev/
 integrate segwit into tcls_tx2txt.sh, e.g. this tx:
@@ -348,6 +370,90 @@ Goal: If one person loses their key, is a victim of theft or goes rouge, the coi
     Instruct the server to sms me the private key if it has not been pinged for 2 month.
     Instruct the server to sms the truster persons the private key if it has not been pinged for 3 month.
 
+I65: 10min tx:
+==============
+based on an article here:
+https://www.reddit.com/r/Bitcoin/comments/3yulwv/any_examples_of_the_10_minute_script_thats_a/
+this tx can knock down nodes...
+what about mine? It is in the file "tcls_10min_tx.txt"
+
+
+I66: bitcoin fees:
+==================
+As for formulas, if you use standard addresses (not P2SH), the formula is:
+
+fee = (n_inputs * 148 + n_outputs * 34 + 10) * price_per_byte
+
+SegWit slightly changes this, where instead of paying per byte, you pay per unit of weight: 1 byte of non witness data = 4 weight, 1 byte of witness data = 1 weight. 
+
+
+67a: SegWit tx: - done
+==============
+this segwit tx is not decoded correctly, improve:
+0200000000010117017d17e296b4cd41cd63758bff8aadf214410505ccaeddb4252579ccffa40300000000171600149835f2e0dff9d7f6a4060140696bc7e00b12edd5ffffffff0100b4c404000000001976a914ac19d3fd17710e6b9a331022fe92c693fdf6659588ac024730440220452a58cf56c45edaffb952acccd2f6f2cea523cf82e73b82f8eb5e3b3b1b17c4022011de26884cf693b12f16fdd8fa6c1d96dacb97050907353852895d9b80b3fae101210206f4bad90006f70112129815b25ba585484f1bb4f8b88f8ebaec2c76f543794300000000
+t has for TXIN[0] unknown opcodes, and the last two lines could be decoded further with "VERY VERBOSE" switch?
+>> WITNESS TXIN[0] stack elements: hex=02, decimal=2
+>>  WITNESS[0] data length (var_int), hex=47, decimal=71, data(uchar[]):
+>>   30440220452A58CF56C45EDAFFB952ACCCD2F6F2CEA523CF82E73B82F8EB5E3B3B1B17C4022011DE26884CF693B12F16FDD8FA6C1D96DACB97050907353852895D9B80B3FAE101
+>>  WITNESS[1] data length (var_int), hex=21, decimal=33, data(uchar[]):
+>>   0206F4BAD90006F70112129815B25BA585484F1BB4F8B88F8EBAEC2C76F5437943
+ 
+
+I67b: signature for P2SH:
+========================
+is this realized correctly in tcls_sign.sh?
+https://bitcoin.stackexchange.com/questions/60468/signature-scheme-for-p2sh
+
+
+I68: signature for signing...
+==============================
+is this realized correctly in tcls_sign.sh?
+https://bitcoin.stackexchange.com/questions/57848/how-to-tell-which-part-of-the-previous-tx-i-need-to-make-the-hash-to-sign-for-an/57866#57866
+
+
+I69: CSV/CLTV use case: - done
+=======================
+USECASE 1:
+you want to lock your bitcoins in the same way, as you do with a life insurance. You pay monthly a certain amount, and after "some" time, you want to grab all the bitcoins.
+USECASE 2:
+when buying bitcoins, and then selling bitcoins in less than a year, many jurisdictions impose tax payments on the gained value. So the idea is, to create a transaction, that is locked in for a year, and can easily be spend a year later. 
+
+There are three options:
+a.) nlocktime
+b.) CSV - CheckSequenceVerify (BIP68/112/113)
+c.) CLTV - CheckLocktimeVerify (BIP65)
+
+What happens in USECASE 1, when you die, and the relatives shall have access to the bitcoins?
+What happens in USECASE 2, when you have a need for some bitcoins (and for sure you want to pay the taxes for it)?
+
+Look at the files [CLTV|CSV]_decode_opcodes.txt, and implement :-)
+
+
+I70: Multisig & Segwit:
+=======================
+integrate contents of file "160905_Multisig_Segwit.txt" into tx_cl_suite
+
+
+I71: tx sequence numbers - Done
+=========================
+when sequence number != FFFFFFFF, then script throughs an error. See here:
+./tcls_tx2txt.sh -vv -T -r 0100000001671a5a1a16202bdbc338384fe62f670cea70ec283f1f2ae3b88548957d289125000000006a47304402200ee1a98c1a6ef3d0bb7293ca86fbc68c913cb69a74391ae6f6eada002c73ecfe022078381f1417b68fad15b77310a2b69ab2fabdfcfe0cec4a4bd43ca5600b04f7aa012103188faec2bf8e1589a1f96fdab1db7def26ffe193b3bc368dce14a81a390637ed000000000120c83f000000000017a914fe38c0827175580a627033a16f7009076254718d8700000000
+...
+  TX_IN[0] Sequence (uint32_t)
+*** error: expected standard sequence number (0xFFFFFFFF), found 00000000
+
+
+I72: hex values, xxd, and shell scripts
+=======================================
+see also item 57 above ...
+
+https://bitcoin.stackexchange.com/questions/55188/download-single-and-specific-block-for-study-purposes/55206?noredirect=1#comment70179_55206
+
+ cat myfile_with_hexchars | tr [:upper:] [:lower:] > myfile_with_hexcodes
+ result=$( cat myfile_with_hexcodes | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
+ printf $result > myfile_hex
+
+you don't need the tr; [:xdigit:] and printf \x handle both cases. In fact this only works right if the input is entirely hex pairs so you can just do printf $(sed 's/../\\&/g' <hexfile) >outfile
 
 
 #####################################

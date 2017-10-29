@@ -531,13 +531,13 @@ step10_11() {
   address_1st_char=$( echo $TARGET_Address | cut -b 1 )
   case $address_1st_char in 
    1) StepCode="19"
-      StepCode=$( echo $StepCode$OP_dup$OP_Hash160$tmpvar$address_hash$OP_Equalverify$OP_Checksig )
+      StepCode=$( echo $StepCode$OP_DUP$OP_HASH160$tmpvar$address_hash$OP_EQUALVERIFY$OP_CHECKSIG )
       ;;
    2|3) StepCode="17"
-      StepCode=$( echo $StepCode$OP_Hash160$tmpvar$redeemscripthash$OP_Equal )
+      StepCode=$( echo $StepCode$OP_HASH160$tmpvar$redeemscripthash$OP_EQUAL )
       ;;
    m|n) T_param_flag=1
-      StepCode=$( echo $StepCode$OP_dup$OP_Hash160$tmpvar$address_hash$OP_Equalverify$OP_Checksig )
+      StepCode=$( echo $StepCode$OP_DUP$OP_HASH160$tmpvar$address_hash$OP_EQUALVERIFY$OP_CHECKSIG )
       ;;
    *) echo "*** ERROR: could not check address type, unrecognized format for $TARGET_Address"
       echo "    don't know what to do, exiting gracefully ..."
@@ -683,7 +683,7 @@ proc_msig() {
     redeemscript=$redeemscript$len_hex$pubkey
   done
 
-  redeemscript=$redeemscript$opcode_msig_reqkeys$OP_Checkmultisig
+  redeemscript=$redeemscript$opcode_msig_reqkeys$OP_CHECKMULTISIG
   echo " "
   echo "The redeemscript:"
   echo "$redeemscript"

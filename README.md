@@ -6,9 +6,10 @@ GITHUB messes with the text and newlines, please view in "raw" mode...
 A suite of shell scripts to work with Bitcoin transactions. Primary goal is to analyze a transaction. Display it in plain text, similiar to the Bitcoin core client or "www.blockchain.info" JSON output, just in plain text. Second goal is to create or sign transactions (and cold storage usage). 
 This suite is based on the previous „trx2txt“ tool, which is now discontinued.
 
-Scripts are written to run on OpenBSD and OSX and Linux systems at the command shell (ksh, bash). OthereExisting tools on the web (Bitcoin CLI tools and others), are written to work only with BASHv4. In this suite, all scripts are coded with the intention, to be (nearly) POSIX compliant. Tested on OpenBSD korn shell, MAC OSX BASHv3 and SuSE Linux BASHv4. 
+Scripts are written to run on OpenBSD and OSX and Linux systems at the command shell (ksh, bash). Other existing tools on the web (Bitcoin CLI tools and others), are written to work only with BASHv4. In this suite, all scripts are coded with the intention, to be (nearly) POSIX compliant. Tested on OpenBSD korn shell, MAC OSX BASHv3 and SuSE Linux BASHv4. 
 
-Main dependency: openssl 1.0.2x is required for the signing procedures.
+MAIN DEPENDENCY: openssl 1.0.2x is required for the signing procedures.
+
 Other dependencies: awk, sed, bc, od ... those tools are normally installed by default on unixoid sytems.
 
 Main program (shell script) to display contents of a transaction is „tcls_tx2txt.sh". It refers to:

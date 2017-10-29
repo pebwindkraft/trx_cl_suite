@@ -1,0 +1,142 @@
+CHECKSEQUENCEVERIFY
+
+https://github.com/bitcoin/bips/blob/master/bip-0112.mediawiki
+Escrow with Timeout
+An escrow that times out automatically 30 days after being funded can be established in the following way. Alice, Bob and Escrow create a 2-of-3 address with the following redeemscript.
+
+    IF
+        2 <Alice's pubkey> <Bob's pubkey> <Escrow's pubkey> 3 CHECKMULTISIG
+    ELSE
+        "30d" CHECKSEQUENCEVERIFY DROP
+        <Alice's pubkey> CHECKSIG
+    ENDIF
+
+At any time funds can be spent using signatures from any two of Alice, Bob or the Escrow.
+After 30 days Alice can sign alone. 
+
+
+https://github.com/bitcoin/bips/blob/master/bip-0114.mediawiki#hashed-time-lock-contract
+
+
+
+===========================
+
+https://bitcointalk.org/index.php?topic=1558207.0
+
+I just want to make sure I am writing the script correctly, and was hoping somebody could point out my errors or let me know it's correct.  I have 2 keys, and I want to require both keys' signatures or wait 2 weeks after inclusion in a block and require 1 signature.
+
+The keys are:
+
+Code:
+
+020dd847d245216d27fad46c99ea490b8b9dbae87e144fc1f0c9427b041e4acf90
+0346cbb9b74d786560a7e69a1013ddb6af6931d939f9dbba8311aab55de4fb772f
+
+
+My understanding of the RLT BIP is that 2 weeks would translate to 0x40093a.  So the script I came up with is:
+
+Code:
+
+OP_IF
+    0x40093a OP_CHECKSEQUENCEVERIFY OP_DROP
+    1
+OP_ELSE
+    2
+OP_ENDIF
+020dd847d245216d27fad46c99ea490b8b9dbae87e144fc1f0c9427b041e4acf90
+0346cbb9b74d786560a7e69a1013ddb6af6931d939f9dbba8311aab55de4fb772f
+2
+OP_CHECKMULTISIG
+
+
+which I believe translates into the redeem script hex of:
+634e3a094000b2755167526821020dd847d245216d27fad46c99ea490b8b9dbae87e144fc1f0c9427b041e4acf90210346cbb9b74d786560a7e69a1013ddb6af6931d939f9dbba8311aab55de4fb772f52ae
+for the address 3B6X5FyVdm3qS8J2CNbX2n8M2JyzXhQw8L.
+
+Alternatively, I changed the relative locktime to be 2016 blocks instead of two weeks, for a redeem script of:
+634de007b2755167526821020dd847d245216d27fad46c99ea490b8b9dbae87e144fc1f0c9427b041e4acf90210346cbb9b74d786560a7e69a1013ddb6af6931d939f9dbba8311aab55de4fb772f52ae
+and the address 3DDPMrpPeL81WEb4u8cVgRAGZyGanVCVVp.
+
+IMPROVED SCRIPTS:
+63033a0940b2755167526821020dd847d245216d27fad46c99ea490b8b9dbae87e144fc1f0c9427b041e4acf90210346cbb9b74d786560a7e69a1013ddb6af6931d939f9dbba8311aab55de4fb772f52ae
+6302e007b2755167526821020dd847d245216d27fad46c99ea490b8b9dbae87e144fc1f0c9427b041e4acf90210346cbb9b74d786560a7e69a1013ddb6af6931d939f9dbba8311aab55de4fb772f52ae
+
+===========================
+
+https://bitcointalk.org/index.php?topic=1952248.0
+
+I am currently studying the OP_CHECKSEQUENCEVERIFY (OP_CSV) opcode and trying to create transactions manually. I have this construction
+
+OP_IF
+   2 [PUBKEY A] [PUBKEY B] 2 OP_CHECKMULTISIG
+OP_ELSE
+   [CSV VALUE] OP_NOP3 OP_DROP
+   OP_DUP OP_HASH160 [PUBKEYHASH B] OP_EQUALVERIFY OP_CHECKSIG
+OP_ENDIF
+
+So far I have succeeded redeeming the P2SH tx above through the multisignature (the OP_IF.. block). But I have problems when redeeming the transaction through the OP_ELSE.. OP_ENDIF block which is when the OP_CSV is evaluated. I have set the [CSV VALUE] to 0x0a in hexadecimal (or 10 in decimal).
+
+and this is the tx on the network:
+https://blockchain.info/rawtx/4ba75dfe11988663cfcbbc8911eedee1f867d99fa744a6137e885315b3a073e1?format=hex
+0200000001a3d3b75529ef352627ada990d9668b2bde2230c803ea200f42f58dd020bc95a600000000d347304402205132429c78cbe811209a475532aaaff7d090d9d7cc467739decdb02a83f294c00220524b622d62eca9dabb06a5c9c0af8ac621e5f165d2f5b981ead1f0d50688bf70012103d7c6052544bc42eb2bc0d27c884016adb933f15576a1a2d21cd4dd0f2de0c37d004c666352210265c0023ee6bfe4ec31f902bc5f64c003c0f5af9be37397623b16e963942052012103d7c6052544bc42eb2bc0d27c884016adb933f15576a1a2d21cd4dd0f2de0c37d52ae675ab27576a914937fe2ee82229d282edec2606c70e755875334c088ac680a0000000150c30000000000001976a914937fe2ee82229d282edec2606c70e755875334c088ac00000000
+
+===========================
+
+One of the big pain points in OpenBazaar v1 was vendors having stuck funds when both a buyer and moderator went unresponsive. By adding a 45 day timeout to the escrow, the vendor will be able to unilaterally move the funds out of escrow and into his wallet after 45 days regardless of whether the buyer and moderator are active or not.
+
+This leaves buyers with 45 days to file a dispute if they have issues with their order (less if they allot time for the dispute resolution process).
+
+The new scripts look like:
+
+OP_IF
+2 <buyer_pubkey><vendor_pubkey><moderator_pubkey> 3 OP_CHECKMULTISIG
+OP_ELSE
+<6480 blocks> OP_CHECKSEQUENCEVERIFY
+OP_DROP
+<vendor_pubkey>
+OP_CHECKSIG
+OP_ENDIF
+
+===========================
+
+file:///Data/Crypto_CCY/Mastering_Bitcoin_2nd.pdf
+"Advanced Transaction Scripting", Chapter 7
+
+In this example, Mohammed wishes to construct a company capital account with flexible rules. The scheme he creates requires different levels of authorization depending on timelocks. The participants in the multisig scheme are Mohammed, his two partners Saeed and Zaira, and their company lawyer Abdul. The three partners make decisions based on a majority rule, so two of the three must agree. However, in the case of a problem with their keys, they want their lawyer to be able to recover the funds with one of the three partner signatures. Finally, if all partners are unavailable or incapacitated for a while, they want the lawyer to be able to manage the account directly.
+
+Here’s the script that Mohammed designs to achieve this:
+
+  IF
+    IF
+      2
+    ELSE
+      <30 days> CHECKSEQUENCEVERIFY DROP
+      <Abdul the Lawyer's Pubkey> CHECKSIGVERIFY
+      1
+    ENDIF
+    <Mohammed's Pubkey> <Saeed's Pubkey> <Zaira's Pubkey> 3 CHECKMULTISIG
+  ELSE
+    <90 days> CHECKSEQUENCEVERIFY DROP
+    <Abdul the Lawyer's Pubkey> CHECKSIG
+  ENDIF
+  
+Mohammed’s script implements three execution paths using nested IF...ELSE flow control clauses.
+
+1.) In the first execution path, this script operates as a simple 2-of-3 multisig with the three partners. This execution path consists of lines 3 and 9. Line 3 sets the quorum of the multisig to 2 (2-of-3). This execution path can be selected by putting TRUE TRUE at the end of the unlocking script:
+ 0 <Mohammed's Sig> <Zaira's Sig> TRUE TRUE
+
+The 0 at the beginning of this unlocking script is because of a bug in CHECKMULTISIG that pops an extra value from the stack. The extra value is disregarded by the CHECKMULTISIG , but it must be present or the script fails. 
+
+2.) The second execution path can only be used after 30 days have elapsed from the creation of the UTXO. At that time, it requires the signature of Abdul the lawyer and one of the three partners (a 1-of-3 multisig). This is achieved by line 7, which sets the quorum for the multisig to 1. To select this execution path, the unlocking script would end in FALSE TRUE:
+ 0 <Saeed's Sig> <Abdul's Sig> FALSE TRUE
+
+Why FALSE TRUE ? Isn’t that backward? Because the two values are pushed on to the stack, with FALSE pushed first, then TRUE pushed second. TRUE is therefore popped first by the first IF opcode.
+
+3.) Finally, the third execution path allows Abdul the lawyer to spend the funds alone, but only after 90 days. To select this execution path, the unlocking script has to end in FALSE:
+ <Abdul's Sig> FALSE
+
+===========================
+
+
+===========================
+
