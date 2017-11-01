@@ -216,7 +216,7 @@ q: how many public/private keypairs can a 24 word hierarchical deterministic wal
 a: 2^31, the number of words in the mnemonic has nothing to do with the capacity, it just adjusts the entropy for the key derivation
 
 
-I51: 02apr2017, svn:
+I51: 02apr2017, svn: - done
 ====================
 testcases_tcls_verify_sig.sh: on OpenBSD the testcase 4 fails ...
 
@@ -242,7 +242,7 @@ I56: 23jun2017, svn:
 tcls_sign.sh: when a tx has more than 100 utxo, the signing process creates an error roughly every 2nd attempt. Looks like this happens for signatures, where a new S-Value must be calculated. The new S-value should be less then N/2. The system creates a new S value, but it's length is then 63 bytes, instead of 64 bytes.
 
 
-I57: 27jun2017, svn:
+I57: 27jun2017, svn: - done
 ====================
 OpenBSD and ./tcls_testcases_verify.sh
 TESTCASE 4:
@@ -258,55 +258,6 @@ I58: 20jul2017, svn:
 ====================
 P2SH scripts - length limitations:
 https://bitcoin.stackexchange.com/questions/38937/what-was-the-original-rationale-for-limiting-the-maximum-push-size
-
-
-I59: Segwit :-) - Done
-===============
-https://bitcoincore.org/en/segwit_wallet_dev/
-integrate segwit into tcls_tx2txt.sh, e.g. this tx:
-https://github.com/bitcoin/bips/blob/master/bip-0143.mediawiki
-Native P2WPKH:
-==============
-01000000000102fff7f7881a8099afa6940d42d1e7f6362bec38171ea3edf433541db4e4ad969f00000000494830450221008b9d1dc26ba6a9cb62127b02742fa9d754cd3bebf337f7a55d114c8e5cdd30be022040529b194ba3f9281a99f2b1c0a19c0489bc22ede944ccf4ecbab4cc618ef3ed01eeffffffef51e1b804cc89d182d279655c3aa89e815b1b309fe287d9b2b55d57b90ec68a0100000000ffffffff02202cb206000000001976a9148280b37df378db99f66f85c95a783a76ac7a6d5988ac9093510d000000001976a9143bde42dbee7e4dbe6a21b2d50ce2f0167faa815988ac000247304402203609e17b84f6a7d30c80bfa610b5b4542f32a8a0d5447a12fb1366d7f01cc44a0220573a954c4518331561406f90300e8f3358f51928d43c212a8caed02de67eebee0121025476c2e83188368da1ff3e292e7acafcdb3566bb0ad253f62fc70f07aeee635711000000
-which converts to:
-    nVersion:  01000000
-    marker:    00
-    flag:      01
-    txin:      02 fff7f7881a8099afa6940d42d1e7f6362bec38171ea3edf433541db4e4ad969f 00000000 494830450221008b9d1dc26ba6a9cb62127b02742fa9d754cd3bebf337f7a55d114c8e5cdd30be022040529b194ba3f9281a99f2b1c0a19c0489bc22ede944ccf4ecbab4cc618ef3ed01 eeffffff
-                  ef51e1b804cc89d182d279655c3aa89e815b1b309fe287d9b2b55d57b90ec68a 01000000 00 ffffffff
-    txout:     02 202cb20600000000 1976a9148280b37df378db99f66f85c95a783a76ac7a6d5988ac
-                  9093510d00000000 1976a9143bde42dbee7e4dbe6a21b2d50ce2f0167faa815988ac
-    witness    00
-               02 47304402203609e17b84f6a7d30c80bfa610b5b4542f32a8a0d5447a12fb1366d7f01cc44a0220573a954c4518331561406f90300e8f3358f51928d43c212a8caed02de67eebee01 21025476c2e83188368da1ff3e292e7acafcdb3566bb0ad253f62fc70f07aeee6357
-    nLockTime: 11000000
-
-
-on https://bitcointalk.org/index.php?topic=1398994.0;all:
-by: Achow101, March 16, 2016, 08:04:51 PM
-a normal client would see this tx as:
-0100000002fff7f7881a8099afa6940d42d1e7f6362bec38171ea3edf433541db4e4ad969f00000000494830450221008b9d1dc26ba6a9cb62127b02742fa9d754cd3bebf337f7a55d114c8e5cdd30be022040529b194ba3f9281a99f2b1c0a19c0489bc22ede944ccf4ecbab4cc618ef3ed01eeffffffef51e1b804cc89d182d279655c3aa89e815b1b309fe287d9b2b55d57b90ec68a0100000000ffffffff02202cb206000000001976a9148280b37df378db99f66f85c95a783a76ac7a6d5988ac9093510d000000001976a9143bde42dbee7e4dbe6a21b2d50ce2f0167faa815988ac11000000
-
-
-P2SH-P2WPKH:
-============
-01000000000101db6b1b20aa0fd7b23880be2ecbd4a98130974cf4748fb66092ac4d3ceb1a5477010000001716001479091972186c449eb1ded22b78e40d009bdf0089feffffff02b8b4eb0b000000001976a914a457b684d7f0d539a46a45bbc043f35b59d0d96388ac0008af2f000000001976a914fd270b1ee6abcaea97fea7ad0402e8bd8ad6d77c88ac02473044022047ac8e878352d3ebbde1c94ce3a10d057c24175747116f8288e5d794d12d482f0220217f36a485cae903c713331d877c1f64677e3622ad4010726870540656fe9dcb012103ad1d8e89212f0b92c74d23bb710c00662ad1470198ac48c43f7d6f93a2a2687392040000
-Native P2WSH:
-=============
-01000000000102fe3dc9208094f3ffd12645477b3dc56f60ec4fa8e6f5d67c565d1c6b9216b36e000000004847304402200af4e47c9b9629dbecc21f73af989bdaa911f7e6f6c2e9394588a3aa68f81e9902204f3fcf6ade7e5abb1295b6774c8e0abd94ae62217367096bc02ee5e435b67da201ffffffff0815cf020f013ed6cf91d29f4202e8a58726b1ac6c79da47c23d1bee0a6925f80000000000ffffffff0100f2052a010000001976a914a30741f8145e5acadf23f751864167f32e0963f788ac000347304402200de66acf4527789bfda55fc5459e214fa6083f936b430a762c629656216805ac0220396f550692cd347171cbc1ef1f51e15282e837bb2b30860dc77c8f78bc8501e503473044022027dc95ad6b740fe5129e7e62a75dd00f291a2aeb1200b84b09d9e3789406b6c002201a9ecd315dd6a0e632ab20bbb98948bc0c6fb204f2c286963bb48517a7058e27034721026dccc749adc2a9d0d89497ac511f760f45c47dc5ed9cf352a58ac706453880aeadab210255a9626aebf5e29c0e6538428ba0d1dcf6ca98ffdf086aa8ced5e0d0215ea465ac00000000
-P2SH-P2WSH 6-of-6 multisig witness:
-===================================
-0100000000010136641869ca081e70f394c6948e8af409e18b619df2ed74aa106c1ca29787b96e0100000023220020a16b5755f7f6f96dbd65f5f0d6ab9418b89af4b1f14a1bb8a09062c35f0dcb54ffffffff0200e9a435000000001976a914389ffce9cd9ae88dcc0631e88a821ffdbe9bfe2688acc0832f05000000001976a9147480a33f950689af511e6e84c138dbbd3c3ee41588ac080047304402206ac44d672dac41f9b00e28f4df20c52eeb087207e8d758d76d92c6fab3b73e2b0220367750dbbe19290069cba53d096f44530e4f98acaa594810388cf7409a1870ce01473044022068c7946a43232757cbdf9176f009a928e1cd9a1a8c212f15c1e11ac9f2925d9002205b75f937ff2f9f3c1246e547e54f62e027f64eefa2695578cc6432cdabce271502473044022059ebf56d98010a932cf8ecfec54c48e6139ed6adb0728c09cbe1e4fa0915302e022007cd986c8fa870ff5d2b3a89139c9fe7e499259875357e20fcbb15571c76795403483045022100fbefd94bd0a488d50b79102b5dad4ab6ced30c4069f1eaa69a4b5a763414067e02203156c6a5c9cf88f91265f5a942e96213afae16d83321c8b31bb342142a14d16381483045022100a5263ea0553ba89221984bd7f0b13613db16e7a70c549a86de0cc0444141a407022005c360ef0ae5a5d4f9f2f87a56c1546cc8268cab08c73501d6b3be2e1e1a8a08824730440220525406a1482936d5a21888260dc165497a90a15669636d8edca6b9fe490d309c022032af0c646a34a44d1f4576bf6a4a74b67940f8faa84c7df9abe12a01a11e2b4783cf56210307b8ae49ac90a048e9b53357a2354b3334e9c8bee813ecb98e99a7e07e8c3ba32103b28f0c28bfab54554ae8c658ac5c3e0ce6e79ad336331f78c428dd43eea8449b21034b8113d703413d57761b8b9781957b8c0ac1dfe69f492580ca4195f50376ba4a21033400f6afecb833092a9a21cfdf1ed1376e58c5d1f47de74683123987e967a8f42103a6d48b1131e94ba04d9737d61acdaa1322008af9602b3b14862c07a1789aac162102d8b661b0b3302ee2f162b09e07a55ad5dfbe673a9f01d9f0c19617681024306b56ae00000000
-
-or:
-0200000000010129b0f742d41c6aad58dd0e779ca53b8bed1790465ed59ed20d2b6a3ecc6744920100000000ffffffff0178cdf5050000000016001443aac20a116e09ea4f7914be1c55e4c17aa600b702483045022100e8877e9351abcfc5dc20a9c9f55d7bcde8d64993d135a20568b5b8628ea3f7b102203801629aad6a7ec0960b4d830aedac673d620179753cc6f197eaed866a4959ba012103335134d7414e1d1a154600b124a96f5ef2c6ca21434d2622469a96bd5262fd5600000000
-
-or:
-02000000021a81aa94d50686201482a7b286f9c8674139741660651b4cd5260ea5a360fdb8000000006a473044022063dc53dde52373c78ea8587b637b2ee6004a42cddbadd955122a8112dd08c89302206af141ce61d9d8ec4a2cce4e18ba0bf72af72d14de8a8219f79ceabd41dac083012103ce73e9e5cc14b9e79d6499848c509ff8333a586d382d76977336433a3730df50ffffffff98b05fc2c7efb14881b4e857f5157e81dc1f368e4dd0b214b44fbff4b1d4b7c4060000006a4730440220675694dad5d78a327e907219acdb176b97fc316b99819096c4f76affc06efd1d022009270cf2499ab267640fb8c7cbb837a64f9e79df4242e08cda08a43ef5e9510b012103aaaec8de9f04cd8fef32301dd99c6a1c85440774c0b77354c2d58e70972f23afffffffff0120a1070000000000220020cdbf909e935c855d3e8d1b61aeb9c5e3c03ae8021b286839b1a72f2e48fdba7000000000
-
-
-I60: tcls_tx2txt.sh
-===================
-an all "if Verbose=1" against v_output or vv_output
 
 
 I61: tcls_testcases for OP_RETURN
@@ -387,18 +338,6 @@ fee = (n_inputs * 148 + n_outputs * 34 + 10) * price_per_byte
 SegWit slightly changes this, where instead of paying per byte, you pay per unit of weight: 1 byte of non witness data = 4 weight, 1 byte of witness data = 1 weight. 
 
 
-67a: SegWit tx: - done
-==============
-this segwit tx is not decoded correctly, improve:
-0200000000010117017d17e296b4cd41cd63758bff8aadf214410505ccaeddb4252579ccffa40300000000171600149835f2e0dff9d7f6a4060140696bc7e00b12edd5ffffffff0100b4c404000000001976a914ac19d3fd17710e6b9a331022fe92c693fdf6659588ac024730440220452a58cf56c45edaffb952acccd2f6f2cea523cf82e73b82f8eb5e3b3b1b17c4022011de26884cf693b12f16fdd8fa6c1d96dacb97050907353852895d9b80b3fae101210206f4bad90006f70112129815b25ba585484f1bb4f8b88f8ebaec2c76f543794300000000
-t has for TXIN[0] unknown opcodes, and the last two lines could be decoded further with "VERY VERBOSE" switch?
->> WITNESS TXIN[0] stack elements: hex=02, decimal=2
->>  WITNESS[0] data length (var_int), hex=47, decimal=71, data(uchar[]):
->>   30440220452A58CF56C45EDAFFB952ACCCD2F6F2CEA523CF82E73B82F8EB5E3B3B1B17C4022011DE26884CF693B12F16FDD8FA6C1D96DACB97050907353852895D9B80B3FAE101
->>  WITNESS[1] data length (var_int), hex=21, decimal=33, data(uchar[]):
->>   0206F4BAD90006F70112129815B25BA585484F1BB4F8B88F8EBAEC2C76F5437943
- 
-
 I67b: signature for P2SH:
 ========================
 is this realized correctly in tcls_sign.sh?
@@ -411,39 +350,12 @@ is this realized correctly in tcls_sign.sh?
 https://bitcoin.stackexchange.com/questions/57848/how-to-tell-which-part-of-the-previous-tx-i-need-to-make-the-hash-to-sign-for-an/57866#57866
 
 
-I69: CSV/CLTV use case: - done
-=======================
-USECASE 1:
-you want to lock your bitcoins in the same way, as you do with a life insurance. You pay monthly a certain amount, and after "some" time, you want to grab all the bitcoins.
-USECASE 2:
-when buying bitcoins, and then selling bitcoins in less than a year, many jurisdictions impose tax payments on the gained value. So the idea is, to create a transaction, that is locked in for a year, and can easily be spend a year later. 
-
-There are three options:
-a.) nlocktime
-b.) CSV - CheckSequenceVerify (BIP68/112/113)
-c.) CLTV - CheckLocktimeVerify (BIP65)
-
-What happens in USECASE 1, when you die, and the relatives shall have access to the bitcoins?
-What happens in USECASE 2, when you have a need for some bitcoins (and for sure you want to pay the taxes for it)?
-
-Look at the files [CLTV|CSV]_decode_opcodes.txt, and implement :-)
-
-
 I70: Multisig & Segwit:
 =======================
 integrate contents of file "160905_Multisig_Segwit.txt" into tx_cl_suite
 
 
-I71: tx sequence numbers - Done
-=========================
-when sequence number != FFFFFFFF, then script throughs an error. See here:
-./tcls_tx2txt.sh -vv -T -r 0100000001671a5a1a16202bdbc338384fe62f670cea70ec283f1f2ae3b88548957d289125000000006a47304402200ee1a98c1a6ef3d0bb7293ca86fbc68c913cb69a74391ae6f6eada002c73ecfe022078381f1417b68fad15b77310a2b69ab2fabdfcfe0cec4a4bd43ca5600b04f7aa012103188faec2bf8e1589a1f96fdab1db7def26ffe193b3bc368dce14a81a390637ed000000000120c83f000000000017a914fe38c0827175580a627033a16f7009076254718d8700000000
-...
-  TX_IN[0] Sequence (uint32_t)
-*** error: expected standard sequence number (0xFFFFFFFF), found 00000000
-
-
-I72: hex values, xxd, and shell scripts
+I72: hex values, xxd, and shell scripts - done
 =======================================
 see also item 57 above ...
 

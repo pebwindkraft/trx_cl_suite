@@ -65,7 +65,7 @@ cp tcls_out_pk_script.sh tmpfile
 chksum_prep
 
 echo "=== TESTCASE 1d: $chksum_cmd tcls_base58check_enc.sh" | tee -a $logfile
-chksum_ref="cbc1ce97e94e22d70aba81145f0dda80d9495428317b675bf078e14e6bffd33e" 
+chksum_ref="5ec23ff90c5f5dadf03de6eb634c3d9babb7d376e1fd36ce03eff96f75810af0" 
 cp tcls_base58check_enc.sh tmpfile
 chksum_prep
 echo " " | tee -a $logfile
@@ -237,29 +237,30 @@ echo " " | tee -a $logfile
 
 testcase6() {
 echo "================================================================" | tee -a $logfile
-echo "=== TESTCASE 6: this trx has 1 input, and 4 outputs          ===" | tee -a $logfile
-echo "=== trx-in sequence = feffffff - what does this mean?        ===" >> $logfile
-echo "=== bitcoin.org: setting all sequence numbers to 0xffffffff  ===" >> $logfile
-echo "=== (the default in Bitcoin Core) can still disable the time ===" >> $logfile
-echo "=== lock, so if you want to use locktime, at least one input ===" >> $logfile
-echo "=== must have a sequence number below the the maximum.       ===" >> $logfile
+echo "=== TESTCASE 6: tx with several inputs and outputs           ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "https://blockchain.info/de/rawtx/7264f8ba4a85a4780c549bf04a98e8de4c9cb1120cb1dfe8ab85ff6832eff864" >> $logfile
 
-echo "=== TESTCASE 6a: ./tcls_tx2txt.sh -r 0100000001df64d3e79..." | tee -a $logfile
+echo "=== TESTCASE 6a: 1 input, 4 outputs - non verbose..." | tee -a $logfile
 ./tcls_tx2txt.sh -r 0100000001df64d3e790779777de937eea18884e9b131c9910bdb860b1a5cea225b61e3510020000006b48304502210082e594fdd17f4f2995edc180e5373a664eb56f56420f0c8761a27fa612db2a2b02206bcd4763303661c9ccaac3e4e7f6bfc062f17ce4b6b1b479ee067a05e5a578b10121036932969ec8c5cecebc1ff6fc07126f8cb5589ada69db8ca97a4f1291ead8c06bfeffffff04d130ab00000000001976a9141f59b78ccc26b6d84a65b0d362185ac4683197ed88acf0fcf300000000001976a914f12d85961d3a36119c2eaed5ad0e728a789ab59c88acb70aa700000000001976a9142baaf47baf1bd1e3dad3956db536c3f2e87c237b88ac94804707000000001976a914cb1b1d3c8be7db6416c16a1d29db170930970a3088acce3d0600 > tmpfile
 chksum_ref="d73f48f73285db8e1d11331d7e3e0a6baada5b36718bf156f548bdcbfeb56da4"
 chksum_prep
 
-echo "=== TESTCASE 6b: ./tcls_tx2txt.sh -v -r 0100000001df64d3e79..." | tee -a $logfile
+echo "=== TESTCASE 6b: 1 input, 4 outputs - verbose..." | tee -a $logfile
 ./tcls_tx2txt.sh -v -r 0100000001df64d3e790779777de937eea18884e9b131c9910bdb860b1a5cea225b61e3510020000006b48304502210082e594fdd17f4f2995edc180e5373a664eb56f56420f0c8761a27fa612db2a2b02206bcd4763303661c9ccaac3e4e7f6bfc062f17ce4b6b1b479ee067a05e5a578b10121036932969ec8c5cecebc1ff6fc07126f8cb5589ada69db8ca97a4f1291ead8c06bfeffffff04d130ab00000000001976a9141f59b78ccc26b6d84a65b0d362185ac4683197ed88acf0fcf300000000001976a914f12d85961d3a36119c2eaed5ad0e728a789ab59c88acb70aa700000000001976a9142baaf47baf1bd1e3dad3956db536c3f2e87c237b88ac94804707000000001976a914cb1b1d3c8be7db6416c16a1d29db170930970a3088acce3d0600 > tmpfile
 chksum_ref="6d0e6d5de957435b784b396154da02f6c33fec4c18402ead23bfc50103cf12cc"
 chksum_prep
 
-echo "=== TESTCASE 6c: ./tcls_tx2txt.sh -vv -r 0100000001df64d3e79..." | tee -a $logfile
+echo "=== TESTCASE 6b: 1 input, 4 outputs - very verbose..." | tee -a $logfile
 ./tcls_tx2txt.sh -vv -r 0100000001df64d3e790779777de937eea18884e9b131c9910bdb860b1a5cea225b61e3510020000006b48304502210082e594fdd17f4f2995edc180e5373a664eb56f56420f0c8761a27fa612db2a2b02206bcd4763303661c9ccaac3e4e7f6bfc062f17ce4b6b1b479ee067a05e5a578b10121036932969ec8c5cecebc1ff6fc07126f8cb5589ada69db8ca97a4f1291ead8c06bfeffffff04d130ab00000000001976a9141f59b78ccc26b6d84a65b0d362185ac4683197ed88acf0fcf300000000001976a914f12d85961d3a36119c2eaed5ad0e728a789ab59c88acb70aa700000000001976a9142baaf47baf1bd1e3dad3956db536c3f2e87c237b88ac94804707000000001976a914cb1b1d3c8be7db6416c16a1d29db170930970a3088acce3d0600 > tmpfile
 chksum_ref="7f8605461c56157870282e501e73ea89dd79358f8a3be7c6eab19f3f21b7efbd"
 chksum_prep
+
+echo "=== TESTCASE 6d: 4 inputs, 2 outputs, very verbose..." | tee -a $logfile
+./tcls_tx2txt.sh -vv -r 01000000046c969e2396497561ebc6fc7cf845022e21b2ebf63e4a6d82544d521310cf3542040000006b483045022100d8cd1b4e6e0999ac397c8d78eae0520366f622be1b062db02479c0aa7f68dde2022070c8d5a4dd2a02b89ee5d4f3b0cf12a46e280dcc9fc405f9d042e93ad3cf20ea01210200a6d3e2a688e720955424cff5a359ee3db7185faad71d5fc8d9c85118dfbd07fffffffffd2dd2b83d84e8f7a076c09256ede7b4d39583da70d9fea181168f36a594b491000000006a473044022030a889577fd95a48ba39fc6f8b059c352fa96618b10b6e42861d23bff3a3300c0220194edb9655edc2a404131b85bb83e68a3acba8f9ebe8a752a58b028f157fca4c0121021093ead70ce7d56115851fb3ca16de1dd39478cdcf2264c94929eaf28571f029ffffffff9ede725ecef99fa5f0e059f26e2bb9f4d6c7783eba4a000e250bf48509820be3000000006a4730440220476940dd78a56e4b66476dd1038e4a305f72b63d21bdc52322e1766c2087341202203a24070a44417588e65e5da348c2b5f96a7efed05d2b28e7b932e76ccdd38d120121029912e17b6e5833d035967dc67b97ce51628a381e451aecfda3d40d679cd1af3fffffffff244887dd1af93418ac9cdda199ae77c557445f280ed91daa04326810bab51ef0010000006a47304402201b68ea684b2d7bd5bfed7f7de589f30253c40908d132f25e718b2f886b18a27f0220230c10572c131c27816c7f73e269bad3312eb737b090034c2e0a2a1c3d0cabb2012102b5e9cba15229ec36732f19fe271de7f8c36ff0901e0a45d3dab6faee6f2f1442ffffffff026f110100000000001976a914ac4aeeedc2a3f4331bc7b40e9e71aa65dcb6b93c88acb5e10e00000000001976a9145140c47d2e2821fd062a412e697e3d08723e71ed88ac00000000 > tmpfile
+chksum_ref="5c7b727115fdcd195e72ab3543cd929a17ffc6517b7fecad16b3c87d86a8db67"
+chksum_prep
+
 echo " " | tee -a $logfile
 }
 

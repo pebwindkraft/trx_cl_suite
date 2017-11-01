@@ -674,9 +674,10 @@ while [ $j -le $TX_IN_Count_dec ]
   fi
 
   # Bitcoin never does sha256 with the hex chars, so need to convert it to hex codes first
-  cat $utxhex_tmp_fn | tr [:upper:] [:lower:] > $utxtxt_tmp_fn
-  result=$( cat $utxtxt_tmp_fn | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
-  printf $result > $utxtxt_tmp_fn
+  # cat $utxhex_tmp_fn | tr [:upper:] [:lower:] > $utxtxt_tmp_fn
+  # result=$( cat $utxtxt_tmp_fn | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
+  # printf $result > $utxtxt_tmp_fn
+  printf $(sed 's/[[:xdigit:]]\{2\}/\\x&/g' <$utxhex_tmp_fn) > $utxtxt_tmp_fn
 
   openssl dgst -binary -sha256 >$utx_sha256_fn  <$utxtxt_tmp_fn 
   openssl dgst -binary -sha256 >$utx_dsha256_fn <$utx_sha256_fn 

@@ -38,4 +38,4 @@ yymmmdd
 17aug22 svn   tcls_tx2txt.sh         I67b SegWIT fixed ...
 17Sep27 svn   tcls_tx2txt.sh         I71 fix issues with sequence numbers not being FFFFFFFF
 17Oct29 svn   tcls_in_sig_script.sh  I69 get OpCodes correctly displayed (smart comtracts!)
-
+17nov01 svn   all files ...          I51, I57, I72: Replace "xxd" and improve code
