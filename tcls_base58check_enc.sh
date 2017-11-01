@@ -184,6 +184,7 @@ if [ $ECDSA_PK -eq 1 ] ; then
   v_output "2. SHA256 hash of public ECDSA key"
   tmpvar=$( echo $param | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
   result=$( printf "$tmpvar" | openssl dgst -sha256 | cut -d " " -f 2 )
+
   v_output "   $result"
   ##############################################
   ### 3: do ripemd160 on sha of ECDSA pubkey ###

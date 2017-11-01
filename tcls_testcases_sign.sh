@@ -52,7 +52,7 @@ echo "================================================================" | tee -a
 
 echo "=== TESTCASE 1a: $chksum_cmd tcls_sign.sh" | tee -a $logfile
 cp tcls_sign.sh tmp_tx_cfile
-chksum_ref="b81b4698981a15a44b5f9cbbc1f15c783e0c74b275098e504764174b3dc9c862" 
+chksum_ref="65d00bde9c44a046bc07b30edc4dea4803528ba5025567535b3eb45d3dc9be7c" 
 chksum_prep
 
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile

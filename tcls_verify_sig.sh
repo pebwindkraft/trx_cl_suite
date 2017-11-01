@@ -302,8 +302,9 @@ if [ "$pubkey_1stchar" == "04" ] ; then
     data_show $pubkey
   fi
   echo $pre_pubstr_uc$pubkey > pubkey.hex
-  result=$( cat pubkey.hex | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
-  printf "$result" > tmp_key2pem
+  # result=$( cat pubkey.hex | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
+  # printf "$result" > tmp_key2pem
+  printf $(sed 's/[[:xdigit:]]\{2\}/\\x&/g' <pubkey.hex) > tmp_key2pem
 else
   if [ $VVerbose -eq 1 ] ; then
     echo "    a pre_pubstr:"
@@ -312,8 +313,9 @@ else
     data_show $pubkey
   fi
   echo $pre_pubstr_c$pubkey > pubkey.hex
-  result=$( cat pubkey.hex | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
-  printf "$result" > tmp_key2pem
+  # result=$( cat pubkey.hex | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
+  # printf "$result" > tmp_key2pem
+  printf $(sed 's/[[:xdigit:]]\{2\}/\\x&/g' <pubkey.hex) > tmp_key2pem
 fi
 v_output  "    base64 pubkey.hex file and put some nice surroundings"
 vv_output "    openssl enc -base64 -in tmp_key2pem"
