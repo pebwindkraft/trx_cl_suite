@@ -57,7 +57,7 @@ chksum_prep
 
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
 cp tcls_key2pem.sh tmp_cfile
-chksum_ref="736af2ceeb382639f271abfe8cde580ebce816b98ae149037a95a2268ba7d893" 
+chksum_ref="bc81085a20cbac01e7c1122a271cd7747a9871a216d1ed846d19f65ed29b8106" 
 chksum_prep
 
 echo "=== TESTCASE 1c: $chksum_cmd tcls_verify_bc_address.awk" | tee -a $logfile

@@ -96,7 +96,7 @@ Compressed form of above needs to start with 0x02:
   06:46:51
 
 
-I38: 16nov2016, svn:
+I38: 16nov2016, svn: - done
 ====================
 tcls_key2pem: the assembly of the pubkey can be made very easy, in this section:
 ######################################
@@ -216,11 +216,6 @@ q: how many public/private keypairs can a 24 word hierarchical deterministic wal
 a: 2^31, the number of words in the mnemonic has nothing to do with the capacity, it just adjusts the entropy for the key derivation
 
 
-I51: 02apr2017, svn: - done
-====================
-testcases_tcls_verify_sig.sh: on OpenBSD the testcase 4 fails ...
-
-
 I52: 03apr2017, svn:
 ====================
 tcls_sign.sh: is TX_OUT handled correctly? Looks like there is only one TX_OUT possible?
@@ -236,22 +231,9 @@ Testcase 10i (?) in testcases_tcls_create.sh shall be reflected in "tcls_sign.sh
     1f6cfa4208bc82ee5039876b4f065a705ce64df7/TwoOfThree.sh
 
 
-
 I56: 23jun2017, svn:
 ====================
 tcls_sign.sh: when a tx has more than 100 utxo, the signing process creates an error roughly every 2nd attempt. Looks like this happens for signatures, where a new S-Value must be calculated. The new S-value should be less then N/2. The system creates a new S value, but it's length is then 63 bytes, instead of 64 bytes.
-
-
-I57: 27jun2017, svn: - done
-====================
-OpenBSD and ./tcls_testcases_verify.sh
-TESTCASE 4:
-./tcls_testcases_verify.sh[234]: xxd: not found
-unable to load Public Key
-./tcls_testcases_verify.sh[234]: xxd: not found
-./tcls_testcases_verify.sh[234]: xxd: not found
-unable to load Public Key
-Error initializing context
 
 
 I58: 20jul2017, svn:
@@ -353,19 +335,6 @@ https://bitcoin.stackexchange.com/questions/57848/how-to-tell-which-part-of-the-
 I70: Multisig & Segwit:
 =======================
 integrate contents of file "160905_Multisig_Segwit.txt" into tx_cl_suite
-
-
-I72: hex values, xxd, and shell scripts - done
-=======================================
-see also item 57 above ...
-
-https://bitcoin.stackexchange.com/questions/55188/download-single-and-specific-block-for-study-purposes/55206?noredirect=1#comment70179_55206
-
- cat myfile_with_hexchars | tr [:upper:] [:lower:] > myfile_with_hexcodes
- result=$( cat myfile_with_hexcodes | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
- printf $result > myfile_hex
-
-you don't need the tr; [:xdigit:] and printf \x handle both cases. In fact this only works right if the input is entirely hex pairs so you can just do printf $(sed 's/../\\&/g' <hexfile) >outfile
 
 
 #####################################
