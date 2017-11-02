@@ -50,7 +50,7 @@ echo "=============================================================" | tee -a $l
 
 echo "TESTCASE 1a: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
 cp tcls_key2pem.sh tmp_tx_cfile
-chksum_ref="736af2ceeb382639f271abfe8cde580ebce816b98ae149037a95a2268ba7d893"
+chksum_ref="bc81085a20cbac01e7c1122a271cd7747a9871a216d1ed846d19f65ed29b8106"
 chksum_prep
 
 echo "TESTCASE 1b: $chksum_cmd tcls_verify_bc_address.awk" | tee -a $logfile
@@ -175,23 +175,27 @@ echo "=== TESTCASE 4: another simple testcase, should just work ===" | tee -a $l
 echo "=============================================================" | tee -a $logfile
 echo "from: http://bitcoin.stackexchange.com/questions/32628/redeeming-a-raw-transaction-step-by-step-example-required" >> $logfile
 
-echo "TESTCASE 4a: " | tee -a $logfile
+echo "TESTCASE 4a: with param -v -x" | tee -a $logfile
 echo "./tcls_key2pem.sh -v -x 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725 -p 0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352" >> $logfile
 ./tcls_key2pem.sh -v -x 18E14A7B6A307F426A94F8114701E7C8E774E7F9A47E2C2035DB29A206321725 -p 0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352 > tmp_tx_cfile
 chksum_ref="0e915e5f11d0f753bfe8713d8497649ab79c3c2199db28798aa5b9a54f979045"
 chksum_prep
 
-echo "TESTCASE 4b: " | tee -a $logfile
+echo "TESTCASE 4b: with param -v -w" | tee -a $logfile
 echo "./tcls_key2pem.sh -v -w 5J1F7GHadZG3sCCKHCwg8Jvys9xUbFsjLnGec4H125Ny1V9nR6V -p 0450863ad64a87ae8a2fe83c1af1a8403cb53f53e486d8511dad8a04887e5b23522cd470243453a299fa9e77237716103abc11a1df38855ed6f2ee187e9c582ba6" >> $logfile
 ./tcls_key2pem.sh -v -w 5J1F7GHadZG3sCCKHCwg8Jvys9xUbFsjLnGec4H125Ny1V9nR6V -p 0450863ad64a87ae8a2fe83c1af1a8403cb53f53e486d8511dad8a04887e5b23522cd470243453a299fa9e77237716103abc11a1df38855ed6f2ee187e9c582ba6 > tmp_tx_cfile
 chksum_ref="f6b85f6b60ff9d482853c0a9bee80f9dd4a11e4dde54df3019f05e15bb6cdb60"
 chksum_prep
 
-echo "TESTCASE 4c: " | tee -a $logfile
+echo "TESTCASE 4c: with param -v -w" | tee -a $logfile
 echo "./tcls_key2pem.sh -v -w Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C -p 0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352" >> $logfile
 ./tcls_key2pem.sh -v -w Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C -p 0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352 > tmp_tx_cfile
 chksum_ref="a0cb46f651eef358e5bf4bfb97c425110c748e9f963036fa0e88c33bf95e665f"
 chksum_prep
+
+echo "TESTCASE 4d: with param -vv, no chksum, cause signature changes everytime" | tee -a $logfile
+echo "./tcls_key2pem.sh -vv -w Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C -p 0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352" >> $logfile
+./tcls_key2pem.sh -vv -w Kx45GeUBSMPReYQwgXiKhG9FzNXrnCeutJp4yjTd5kKxCitadm3C -p 0250863AD64A87AE8A2FE83C1AF1A8403CB53F53E486D8511DAD8A04887E5B2352 > tmp_tx_cfile
 
 echo " " | tee -a $logfile
 }

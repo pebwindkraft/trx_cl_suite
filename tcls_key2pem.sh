@@ -262,6 +262,8 @@ else
            echo "*** wrong pubkey length (${#pubkey}), must be 66 or 130 chars"
            proc_help
            exit 1
+         else
+           printf $pubkey > pubkey_hex.txt
          fi
          shift
          shift
@@ -518,8 +520,7 @@ else
   v_output "  the pubkey   : $pubkey"
 fi
 echo $pre_string$hex_privkey$mid_string$pubkey > privkey_hex.txt
-result=$( echo $pre_string$hex_privkey$mid_string$pubkey | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
-printf "$result" > tmp_key2pem
+printf $( echo $pre_string$hex_privkey$mid_string$pubkey | sed 's/[[:xdigit:]]\{2\}/\\x&/g' ) > tmp_key2pem
 
 v_output " "
 v_output "### base64 privkey file and put some nice surroundings"
@@ -566,22 +567,18 @@ if [ $VVerbose -eq 1 ] ; then
     echo   "  a pre_pubstr: $pre_pubstr_uc" 
     echo   "  the pubkey  : $pubkey"
     echo $pre_pubstr_uc$pubkey > pubkey_m_hex.txt
-    result=$( cat pubkey_m_hex.txt | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
-    printf "$result" > tmp_key2pem
   else
     echo   "  a pre_pubstr: $pre_pubstr_c" 
     echo   "  the pubkey  : $pubkey"
     echo $pre_pubstr_c$pubkey > pubkey_m_hex.txt
-    result=$( cat pubkey_m_hex.txt | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
-    printf "$result" > tmp_key2pem
   fi
+  printf $( cat pubkey_m_hex.txt | sed 's/[[:xdigit:]]\{2\}/\\x&/g' ) > tmp_key2pem
   vv_output " "
   vv_output "### base64 pubkey_m_hex.txt file and put some nice surroundings"
   vv_output "openssl enc -base64 -in tmp_key2pem"
   echo "-----BEGIN PUBLIC KEY-----"   >  pubkey_m.pem
   openssl enc -base64 -in tmp_key2pem >> pubkey_m.pem
   echo "-----END PUBLIC KEY-----"     >> pubkey_m.pem
-  rm tmp_key2pem
   cat pubkey_m.pem
   echo " "
   echo "openssl asn1parse -in pubkey.pem"
@@ -589,6 +586,8 @@ if [ $VVerbose -eq 1 ] ; then
   echo " "
   echo "openssl asn1parse -in pubkey_m.pem"
   openssl asn1parse -in pubkey_m.pem 
+  rm tmp_key2pem
+
 fi
 
 ###################################################
@@ -601,8 +600,7 @@ if [ $Verbose -eq 1 ] ; then
   echo "############################################################"
   echo " "
 
-  result=$( echo $sha256_string | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
-  printf $result > tmp_urtx.sha
+  printf $( echo $sha256_string | sed 's/[[:xdigit:]]\{2\}/\\x&/g' ) > tmp_urtx.sha
 
   echo "sign with privkey (openssl pkeyutl ... )"
   vv_output "  -sign -in tmp_urtx.sha -inkey privkey.pem -keyform PEM > tmp_pkeyutl_sig.hex"
