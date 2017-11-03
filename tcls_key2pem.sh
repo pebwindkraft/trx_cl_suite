@@ -109,6 +109,7 @@ mid_string_uc=$( echo "a00706052b8104000aa144034200" )
 pre_string_c=$( echo "30540201010420" )
 mid_string_c=$( echo "a00706052b8104000aa124032200" )
 
+# PUBKEY pre-String:
 # ASN.1 STRUCTURE FOR PUBKEY (uncompressed and compressed):
 #   30  <-- declares the start of an ASN.1 sequence
 #   56  <-- length of following sequence (dez 86)
@@ -144,22 +145,6 @@ pre_pubstr_c=3036301006072a8648ce3d020106052b8104000a032200
 #         HrtTA3z9QNeI5TZ8v0l0=" | base64 -D - > ec-pub_c.hex
 #   hexdump -C ec-pub_uc.hex 
 #   hexdump -C ec-pub_c.hex 
-# PUBKEY pre-String:
-#   30  <-- declares the start of an ASN.1 sequence
-#   56  <-- length of following sequence (dez 86)
-#   30  <-- length declaration is following  
-#   10  <-- length of integer in bytes (dez 16)
-#   06  <-- declares the start of an "octet string"
-#   07  <-- length of integer in bytes (dez 7)
-#   2a 86 48 ce 3d 02 01 <-- Object Identifier: 1.2.840.10045.2.1
-#                            = ecPublicKey, ANSI X9.62 public key type
-#   06  <-- declares the start of an "octet string"
-#   05  <-- length of integer in bytes (dez 5)
-#   2b 81 04 00 0a <-- Object Identifier: 1.3.132.0.10 
-#                      = secp256k1, SECG (Certicom) named eliptic curve
-#   03  <-- declares the start of an "octet string"  
-#   42  <-- length of bit string to follow (66 bytes)
-#   00  <-- ??
 #
 
 # base58=({1..9} {A..H} {J..N} {P..Z} {a..k} {m..z})
@@ -360,14 +345,40 @@ fi
 #  From the same private key data, a compressed public key makes a different address. 
 #  address. You cannot spend bitcoins sent to a compressed address/public key with an 
 #  uncompressed version.
+# 
 #  Hint 2:
 #  Be mindful that there is no practical reason to "convert" between uncompressed and 
 #  compressed public keys. Each has their own Bitcoin address - you cannot spend funds 
 #  sent to the uncompressed public key's address with the compressed public key.
+# 
 #  Hint 3:
 #  A public key (uncompressed) is simply an x and y coordinate of a point on a graph.
 #  A compressed public key is just the x coordinate. Using the x coordinate you should 
-#  be able to calculate the y coordinate if you really want it, ...
+#  be able to calculate the y coordinate if you really want it:
+#  Example 1, an uncompressed pubkey (0x04):
+#     047D5B52B82B782C:62CBB7A46E13DB48
+#     D987BC0284981018:3B0FA87722C8EAE3
+#     C1D12532B60D5307:BF25836F99793910
+#     F0F2474A78DF2A70:2FAA321CD2E43120
+#     67
+#  Find last byte from Y co-ordinate, LSB is set:
+#  0x6D (to binary) => 0b1100111 (extracting LSB) => 0b00000011
+#     037D5B52B82B782C:62CBB7A46E13DB48
+#     D987BC0284981018:3B0FA87722C8EAE3
+#     C1
+#   
+#  Example 2, an uncompressed pubkey (0x04)
+#     04D5A76989897EE6:72FD4A2F2088C7A2
+#     FDABEBA47901E548:B474CB0ADFAF0646
+#     511B22B9F58A8C2D:24085B4727B5C6C8
+#     062D52DEEEB41FB2:371DFAE2F1BA2B31
+#     A6
+#  Find last byte from Y co-ordinate, LSB is not set
+#  0xA6 => 0b10100110 => 0b00000010
+#     02d5a76989897ee672fd4a2f2088c7
+#     a2fdabeba47901e548b474cb0adfaf
+#     064651
+#   
 #  Hint 4:
 #  The client parses for payments according to the hash160 of the pubkey, 
 #  but it doesn't check for both forms. 
