@@ -7,6 +7,7 @@
 #
 # Version	by      date    comment
 # 0.1		svn     22aug16 initial release, extracted from "trx_create_sign.sh"
+# 0.2		svn	03nov17 added check for R value <=N/2
 # 
 # Permission to use, copy, modify, and distribute this software for any 
 # purpose with or without fee is hereby granted, provided that the above 
@@ -21,7 +22,36 @@
 # NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE 
 # USE OR PERFORMANCE OF THIS SOFTWARE. 
 # 
-
+#
+#
+# RULES FOR STRICT SIG CHECKING:
+#
+#  http://bitcoin-development.narkive.com/OOU2XVSG/bitcoin-development-who-is-creating-non-der-signatures
+#  * 2. Signatures are strictly DER-encoded (+ hashtype byte). The format is:
+#  0x30 <lenT> 0x02 <lenR> <R> 0x02 <lenS> <S> <hashtype>
+#  * R and S are signed integers, encoded as a big-endian byte sequence.
+#  They are stored in as few bytes as possible (i.e., no 0x00 padding in
+#  front), except that a single 0x00 byte is needed and even required
+#  when the byte following it has its highest bit set, to prevent it
+#  from being interpreted as a negative number.
+#  * lenR and lenS are one byte, containing the length of the R and S
+#  records, respectively.
+#  * lenT is one byte, containing the length of the complete structure
+#  following it, starting from the 0x02, up to the S record. Thus, it
+#  must be equal to lenR + lenS + 4.
+#  * The hashtype is one byte, and is either 0x01, 0x02, 0x03, 0x81, 0x82
+#  or 0x83.
+#  * No padding is allowed before or after the hashtype byte, thus lenT
+#  is equal to the size of the whole signature minus 3.
+#  
+#  https://bitcointalk.org/index.php?topic=653313.msg7338853#msg7338853
+#  To be correct: R & S usually are 32 or 33 bytes. But can be smaller.
+#  If highest bit of 256-bit integer is set we got 33 bytes ( probability is 1/2 )
+#  If highest byte is greater than 0 and smaller than 128 we got 32 bytes ( probability 127/256 )
+#  If highest byte is 0 - we should take R as 248-bit integer and repeat these steps
+#  There are signatures in blockchain where the length of R or S is 29, 30, 31
+#  
+#  
 ###########################
 # Some variables ...      #
 ###########################
@@ -73,20 +103,6 @@ indent_data() {
     output=$( echo "$1" | cut -b $ifrom-$ito )
     echo "$indent_string$output"
   done
-
-# if [ ${#1} -gt 150 ] ; then
-#   echo "$1" | cut -b 1-75 
-#   output=$( echo "$1" | cut -b 76-146 )
-#   echo "$indent_string$output"
-#   output=$( echo "$1" | cut -b 147- )
-#   echo "$indent_string$output"
-# elif [ ${#1} -gt 75 ] ; then
-#   echo "$1" | cut -b 1-75 
-#   output=$( echo "$1" | cut -b 76- )
-#   echo "$indent_string$output"
-# else
-#   echo "$1"
-# fi
 }
 
 ###########################################################
@@ -449,7 +465,7 @@ else
 fi
 
 #################################
-# if s -gt N/2 ; then s = N - s #
+# if R -gt N/2 ; then R = N - R #
 #################################
 #  Where R and S are not negative (their first byte has its highest bit not set), and not
 #  excessively padded (do not start with a 0 byte, unless an otherwise negative number follows,
@@ -460,8 +476,8 @@ fi
 #  This function is consensus-critical since BIP66.
 # 
 # make sure, SIG has correct parts - this is "Bitcoin" specific... 
-# SIG is <r><s> concatenated together. An s value greater than N/2 
-# is not allowed. Need to add code: if s -gt N/2 ; then s = N - s
+# SIG is <r><s> concatenated together. An R or S value greater than N/2 
+# is not allowed. Need to add code: if R -gt N/2 ; then R = N - R
 # N is the curve order: 
 # N hex:   FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141
 # N hex/2: 7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0
@@ -470,17 +486,114 @@ fi
 # N dec/2:
 #   57896044618658097711785492504343953926418782139537452191302581570759080747168
 #         
+# also need to check, if first Bytes are "00", this would mean, it has been zero padded 
+# (first byte is '00') to protect MSB 1 unsigned int
+#
 Nhalf_Value_hex=7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0
-value=$( echo "obase=16;ibase=16;$S_value_string < $Nhalf_Value_hex" | bc ) 
+value=$( echo "obase=16;ibase=16;$R_value_string < $Nhalf_Value_hex" | bc ) 
+R_value=$( echo "$R_value_string" | cut -c 1-2 )
 
+if [ $Verbose -eq 1 ] ; then
+  printf "    checking R-value is less than N/2, "
+fi
 if [ $value -eq 1 ] ; then 
-  v_output  "    S-value must be smaller than N/2                            - ok"
+  v_output  "yup...                   - ok"
+  vv_output "    cool, R is smaller than N/2"
+  if [ $o_param_flag -eq 1 ] ; then
+    printf "$ScriptSig" > $outfile
+  fi
+elif [ "$R_value" == "00" ] ; then 
+  v_output  "R-value is zero padded   - ok"
+else
+  v_output  "no...                   - nok"
+  v_output "    --> R is not smaller than N/2, need new R-Value (new_r = N - r)"
+  R_value=$( echo "obase=16;ibase=16;FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141 - $R_value_string" | bc )
+
+  if [ ${#R_value} -ne 64 ] ; then 
+    R_value=$( zero_pad $S_value )
+  fi
+  if [ ${#R_value} -ne 64 ] ; then 
+    echo "*** ERROR: script sig verification for R-Value: "
+    echo "    something went deadly wrong ..."
+    echo "    new R-value must be smaller than N/2:"
+    echo "    N/2 (in hex)= $Nhalf_Value_hex"
+    echo "    old R-value = $R_value_string"
+    echo "    new R-value = $R_value"
+    echo "    new R value length ${#R_value} (must be 64 chars)"
+    echo "    old scriptsig:"
+    echo "    $ScriptSig" 
+    echo "    exiting gracefully ... "
+    echo " "
+    exit 1
+  else
+    v_output "    new R=$R_value"
+    # we are good to assemble a new sig, by concatenating values into $ScriptSig
+    # we begin with code '0x30' (sequence identfier)
+    ScriptSig=$( echo "30" )
+    
+    # now length of R-Value and S-Value and codes 
+    # R-Value was defined in $R_len_dec, R value = 32 Bytes (0x20) --> 64 chars
+    # and 4 hex codes (for R and S: '0x02' + length value)         -->  8 chars
+    # value=$( echo "$R_len_dec + 64 + 8" | bc )
+    value=$( echo "obase=16;($R_len_dec + 64 + 8) / 2" | bc )
+    ScriptSig=$( echo "$ScriptSig$value" )
+    
+    # this is DER sig code '02', identifiying next hexcode as R-Value length
+    value="02"
+    ScriptSig=$( echo "$ScriptSig$value" )
+    
+    # convert $R_len_dec to hex
+    value=$( echo "obase=16;$R_len_dec / 2" | bc )
+    ScriptSig=$( echo "$ScriptSig$value" )
+    
+    # and concatenate the original R-Value 
+    ScriptSig=$( echo "$ScriptSig$R_value_string" )
+    
+    # this is code '02' and R value length, which is here exactly 32 bytes, in hex 20 
+    value="0220"
+    ScriptSig=$( echo "$ScriptSig$value" )
+    
+    # and concatenate the new R-Value 
+    ScriptSig=$( echo "$ScriptSig$R_value" )
+    if [ $o_param_flag -eq 1 ] ; then
+      printf "$ScriptSig" > $outfile
+    fi
+
+    # and bring it into a tmp file, eventually required in other scripts
+    if [ -f tmp_trx_sig.hex ] ; then 
+      cp tmp_trx_sig.hex tmp_trx_sig_old.hex
+    fi
+    v_output "    new signature=$ScriptSig" 
+    ScriptSig=$( echo $ScriptSig | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
+    printf "$ScriptSig" > tmp_trx_sig.hex
+
+  fi
+fi
+
+#################################
+# if S -gt N/2 ; then S = N - S #
+#################################
+#  
+#  Following the logic from R-Value above ...
+#  
+value=$( echo "obase=16;ibase=16;$S_value_string < $Nhalf_Value_hex" | bc ) 
+S_value=$( echo "$S_value_string" | cut -c 1-2 )
+
+if [ $Verbose -eq 1 ] ; then
+  printf "    checking S-value is less than N/2, "
+fi
+if [ $value -eq 1 ] ; then 
+  v_output  "yup...                   - ok"
   vv_output "    cool, S is smaller than N/2"
   v_output  "    strictly check DER-encoded signature                        - ok"
   if [ $o_param_flag -eq 1 ] ; then
     printf "$ScriptSig" > $outfile
   fi
+elif [ "$S_value" == "00" ] ; then 
+  v_output  "S-value is zero padded   - ok"
+  v_output  "    strictly check DER-encoded signature                        - ok"
 else
+  v_output  "no...                   - nok"
   v_output "    --> S is not smaller than N/2, need new S-Value (new_s = N - s)"
   S_value=$( echo "obase=16;ibase=16;FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141 - $S_value_string" | bc )
 

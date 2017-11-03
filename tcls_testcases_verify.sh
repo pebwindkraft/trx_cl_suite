@@ -57,12 +57,12 @@ chksum_prep
 
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
 cp tcls_key2pem.sh tmp_tx_cfile
-chksum_ref="bc81085a20cbac01e7c1122a271cd7747a9871a216d1ed846d19f65ed29b8106" 
+chksum_ref="0b5fb56e663368f7e011e49b8caf3560aff87c3176c1608b482f398c1deaaf1f" 
 chksum_prep
 
 echo "=== TESTCASE 1c: $chksum_cmd tcls_strict_sig_verify.sh" | tee -a $logfile
 cp tcls_strict_sig_verify.sh tmp_tx_cfile
-chksum_ref="f45f17eed63026710b9b238ab8315c1816ec779e44ea0726fa6633897ca2c1f5"
+chksum_ref="18423e6270685705eba8fdbb853601a43510a351618e326a7d8ee50b986203cd"
 chksum_prep
 
 echo "=== TESTCASE 1d: $chksum_cmd tcls_verify_hexkey.awk" | tee -a $logfile
@@ -112,13 +112,13 @@ chksum_prep
 echo "=== TESTCASE 3b: pizza, be a bit more verbose..." | tee -a $logfile
 echo "./tcls_verify_sig.sh -v -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e" >> $logfile
 ./tcls_verify_sig.sh -v -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669  -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e > tmp_tx_cfile 
-chksum_ref="1ef0a0bfa83dc0c003c2abbdcf3825da589dd15faa73612de2803a1c5ed6cf7f" 
+chksum_ref="4bd3a7543bd8fa3ffd88f639fc568f1f073afc44ceff3beeb301a0e6617b4a80" 
 chksum_prep
 
 echo "=== TESTCASE 3c: pizza, be very verbose..." | tee -a $logfile
 echo "./tcls_verify_sig.sh -vv -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669 -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e" >> $logfile
 ./tcls_verify_sig.sh -vv -d c2d48f45d7fbeff644ddb72b0f60df6c275f0943444d7df8cc851b3d55782669  -p 042e930f39ba62c6534ee98ed20ca98959d34aa9e057cda01cfd422c6bab3667b76426529382c23f42b9b08d7832d4fee1d6b437a8526e59667ce9c4e9dcebcabb -s 30450221009908144ca6539e09512b9295c8a27050d478fbb96f8addbc3d075544dc41328702201aa528be2b907d316d2da068dd9eb1e23243d97e444d59290d2fddf25269ee0e > tmp_tx_cfile 
-chksum_ref="ffe4e1ccad6b88ec4afa7b777e82803591beedaa3dbc6092613e0043b618374a" 
+chksum_ref="3e19c7c9f511f367d138195d780cfbbf92fecc66e166919dc5413253c92667d2" 
 chksum_prep
 
 echo " " | tee -a $logfile
@@ -197,12 +197,50 @@ echo " " | tee -a $logfile
 }
 
 
+testcase5() {
+echo "================================================================" | tee -a $logfile
+echo "=== TESTCASE 5: strictly testing signatures...               ===" | tee -a $logfile
+echo "================================================================" | tee -a $logfile
+echo "=== TESTCASE 5a: R and S-Value of signature <= N/2 ... " | tee -a $logfile
+echo "./tcls_strict_sig_verify.sh -v 30440220443ad3e0b7a1ee2e7b2341ef0e9f35664d5a664aefb622f2c686ca4836a2d48902205aef0722370bfe315758f4a6b9c656b07471e33d1b30c7c224e07228c701114501" >> $logfile
+./tcls_strict_sig_verify.sh -v 30440220443ad3e0b7a1ee2e7b2341ef0e9f35664d5a664aefb622f2c686ca4836a2d48902205aef0722370bfe315758f4a6b9c656b07471e33d1b30c7c224e07228c701114501 > tmp_tx_cfile
+chksum_ref="5b40890a5590e3e5b54e2cce637e2a3788b8354469101254cec2e5d21fc266d7" 
+chksum_prep
+ 
+echo "=== TESTCASE 5b: R and S-Value are zero padded ... " | tee -a $logfile
+echo "./tcls_strict_sig_verify.sh -v 304602210090c4fc2369cf225559c1141a1e9be3d7598f0fb7affe8a29f86e737972c7587a022100cbd8619ecae3baa40fdb565014fdac28a95deb90c0fcd4adcbd97d58d0e96f98" >> $logfile
+./tcls_strict_sig_verify.sh -v 304602210090c4fc2369cf225559c1141a1e9be3d7598f0fb7affe8a29f86e737972c7587a022100cbd8619ecae3baa40fdb565014fdac28a95deb90c0fcd4adcbd97d58d0e96f98> tmp_tx_cfile
+chksum_ref="6f6056fa6fbe6cc389cd3e28351c95b14fc05eb60e88475ae9b75f20dbd48efa" 
+chksum_prep
+ 
+echo "=== TESTCASE 5c - error: R-Value of signature >= N/2 ... " | tee -a $logfile
+echo "./tcls_strict_sig_verify.sh -v 30440220843ad3e0b7a1ee2e7b2341ef0e9f35664d5a664aefb622f2c686ca4836a2d48902205aef0722370bfe315758f4a6b9c656b07471e33d1b30c7c224e07228c701114501" >> $logfile
+./tcls_strict_sig_verify.sh -v 30440220843ad3e0b7a1ee2e7b2341ef0e9f35664d5a664aefb622f2c686ca4836a2d48902205aef0722370bfe315758f4a6b9c656b07471e33d1b30c7c224e07228c701114501 > tmp_tx_cfile
+chksum_ref="e2236c7ea3ffc39015417fc40d3cd6957111f38fe08f088dad2f2e4045ee5442" 
+chksum_prep
+ 
+echo "=== TESTCASE 5d - error: S-Value of signature >= N/2 ... " | tee -a $logfile
+echo "./tcls_strict_sig_verify.sh -v 30440220443ad3e0b7a1ee2e7b2341ef0e9f35664d5a664aefb622f2c686ca4836a2d48902208aef0722370bfe315758f4a6b9c656b07471e33d1b30c7c224e07228c701114501" >> $logfile
+./tcls_strict_sig_verify.sh -v 30440220443ad3e0b7a1ee2e7b2341ef0e9f35664d5a664aefb622f2c686ca4836a2d48902208aef0722370bfe315758f4a6b9c656b07471e33d1b30c7c224e07228c701114501 > tmp_tx_cfile
+chksum_ref="280da6542732fd4d76b81b098ced5f5e4504d5b60599a84bfc6e18b745b93c38" 
+chksum_prep
+ 
+echo "=== TESTCASE 5e - error: R and S-Value of signature >= N/2 ... " | tee -a $logfile
+echo "./tcls_strict_sig_verify.sh -v 30440220843ad3e0b7a1ee2e7b2341ef0e9f35664d5a664aefb622f2c686ca4836a2d48902208aef0722370bfe315758f4a6b9c656b07471e33d1b30c7c224e07228c701114501" >> $logfile
+./tcls_strict_sig_verify.sh -v 30440220843ad3e0b7a1ee2e7b2341ef0e9f35664d5a664aefb622f2c686ca4836a2d48902208aef0722370bfe315758f4a6b9c656b07471e33d1b30c7c224e07228c701114501 > tmp_tx_cfile
+chksum_ref="e123adb190118565c39149e6bf77710791bb5fa9715297a70eb1e1534044ddf0" 
+chksum_prep
+ 
+echo " " | tee -a $logfile
+}
+
 
 all_testcases() {
   testcase1 
   testcase2 
   testcase3 
   testcase4 
+  testcase5 
 }
 
 #####################
