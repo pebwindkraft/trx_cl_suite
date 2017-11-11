@@ -173,7 +173,7 @@ s01_SIG_LEN() {
   vv_output "s01_SIG_LEN"
   get_next_opcode
   case $cur_opcode in
-    30) echo "    $cur_opcode: OP_SEQUENCE_0x30:   type tag indicating SEQUENCE, begin sigscript"
+    30) echo "    $cur_opcode: OP_SEQUENCE_0x30:    type tag indicating SEQUENCE, begin sigscript"
         sig_string=$cur_opcode
         s02_SIGTYPE
         ;;
@@ -188,13 +188,13 @@ s02_SIGTYPE() {
   vv_output "s02_SIGTYPE"
   get_next_opcode
   case $cur_opcode in
-    44) echo "    $cur_opcode: OP_LENGTH_0x44:     length of R + S"
+    44) echo "    $cur_opcode: OP_LENGTH_0x44:      length of R + S"
         s03_LENGTH 
         ;;
-    45) echo "    $cur_opcode: OP_LENGTH_0x44:     length of R + S"
+    45) echo "    $cur_opcode: OP_LENGTH_0x44:      length of R + S"
         s03_LENGTH 
         ;;
-    46) echo "    $cur_opcode: OP_LENGTH_0x44:     length of R + S"
+    46) echo "    $cur_opcode: OP_LENGTH_0x44:      length of R + S"
         s03_LENGTH 
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
@@ -208,10 +208,10 @@ s03_LENGTH() {
   vv_output "s03_LENGTH"
   get_next_opcode
   case $cur_opcode in
-    01) echo "    $cur_opcode: OP_SIGHASHALL:      this terminates the ECDSA signature (ASN1-DER structure)"
+    01) echo "    $cur_opcode: OP_SIGHASHALL:       this terminates the ECDSA signature (ASN1-DER structure)"
         s08_SIG 
         ;;
-    02) echo "    $cur_opcode: OP_INT_0x02:        type tag INTEGER indicating length"
+    02) echo "    $cur_opcode: OP_INT_0x02:         type tag INTEGER indicating length"
         s04_R_LENGTH 
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
@@ -225,11 +225,15 @@ s04_R_LENGTH() {
   vv_output "s04_R_LENGTH"
   get_next_opcode
   case $cur_opcode in
-    20) echo "    $cur_opcode: OP_LENGTH_0x20:     this is SIG R (32 Bytes)"
+    1F) echo "    $cur_opcode: OP_LENGTH_0x1F:      this is SIG R (31 Bytes)"
         op_data_show
         s05_SIG_R
         ;;
-    21) echo "    $cur_opcode: OP_LENGTH_0x20:     this is SIG R (33 Bytes)"
+    20) echo "    $cur_opcode: OP_LENGTH_0x20:      this is SIG R (32 Bytes)"
+        op_data_show
+        s05_SIG_R
+        ;;
+    21) echo "    $cur_opcode: OP_LENGTH_0x20:      this is SIG R (33 Bytes)"
         op_data_show
         s05_SIG_R
         ;;
@@ -249,7 +253,7 @@ s05_SIG_R() {
   vv_output "s05_SIG_R"
   get_next_opcode
   case $cur_opcode in
-    02) echo "    $cur_opcode: OP_INT_0x02:        type tag INTEGER indicating length"
+    02) echo "    $cur_opcode: OP_INT_0x02:         type tag INTEGER indicating length"
         s06_LENGTH 
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
@@ -263,11 +267,11 @@ s06_LENGTH() {
   vv_output "s06_LENGTH"
   get_next_opcode
   case $cur_opcode in
-    20) echo "    $cur_opcode: OP_LENGTH_0x20:     this is SIG S (32 Bytes)"
+    20) echo "    $cur_opcode: OP_LENGTH_0x20:      this is SIG S (32 Bytes)"
         op_data_show 
         s07_SIG_S
         ;;
-    21) echo "    $cur_opcode: OP_LENGTH_0x21:     this is SIG S (33 Bytes)"
+    21) echo "    $cur_opcode: OP_LENGTH_0x21:      this is SIG S (33 Bytes)"
         op_data_show 
         s07_SIG_S
         ;;
@@ -287,13 +291,13 @@ s07_SIG_S() {
   vv_output "s07_SIG_S"
   get_next_opcode
   case $cur_opcode in
-    01) echo "    $cur_opcode: OP_SIGHASHALL:      this terminates the ECDSA signature (ASN1-DER structure)"
+    01) echo "    $cur_opcode: OP_SIGHASHALL:       this terminates the ECDSA signature (ASN1-DER structure)"
         s08_SIG 
         ;;
-    02) echo "    $cur_opcode: OP_SIGHASHNONE:     this terminates the ECDSA signature (ASN1-DER structure)"
+    02) echo "    $cur_opcode: OP_SIGHASHNONE:      this terminates the ECDSA signature (ASN1-DER structure)"
         s08_SIG 
         ;;
-    03) echo "    $cur_opcode: OP_SIGHASHSINGLE:   this terminates the ECDSA signature (ASN1-DER structure)"
+    03) echo "    $cur_opcode: OP_SIGHASHSINGLE:    this terminates the ECDSA signature (ASN1-DER structure)"
         s08_SIG 
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
@@ -318,7 +322,7 @@ s0a_SIG_LEN() {
   vv_output "s0a_SIG_LEN"
   get_next_opcode
   case $cur_opcode in
-    30) echo "    $cur_opcode: OP_SEQUENCE_0x30: type tag indicating SEQUENCE, begin sigscript"
+    30) echo "    $cur_opcode: OP_SEQUENCE_0x30:  type tag indicating SEQUENCE, begin sigscript"
         sig_string=$cur_opcode
         s0b_SIGTYPE
         ;;
@@ -333,7 +337,7 @@ s0b_SIGTYPE() {
   vv_output "s0b_SIGTYPE"
   get_next_opcode
   case $cur_opcode in
-    39) echo "    $cur_opcode: OP_LENGTH_0x39:   length of R + S"
+    39) echo "    $cur_opcode: OP_LENGTH_0x39:    length of R + S"
         s0c_LENGTH
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
@@ -347,7 +351,7 @@ s0c_LENGTH() {
   vv_output "s0c_LENGTH"
   get_next_opcode
   case $cur_opcode in
-    02) echo "    $cur_opcode: OP_INT_0x02:      type tag indicating INTEGER"
+    02) echo "    $cur_opcode: OP_INT_0x02:       type tag indicating INTEGER"
         s0d_X_LENGTH
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
@@ -361,7 +365,7 @@ s0d_X_LENGTH() {
   vv_output "s0d_X_LENGTH"
   get_next_opcode
   case $cur_opcode in
-    15) echo "    $cur_opcode: OP_INT_0x15:   this is SIG X"
+    15) echo "    $cur_opcode: OP_INT_0x15:    this is SIG X"
         op_data_show 
         s0e_SIG_X
         ;;
@@ -384,7 +388,7 @@ s0e_SIG_X() {
   esac
 }
 #####################################
-### STATUS 10 (s10_PK_LEN)       ###
+### STATUS 10 (s10_PK_LEN)        ###
 #####################################
 s10_PK_LEN() {
   vv_output "s10_PK_LEN"
@@ -407,7 +411,7 @@ s20_DUP() {
   vv_output "s20_DUP"
   get_next_opcode
   case $cur_opcode in
-    A9) echo "    $cur_opcode: OP_HASH160:         input is hashed with SHA-256 and RIPEMD-160"
+    A9) echo "    $cur_opcode: OP_HASH160:          input is hashed with SHA-256 and RIPEMD-160"
         s21_HASH160
         ;;
     *)  s98_RET
@@ -421,15 +425,15 @@ s21_HASH160() {
   vv_output "s21_HASH160"
   get_next_opcode
   case $cur_opcode in
-    14) echo "    $cur_opcode: OP_Data:            $cur_opcode_dec bytes on the stack"
+    14) echo "    $cur_opcode: OP_Data:             $cur_opcode_dec bytes on the stack"
         op_data_show
         if [ $Verbose -eq 1 ] ; then
-          echo "        This is a P2PKH script "
-          printf "        corresponding bitcoin address is:"
+          echo   "        base58check encoding $ret_string"
+          printf "        bitcoin address is"
           if [ $TESTNET -eq 1 ] ; then
-            sh ./tcls_base58check_enc.sh -T -q -p2pkh $result
+            sh ./tcls_base58check_enc.sh -T -q -p2pkh $ret_string
           else
-            sh ./tcls_base58check_enc.sh -q -p2pkh $result
+            sh ./tcls_base58check_enc.sh -q -p2pkh $ret_string
           fi
         fi
         s22_DATA20 
@@ -445,7 +449,7 @@ s22_DATA20() {
   vv_output "s22_DATA20"
   get_next_opcode
   case $cur_opcode in
-    88) echo "    $cur_opcode: OP_EQUALVERIFY:     same as OP_EQUAL, but runs OP_VERIFY afterward"
+    88) echo "    $cur_opcode: OP_EQUALVERIFY:      same as OP_EQUAL, but runs OP_VERIFY afterward"
         s23_EQ_VRFY 
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
@@ -459,7 +463,8 @@ s23_EQ_VRFY() {
   vv_output "s23_EQ_VRFY"
   get_next_opcode
   case $cur_opcode in
-    AC) echo "    $cur_opcode: OP_CHECKSIG:        sig must be a valid sig for hash and pubkey"
+    AC) echo "    $cur_opcode: OP_CHECKSIG:         sig must be a valid sig for hash and pubkey"
+        echo "        This is a P2PKH script"
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
         ;;
@@ -472,7 +477,8 @@ s30_HASH160() {
   vv_output "s30_HASH160"
   get_next_opcode
   case $cur_opcode in
-    14) echo "    $cur_opcode: OP_Data:          $cur_opcode_dec bytes on the stack"
+    14) echo "    $cur_opcode: OP_Data:           $cur_opcode_dec bytes on the stack"
+        op_data_show
         s31_P2SH
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
@@ -484,8 +490,23 @@ s30_HASH160() {
 #####################################
 s31_P2SH() {
   vv_output s31_P2SH 
-  echo "  This is a P2SH script:"
-  op_data_show
+  get_next_opcode
+  case $cur_opcode in
+    87) echo "    $cur_opcode: OP_Equal:            Returns 1 if inputs are equal, 0 otherwise"
+        echo "        This is a P2SH script:"
+        if [ $Verbose -eq 1 ] ; then
+          printf "        corresponding bitcoin address is: "
+          rmd160_sha256
+          if [ $TESTNET -eq 1 ] ; then
+            ./tcls_base58check_enc.sh -T -q -p2sh $ret_string
+          else
+            ./tcls_base58check_enc.sh -q -p2sh $ret_string
+          fi
+        fi
+        ;;
+    *)  echo "    $cur_opcode: unknown opcode "
+        ;;
+  esac
 }
 #####################################
 ### STATUS 40 (s40_OP_1TO16)      ###
@@ -511,7 +532,7 @@ s40_OP_1TO16() {
       get_next_opcode
       msig_redeem_str=$msig_redeem_str$cur_opcode
       case $cur_opcode in
-        21) echo "    $cur_opcode: OP_DATA_0x21:       compressed pub key (33 Bytes)"
+        21) echo "    $cur_opcode: OP_DATA_0x21:        compressed pub key (33 Bytes)"
             op_data_show
             if [ $Verbose -eq 1 ] ; then
               echo "        This is MultiSig's compressed Public Key (X9.63 form)"
@@ -527,7 +548,7 @@ s40_OP_1TO16() {
               ret_string=''
             fi
             ;;
-        41) echo "    $cur_opcode: OP_DATA_0x41:       uncompressed pub key (65 Bytes)"
+        41) echo "    $cur_opcode: OP_DATA_0x41:        uncompressed pub key (65 Bytes)"
             op_data_show
             if [ $Verbose -eq 1 ] ; then
               echo "        This is MultiSig's uncompressed Public Key (X9.63 form)"
@@ -546,9 +567,9 @@ s40_OP_1TO16() {
 
         *)  cur_opcode_dec=$(( $cur_opcode_dec - 80 ))
             if [ $cur_opcode_dec -lt 10 ] ; then
-              printf "    %s: OP_%d:               the number %d is pushed onto stack\n" $cur_opcode $cur_opcode_dec $cur_opcode_dec
+              printf "    %s: OP_%d:                the number %d is pushed onto stack\n" $cur_opcode $cur_opcode_dec $cur_opcode_dec
             else
-              printf "    %s: OP_%d:              the number %d is pushed onto stack\n" $cur_opcode $cur_opcode_dec $cur_opcode_dec
+              printf "    %s: OP_%d:               the number %d is pushed onto stack\n" $cur_opcode $cur_opcode_dec $cur_opcode_dec
             fi
             echo "        ################### $msig_n-of-$cur_opcode_dec Multisig ###################################"
             break
@@ -566,7 +587,7 @@ s41_OP_1TO16() {
   vv_output "s41_OP_1TO16()"
   get_next_opcode
   case $cur_opcode in
-    AE) echo "    $cur_opcode: OP_CHECKMULTISIG:   terminating multisig"
+    AE) echo "    $cur_opcode: OP_CHECKMULTISIG:    terminating multisig"
         msig_redeem_str=$msig_redeem_str$cur_opcode
         if [ $Verbose -eq 1 ] ; then
           show_redeem_script $msig_redeem_str
@@ -593,7 +614,7 @@ s4a_CLTV() {
   vv_output "s4a_CLTV()"
   get_next_opcode
   case $cur_opcode in
-    75) echo "    $cur_opcode: OP_DROP:            Removes the top stack item"
+    75) echo "    $cur_opcode: OP_DROP:             Removes the top stack item"
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
         s98_RET
@@ -607,7 +628,7 @@ s4b_CSV() {
   vv_output "s4b_CSV()"
   get_next_opcode
   case $cur_opcode in
-    75) echo "    $cur_opcode: OP_DROP:            Removes the top stack item"
+    75) echo "    $cur_opcode: OP_DROP:             Removes the top stack item"
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
         s98_RET
@@ -621,7 +642,7 @@ s51_SHA256() {
   vv_output "s51_SHA256()"
   get_next_opcode
   case $cur_opcode in
-    20) echo "    $cur_opcode: OP_Data:            Hash these 32 Bytes"
+    20) echo "    $cur_opcode: OP_Data:             Hash these 32 Bytes"
         op_data_show
         s52_DATA
         ;;
@@ -636,7 +657,7 @@ s52_DATA() {
   vv_output "s52_DATA()"
   get_next_opcode
   case $cur_opcode in
-    87) echo "    $cur_opcode: OP_Equal:           Returns 1 if inputs are equal, 0 otherwise"
+    87) echo "    $cur_opcode: OP_Equal:            Returns 1 if inputs are equal, 0 otherwise"
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
         s98_RET
@@ -650,7 +671,7 @@ s5a_PUSHDATA1() {
   vv_output "s5a_PUSHDATA1()"
   get_next_opcode
   if [ $cur_opcode_dec -gt 1 ] && [ $cur_opcode_dec -lt 255 ] ; then
-    echo "    $cur_opcode: OP_Int(0x01-0xff):  $cur_opcode_dec bytes onto the stack"
+    echo "    $cur_opcode: OP_Int(0x01-0xff):   $cur_opcode_dec bytes onto the stack"
   else
     echo "    $cur_opcode: unknown opcode "
     s98_RET
@@ -662,19 +683,21 @@ s5a_PUSHDATA1() {
 s97_NA_or_1TO16() {
   vv_output "S97_NA_or_1to16()"
   if [ $cur_opcode_dec -gt 0 ] && [ $cur_opcode_dec -lt 75 ] ; then
-    echo "    $cur_opcode: OP_Data(0x01-0x4b): $cur_opcode_dec byte(s) to be pushed to the stack"
-    op_data_show
+    echo "    $cur_opcode: OP_Data(0x01-0x4b):  $cur_opcode_dec byte(s) to be pushed to the stack"
+    if [ $cur_opcode_dec -ne 25 ] ; then
+      op_data_show
+    fi
   elif [ $cur_opcode_dec -gt 80 ] && [ $cur_opcode_dec -lt 96 ] ; then
     cur_opcode_dec=$(( $cur_opcode_dec - 80 ))
     if [ $cur_opcode_dec -lt 10 ] ; then
-      printf "    %s: OP_%d:               the number %d is pushed onto stack\n" $cur_opcode $cur_opcode_dec $cur_opcode_dec 
+      printf "    %s: OP_%d:                the number %d is pushed onto stack\n" $cur_opcode $cur_opcode_dec $cur_opcode_dec 
     else
-      printf "    %s: OP_%d:              the number %d is pushed onto stack\n" $cur_opcode $cur_opcode_dec $cur_opcode_dec 
+      printf "    %s: OP_%d:               the number %d is pushed onto stack\n" $cur_opcode $cur_opcode_dec $cur_opcode_dec 
     fi
     s40_OP_1TO16
   else
     echo "    $cur_opcode: unknown opcode "
-    s98_RET
+    s99_UNKNOWN
   fi
 }
 ###########################
@@ -689,11 +712,9 @@ s98_RET() {
 ###########################
 s99_UNKNOWN() {
   vv_output "S99_Unknown()"
-  cur_opcode_dec=$opcodes_len
-  op_data_show
 }
 	  
-####################
+#################### 
 ### LET'S GO ... ###
 ####################
 
@@ -768,7 +789,8 @@ fi
 ### STATUS 0 - INIT               ###
 #####################################
   opcodes_len=${#param}
-  # echo "array length= ${#ss_array[*]}"
+  # echo "array length=  ${#ss_array[*]}"
+  # echo "array content= ${ss_array[@]}"
   while [ $ss_array_ptr -lt ${#ss_array[*]} ]
    do
     get_next_opcode
@@ -776,57 +798,60 @@ fi
     vv_output "S0_INIT, opcode=$cur_opcode" 
     
     case $cur_opcode in
-      00) echo "    $cur_opcode: OP_0, OP_FALSE:     an empty array is pushed onto the stack."
+      00) echo "    $cur_opcode: OP_0, OP_FALSE:      an empty array is pushed onto the stack."
           ;;
-      21) echo "    $cur_opcode: OP_DATA_0x21:       length compressed Public Key (X9.63 form, $cur_opcode_dec Bytes)"
+      21) echo "    $cur_opcode: OP_DATA_0x21:        length compressed Public Key (X9.63 form, $cur_opcode_dec Bytes)"
 	  s10_PK_LEN
           ;;
-      3C) echo "    $cur_opcode: OP_DATA_0x3C:       type tag indicating LENGTH"
+      3C) echo "    $cur_opcode: OP_DATA_0x3C:        type tag indicating LENGTH"
 	  s0a_SIG_LEN
           ;;
-      41) echo "    $cur_opcode: OP_DATA_0x41:       length uncompressed Public Key (X9.63 form, $cur_opcode_dec Bytes)"
+      41) echo "    $cur_opcode: OP_DATA_0x41:        length uncompressed Public Key (X9.63 form, $cur_opcode_dec Bytes)"
 	  s10_PK_LEN
           ;;
-      47) echo "    $cur_opcode: OP_DATA_0x47:       push hex 47 (decimal 71) bytes on stack"
+      46) echo "    $cur_opcode: OP_DATA_0x46:        push hex 46 (decimal 70) bytes on stack"
           s01_SIG_LEN
           ;;
-      48) echo "    $cur_opcode: OP_DATA_0x48:       push hex 48 (decimal 72) bytes on stack"
+      47) echo "    $cur_opcode: OP_DATA_0x47:        push hex 47 (decimal 71) bytes on stack"
           s01_SIG_LEN
           ;;
-      49) echo "    $cur_opcode: OP_DATA_0x49:       push hex 49 (decimal 73) bytes on stack"
+      48) echo "    $cur_opcode: OP_DATA_0x48:        push hex 48 (decimal 72) bytes on stack"
           s01_SIG_LEN
           ;;
-      4C) echo "    $cur_opcode: OP_PUSHDATA1:       next byte is # of bytes that go onto stack" 
+      49) echo "    $cur_opcode: OP_DATA_0x49:        push hex 49 (decimal 73) bytes on stack"
+          s01_SIG_LEN
+          ;;
+      4C) echo "    $cur_opcode: OP_PUSHDATA1:        next byte is # of bytes that go onto stack" 
 	  s5a_PUSHDATA1
           ;;
-      50) echo "    $cur_opcode: OP_RESERVED:        tx is invalid unless occuring in an unexecuted OP_IF branch"
+      50) echo "    $cur_opcode: OP_RESERVED:         tx is invalid unless occuring in an unexecuted OP_IF branch"
           ;;
-      63) echo "    $cur_opcode: OP_IF:              <expr> if [...] [else [...]]* endif"
+      63) echo "    $cur_opcode: OP_IF:               <expr> if [...] [else [...]]* endif"
           ;;
-      64) echo "    $cur_opcode: NOT_IF:             <expr> notif [...] [else [...]]* endif"
+      64) echo "    $cur_opcode: NOT_IF:              <expr> notif [...] [else [...]]* endif"
           ;;
-      67) echo "    $cur_opcode: OP_ELSE:            <expr> if [...] [else [...]]* endif"
+      67) echo "    $cur_opcode: OP_ELSE:             <expr> if [...] [else [...]]* endif"
           ;;
-      68) echo "    $cur_opcode: OP_ENDIF:           <expr> if [...] [else [...]]* endif"
+      68) echo "    $cur_opcode: OP_ENDIF:            <expr> if [...] [else [...]]* endif"
           ;;
-      75) echo "    $cur_opcode: OP_DROP:            removes the top stack item "
+      75) echo "    $cur_opcode: OP_DROP:             removes the top stack item "
           ;;
-      76) echo "    $cur_opcode: OP_DUP:             duplicates the top stack item"
+      76) echo "    $cur_opcode: OP_DUP:              duplicates the top stack item"
           s20_DUP
           ;;
-      87) echo "    $cur_opcode: OP_EQUAL:           Returns 1 if the inputs are exactly equal, 0 otherwise"
+      87) echo "    $cur_opcode: OP_EQUAL:            Returns 1 if the inputs are exactly equal, 0 otherwise"
           ;;
-      88) echo "    $cur_opcode: OP_EQUALVERIFY:     Same as OP_EQUAL, but runs OP_VERIFY afterward"
+      88) echo "    $cur_opcode: OP_EQUALVERIFY:      Same as OP_EQUAL, but runs OP_VERIFY afterward"
           ;;
-      A8) echo "    $cur_opcode: OP_SHA256:          input is hashed using SHA-256"
+      A8) echo "    $cur_opcode: OP_SHA256:           input is hashed using SHA-256"
           s51_SHA256 
           ;;
-      A9) echo "    $cur_opcode: OP_HASH160:         input is hashed with SHA-256 and RIPEMD-160"
+      A9) echo "    $cur_opcode: OP_HASH160:          input is hashed with SHA-256 and RIPEMD-160"
           s30_HASH160
           ;;
-      AC) echo "    $cur_opcode: OP_CHECKSIG:        sig must be a valid sig for hash and pubkey"
+      AC) echo "    $cur_opcode: OP_CHECKSIG:         sig must be a valid sig for hash and pubkey"
           ;;
-      AD) echo "    $cur_opcode: OP_CHECKSIGVERIFY:  Same as OP_CHECKSIG, but OP_VERIFY is executed afterward"
+      AD) echo "    $cur_opcode: OP_CHECKSIGVERIFY:   Same as OP_CHECKSIG, but OP_VERIFY is executed afterward"
           ;;
       B1) echo "    $cur_opcode: OP_CHECKLOCKTIMEVERIFY: see documentation..."
           s4a_CLTV

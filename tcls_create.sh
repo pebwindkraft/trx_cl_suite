@@ -104,8 +104,8 @@ proc_help() {
   echo " -vv display VERY Verbose output"
   echo " "
   echo "Create a transaction from command line where <options> are:"
-  echo " -c <prevtx_id> <prevtx_output_idx> <prevtx_PKscript> <prevtx_amount>"
-  echo "    <amount> <address> [txfee] [ret_address]"
+  echo " -c <prevtx_id> <prevtx_output_idx> <prevtx_PKscript | redeem_script>"
+  echo "    <prevtx_amount> <amount> <address> [txfee] [ret_address]"
   echo " -f <filename> <amount> <address> [txfee] [ret_address]"
   echo "    read inputs from a file, use -f help for more details"
   echo " -m <n> <m> <comma separated list of pubkeys (66 or 130 hex chars)>" 
@@ -118,6 +118,7 @@ proc_help() {
   echo "  <prevtx_id>         : the transaction, from which we want to spend"
   echo "  <prevtx_output_idx> : output index from previous TX"
   echo "  <prevtx_PKscript>   : (not with '-t') the PK SCRIPT from previous TX"
+  echo "  <redeem_script>     : when spending from a P2SH (multisig) TX"
   echo "  <prevtx_amount>     : the amount from previous TX"
   echo "  <amount>            : the amount to spend (decimal, in Satoshi)"
   echo "                        *** careful: input - output = TX fee !!!"
@@ -144,10 +145,10 @@ vv_output() {
   fi
 }
 
-#################################################
-# procedure to concatenate string for a raw trx #
-#################################################
-trx_concatenate() {
+################################################
+# procedure to concatenate string for a raw tx #
+################################################
+tx_concatenate() {
   RAW_TX=$RAW_TX$StepCode
   vv_output "$RAW_TX"
   vv_output " "
@@ -201,12 +202,12 @@ check_tool() {
   fi
 }
 
-###############################################
-### Check length of provided trx characters ###
-###############################################
-chk_trx_len() {
+##################################
+# Check length of provided tx ID #
+##################################
+chk_tx_len() {
   if [ $VVerbose -eq 1 ]; then
-    printf " check length of trx (32Bytes/64chars)"
+    printf "        checking length of tx ID (32Bytes/64chars)"
   fi
   if [ ${#utxo_TX_ID} -ne 64 ] ; then
     echo " "
@@ -218,13 +219,13 @@ chk_trx_len() {
     exit 1 
   fi
   if [ $VVerbose -eq 1 ]; then
-    printf " - yes \n" 
+    printf " - ok \n" 
   fi
 }
 
-####################################################
-### GET_TX_VALUES() - fetch required trx values ###
-####################################################
+###################################################
+### GET_TX_VALUES() - fetch required tx values  ###
+###################################################
 #  if param "-t" or "-f" is given, we fetch values from prev transactions. 
 #  This shall be executed:
 #    ./tcls_tx2txt.sh -vv -r $RAW_TX | grep -A7 TX_OUT[$utxo_OutPoint] > $prawtx_fn
@@ -245,7 +246,7 @@ chk_trx_len() {
 #  3--> used for STEP 5, need to grep and cut
 #  4--> used for STEP 6, need to grep -A1 -B1 pk_script[$utxo_OutPoint]
 #  
-get_trx_values() {
+get_tx_values() {
   vv_output "./tcls_tx2txt.sh -vv -r $RAW_TX | grep -A7 TX_OUT[$utxo_OutPoint] > $prawtx_fn"
   ./tcls_tx2txt.sh -vv -r $RAW_TX | grep -A7 TX_OUT[[]$utxo_OutPoint[]] > $prawtx_fn
   #
@@ -413,44 +414,47 @@ step3to7() {
   ##############################################################################
   ### STEP 3 - TX_IN, previous transaction hash: 32hex = 64 chars            ###
   ##############################################################################
-  v_output "###  3. TX_IN, previous transaction hash"
-  vv_output "###     org trx:  $utxo_TX_ID"
+  v_output "###  3. TX_IN[$line_items], previous transaction hash"
+  vv_output "###     org tx:   $utxo_TX_ID"
   StepCode=$( reverse_hex $utxo_TX_ID )
   vv_output "###     reversed: $StepCode"
-  trx_concatenate
+  tx_concatenate
   
   ##############################################################################
   ### STEP 4 - TX_IN, the output index we want to redeem from                ###
   ##############################################################################
-  v_output "###  4. TX_IN, the output index we want to redeem from"
+  v_output "###  4. TX_IN[$line_items], the output index we want to redeem from"
   # check that we have a number, not a char...
   StepCode=$( echo "obase=16;$utxo_OutPoint"|bc -l)
   StepCode=$( zero_pad $StepCode 8 )
   StepCode=$( reverse_hex $StepCode )
-  vv_output "###            convert from $utxo_OutPoint to reversed hex: $StepCode"
-  trx_concatenate
+  vv_output "###     convert from $utxo_OutPoint to reversed hex: $StepCode"
+  tx_concatenate
   
   ##############################################################################
   ### STEP 5 - TX_IN, scriptsig length: first hex Byte is length (2 chars)   ###
   ##############################################################################
   # For the purpose of signing the transaction, this is temporarily filled 
   # with the scriptPubKey of the output we want to redeem. 
-  v_output "###  5. TX_IN, scriptsig length"
+  v_output "###  5. TX_IN[$line_items], scriptsig length"
   if [ $t_param_flag -eq 0 ] ; then
     StepCode=${#utxo_PKScript}
     StepCode=$(( $StepCode / 2 ))
     StepCode=$( echo "obase=16;$StepCode"|bc ) 
+    if [ ${#StepCode} -eq 1 ] ; then
+      StepCode=0$StepCode
+    fi
   else
-    vv_output "StepCode=$STEP5_SCRIPT_LEN"
     StepCode=$STEP5_SCRIPT_LEN
   fi 
-  trx_concatenate
+  vv_output "###     ScriptSig length=$StepCode"
+  tx_concatenate
   
   ##############################################################################
   ### STEP 6 - TX_IN, signature script, uchar[] - variable length            ###
   ##############################################################################
   # the actual scriptSig (which is the scriptPubKey of the utxo_TX_ID
-  v_output "###  6. TX_IN, signature script"
+  v_output "###  6. TX_IN[$line_items], signature script"
   if [ $t_param_flag -eq 0 ] ; then
     StepCode=$utxo_PKScript
     vv_output "$StepCode"
@@ -458,15 +462,20 @@ step3to7() {
     vv_output "StepCode=$STEP6_SCRIPTSIG"
     StepCode=$STEP6_SCRIPTSIG
   fi 
-  trx_concatenate
+  if [ "$StepCode" == "0" ] ; then
+    vv_output "$RAW_TX"
+    vv_output " "
+  else
+    tx_concatenate
+  fi
   
   ##############################################################################
   ### STEP 7 - TX_IN, SEQUENCE: This is currently always set to 0xffffffff   ###
   ##############################################################################
   # This is currently always set to 0xffffffff
-  v_output "###  7. TX_IN, concatenate sequence number (currently always 0xffffffff)"
+  v_output "###  7. TX_IN[$line_items], concatenate sequence number (currently always 0xffffffff)"
   StepCode="ffffffff"
-  trx_concatenate
+  tx_concatenate
 }  
 
 ##############################################################################
@@ -480,7 +489,7 @@ step9() {
   StepCode_rev=$( reverse_hex $StepCode ) 
   vv_output "                in hex=$StepCode, reversed=$StepCode_rev"
   StepCode=$StepCode_rev
-  trx_concatenate
+  tx_concatenate
 }
 
 
@@ -516,8 +525,9 @@ step10_11() {
   #
   if [ $msig_identifyer -eq 1 ] ; then
     address_hash=$( echo $address_hash | cut -b 3-42 )
-    echo $address_hash
+    # echo $address_hash
   fi
+
 
   # first check length of address hash. It is always 20 Bytes (40 chars), in hex 0x14, right?
   if [ ${#address_hash} -ne 40 ] ; then
@@ -544,7 +554,7 @@ step10_11() {
       exit
       ;;
   esac
-  trx_concatenate
+  tx_concatenate
 }
 
 
@@ -731,9 +741,9 @@ chk_numeric() {
 }
 
 
-echo "##########################################################"
-echo "### tcls_create.sh: create a raw, unsigned Bitcoin trx ###"
-echo "##########################################################"
+echo "#########################################################"
+echo "### tcls_create.sh: create a raw, unsigned Bitcoin tx ###"
+echo "#########################################################"
 
 ################################
 # command line params handling #
@@ -747,14 +757,14 @@ fi
 if [ "$1" == "-f" ] && [ "$2" == "help" ] ; then
   echo " provide the following parameters:"
   echo " -f <filename> <amount> <address> [txfee] [ret_address]"
-  echo "    <filename>:    prev trx params line by line separated by blanks, containing:"
+  echo "    <filename>:    prev tx params line by line separated by blanks, containing:"
   echo "                   <prev_tx-id> <prev_output-index> <prev_PK-script> <prev_utxo_amount>"
   echo "    <amount>:      amount to spend in Satoshis"
   echo "    <address>:     the target address for this transaction"
-  echo "    [txfee]:       numeric amount for trx fees (Satoshi/Byte)"
+  echo "    [txfee]:       numeric amount for tx fees (Satoshi/Byte)"
   echo "    [ret_address]: a return address"
   echo " "
-  echo "    <prev_trx-id> <prev_output-index> <prev_pubkey-script> <prev_utxo_amount>, see:"
+  echo "    <prev_tx-id> <prev_output-index> <prev_pubkey-script> <prev_utxo_amount>, see:"
   echo "     blockchain.info/de/unspent?active=<address>"
   echo "    more detailed with bitcoin core CLI:"
   echo "     listunspent 6 9999999 \"[\\\"<address>\\\"]\""
@@ -765,7 +775,7 @@ if [ "$1" == "-f" ] && [ "$2" == "help" ] ; then
   echo "    3) convert amount into Satoshis:"
   echo "     LC_ALL=ISO_8859-1 awk '{ \$NF=\$NF*100000000; print }' test2"
   echo " "
-  echo "    *** careful: input - output = trx fee !!!"
+  echo "    *** careful: input - output = tx fee !!!"
   echo " "
   exit 0
 fi  
@@ -811,7 +821,7 @@ else
          # if there is only one parameter left, it can be tx_fee or return_address
          # if length of param is less then 9 chars, then it is for sure tx_fee. 
          # TX fees shouldn't have 9 digits of satoshis (aka more than a bitcoin)...
-         # otherwise it is the return address, and trxfee needs to get calculated automatically.
+         # otherwise it is the return address, and txfee needs to get calculated automatically.
          if [ $# -eq 1 ] ; then
            if [ ${#txfee_per_byte} -lt 10 ] ; then
              txfee_param_flag=1
@@ -864,7 +874,7 @@ else
          # if there is only one parameter left, it can be tx_fee or return_address
          # if length of param is less then 9 chars, then it is for sure tx_fee. 
          # TX fees shouldn't have 9 digits of satoshis (aka more than a bitcoin)...
-         # otherwise it is the return address, and trxfee needs to get calculated automatically.
+         # otherwise it is the return address, and txfee needs to get calculated automatically.
          if [ $# -eq 1 ] ; then
            if [ ${#txfee_per_byte} -lt 9 ] ; then
              txfee_param_flag=1
@@ -941,7 +951,7 @@ else
          # if there is only one parameter left, it can be tx_fee or return_address
          # if length of param is less then 9 chars, then it is for sure tx_fee. 
          # TX fees shouldn't have 9 digits of satoshis (aka more than a bitcoin)...
-         # otherwise it is the return address, and trxfee needs to get calculated automatically.
+         # otherwise it is the return address, and txfee needs to get calculated automatically.
          if [ $# -eq 1 ] ; then
            if [ ${#txfee_per_byte} -lt 9 ] ; then
              txfee_param_flag=1
@@ -1078,7 +1088,7 @@ if [ $? -eq 0 ]; then
   if [ $txfee_param_flag -eq 0 ] ; then
     BF21_txfee_per_byte=$( $http_get_cmd https://bitcoinfees.21.co/api/v1/fees/recommended | head -n1 | awk ' BEGIN {FS="[:}]"} { print $4 }' )
   fi
-  # if we create a trx, and param -t was given, then a 
+  # if we create a tx, and param -t was given, then a 
   # Bitcoin TRANSACTION_ID should be in variable "utxo_TX_ID":
   if [ "$t_param_flag" -eq 1 ] ; then
     # 
@@ -1089,7 +1099,7 @@ if [ $? -eq 0 ]; then
     # 3.) pass everything into the variable "RAW_TX"
     # 
     vv_output " going for this TX: $utxo_TX_ID"
-    chk_trx_len 
+    chk_tx_len 
     if [ $VVerbose -eq 1 ]; then
       printf " check if we can reach www.blockchain.info (ping)" 
     fi
@@ -1097,7 +1107,7 @@ if [ $? -eq 0 ]; then
     if [ $? -ne 0 ] ; then
       echo " "
       echo "*** ERROR: www.blockchain.info not reachable"
-      echo "    verify your network settings, or assemble trx manually [-m]"
+      echo "    verify your network settings, or assemble tx manually [-m]"
       echo "    exiting gracefully ... "
       exit 1
     else
@@ -1113,12 +1123,12 @@ if [ $? -eq 0 ]; then
         exit 1
       fi
       if [ ${#RAW_TX} -eq 0 ] ; then
-          echo "*** ERROR: the raw trx has a length of 0. Something failed."
+          echo "*** ERROR: the raw tx has a length of 0. Something failed."
           echo "    downoad manually, and call 'tcls_tx2txt.sh -r ...'"
           exit 1
         fi
       fi
-    get_trx_values 
+    get_tx_values 
   fi
 else
   vv_output " - no "
@@ -1135,7 +1145,7 @@ fi
 v_output " "
 v_output "###  1. VERSION"
 StepCode="01000000"
-trx_concatenate
+tx_concatenate
 
 ##############################################################################
 ### STEP 2 - TX_IN COUNT, One-byte varint specifying the number of inputs  ###
@@ -1161,36 +1171,36 @@ if [ "$f_param_flag" -eq 1 ] ; then
     else
       StepCode=$( echo "obase=16;$StepCode_decimal"|bc ) 
     fi   
-    vv_output "lines in file equals trx inputs: $StepCode_decimal, hex: 0x$StepCode"
+    vv_output "lines in file equals tx inputs: $StepCode_decimal, hex: 0x$StepCode"
   else
     echo "*** ERROR: file $filename does not exist"
     echo " "
     exit 1
   fi
 fi
-trx_concatenate
+tx_concatenate
 
 ############################
 ### TX_IN: call STEP 3-7 ### 
 ############################
 if [ "$f_param_flag" -eq 1 ] ; then
   # each line item is a references to the previous transaction:
-  # utxo_TX_ID            --> the trx number
+  # utxo_TX_ID            --> the tx number
   # utxo_OutPoint         --> the outpoint, from which to spend 
   # utxo_PKScript         --> the corresponding public key script
   # prev_tx_utxo_amount   --> and the amount from all inputs
   # if only utxo_TX_ID is given, need to connect to network and do s.th. like
-  # listunspend(trx_number) ?
+  # listunspend(tx_number) ?
   while IFS=" " read utxo_TX_ID utxo_OutPoint utxo_PKScript prev_tx_utxo_amount
    do
-    # for every line item we need to check the trx, and get the values:
-    chk_trx_len 
-    # if only utxo_TX_ID is given, we could fetch remaining items with 'get_trx_values' ?
-    v_output "####### TX_IN: line item $line_items"
-    vv_output "       utxo_TX_ID=$utxo_TX_ID"
-    vv_output "       utxo_OutPoint=$utxo_OutPoint"
-    vv_output "       utxo_PKScript=$utxo_PKScript"
-    vv_output "       prev_tx_utxo_amount=$prev_tx_utxo_amount"
+    v_output  "####### TX_IN: line item $line_items"
+    # for every line item we need to check the tx, and get the values:
+    chk_tx_len 
+    # if only utxo_TX_ID is given, we could fetch remaining items with 'get_tx_values' ?
+    vv_output "        utxo_TX_ID=$utxo_TX_ID"
+    vv_output "        utxo_OutPoint=$utxo_OutPoint"
+    vv_output "        utxo_PKScript=$utxo_PKScript"
+    vv_output "        prev_tx_utxo_amount=$prev_tx_utxo_amount"
     step3to7 
     line_items=$(( $line_items + 1 ))
     file_utxo_amount=$(( $file_utxo_amount + $prev_tx_utxo_amount ))
@@ -1212,7 +1222,7 @@ if [ ${#RETURN_Address} -gt 28 ] ; then
 else
   StepCode="01"
 fi 
-trx_concatenate
+tx_concatenate
 
 ##############################
 ### TX_OUT: call STEP 9-11 ### 
@@ -1243,19 +1253,19 @@ if [ ${#RETURN_Address} -gt 28 ] ; then
   step10_11
 fi 
 
-############################################################################
-### STEP 12 - LOCK_TIME: block nor timestamp at which this trx is locked ###
-############################################################################
-v_output "### 12. LOCK_TIME: block or timestamp at which this trx is locked"
+###########################################################################
+### STEP 12 - LOCK_TIME: block nor timestamp at which this tx is locked ###
+###########################################################################
+v_output "### 12. LOCK_TIME: block or timestamp at which this tx is locked"
 StepCode="00000000" 
-trx_concatenate
+tx_concatenate
 
 ##############################################################################
 ### STEP 13 - HASH CODE TYPE                                               ###
 ##############################################################################
 v_output "### 13. HASH CODE TYPE"
 StepCode="01000000" 
-trx_concatenate
+tx_concatenate
 echo $RAW_TX > $c_utx_fn
 
 ##############################################################################
@@ -1300,17 +1310,17 @@ if [ $txfee_param_flag -eq 0 ] ; then
   printf "### bitcoinfees.21.co (@ $BF21_txfee_per_byte Satoshi/Byte * $TX_bytes TX_bytes):"
   line_length=$(( ${#txfee_per_byte} + ${#TX_bytes} ))
   case $line_length in
-   3) printf "      %10d" $BF21_txfee
+   3) printf "     %10d" $BF21_txfee
       ;;
-   4) printf "     %10d" $BF21_txfee
+   4) printf "    %10d" $BF21_txfee
       ;;
-   5) printf "    %10d" $BF21_txfee
+   5) printf "   %10d" $BF21_txfee
       ;;
-   6) printf "   %10d" $BF21_txfee
+   6) printf "  %10d" $BF21_txfee
       ;;
-   7) printf "  %10d" $BF21_txfee
+   7) printf " %10d" $BF21_txfee
       ;;
-   8) printf " %10d" $BF21_txfee
+   8) printf "%10d" $BF21_txfee
       ;;
   esac
   printf " ###\n" $BF21_txfee

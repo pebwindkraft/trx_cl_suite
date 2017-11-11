@@ -593,7 +593,7 @@ while [ $loopcounter -lt $tx_in_count_dec ]
   ##############################################################################
   ### STEP 5 - TX_IN, script length is var_int, 1-4 hex chars ...            ###
   ##############################################################################
-  ### Size: 1 or more chars, data type var_int
+  ### Size: 1 or more chars, a one-byte varint which denotes the length of the scriptSig 
   tx_array_bytes=1
   proc_var_int
   tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
@@ -607,29 +607,32 @@ while [ $loopcounter -lt $tx_in_count_dec ]
   fi
 
   ##############################################################################
-  ### STEP 6 - TX_IN, signature script, first hex Byte is length (2 chars)   ###
+  ### STEP 6 - TX_IN, signature script, uchar[] - variable length            ###
   ##############################################################################
-  ### Size: 1, Data type u_int 
-  # For unsigned raw transactions, this is temporarily filled with the scriptPubKey 
-  # of the output. First a one-byte varint which denotes the length of the scriptSig 
+  ### Size: 20+, Data type uchar[] 
+  # with unsigned raw transactions, this is temporarily filled with the scriptPubKey 
+  # of the output, or the redeem script
   if [ "$script_length_dec" -ne 0 ] ; then
     v_output "  TX_IN[$loopcounter] Script Sig (uchar[])"
     tx_array_bytes=$script_length_dec
-    # echo "tx_array_ptr=$tx_array_ptr, tx_array_bytes=$tx_array_bytes"
+
+    # echo "array elements: " ${#tx_array[@]}
+    # echo ${tx_array[@]} 
+    # echo "tx_array_ptr=$tx_array_ptr, tx_array_bytes=$tx_array_bytes"
     sig_script=$( get_TX_section )
     tx_array_ptr=$(( $tx_array_ptr + $tx_array_bytes ))
     echo "  $sig_script "
   fi
 
   ##############################################################################
-  ### STEP 7 - TX_IN, signature script, uchar[] - variable length            ###
+  ### STEP 7 - TX_IN, signature script decoding                              ###
   ##############################################################################
-  ### Size: 20+, Data type uchar[] 
   if [ "$VVerbose" -eq 1 ] && [ "$script_length_dec" -ne 0 ] ; then
     if [ $u_flag -eq 1 ] ; then
       echo "  Working on an unsigned raw TX. This is the pubkey script "
       echo "  of previous trx, for which you'll need the privkey to sign:"
-      decode_pkscript $sig_script
+      # decode_pkscript $sig_script
+      sh ./tcls_in_sig_script.sh -v $sig_script
     else
       if [ "$TESTNET" -eq 1 ] ; then
         if [ "$VVerbose" -eq 1 ] ; then
