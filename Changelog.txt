@@ -42,3 +42,7 @@ yymmmdd
 17nov02 svn   tcls_key2pem.sh           I33: verified, updated.
 17nov02 svn   tcls_key2pem.sh           I38: improved script code, using openssl
 17nov03 svn   tcls_strict_sig_verify.sh I40: added check for R-Value <= N/2
+17nov04 svn   tcls_strict_sig_verify.sh I40: fixed an issue with Testcase 16b
+17nov06 svn   tcls_sign.sh              I52: get multiple outputs working, and  get multisig
+ 					     working correctly in signing
+

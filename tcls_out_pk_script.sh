@@ -418,6 +418,15 @@ fi
       51) echo "   $cur_opcode: OP_1, OP_TRUE"
 	  S13_OP_1
           ;;
+      52) echo "   $cur_opcode: OP_2"
+	  S13_OP_1
+          ;;
+      53) echo "   $cur_opcode: OP_3"
+	  S13_OP_1
+          ;;
+      54) echo "   $cur_opcode: OP_4"
+	  S13_OP_1
+          ;;
       6A) echo "   $cur_opcode: OP_RETURN"
 	  S24_OP_RETURN
           ;;

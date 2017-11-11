@@ -52,7 +52,7 @@ echo "================================================================" | tee -a
 
 echo "=== TESTCASE 1a: $chksum_cmd tcls_sign.sh" | tee -a $logfile
 cp tcls_sign.sh tmp_tx_cfile
-chksum_ref="65d00bde9c44a046bc07b30edc4dea4803528ba5025567535b3eb45d3dc9be7c" 
+chksum_ref="1ef2f84900b06a1a19e537636cadbba95ac2f91e3581a3ec62043603fc117cdd" 
 chksum_prep
 
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
@@ -75,10 +75,10 @@ echo "=== TESTCASE 2: parameters testing                           ===" | tee -a
 echo "=== do several testcases with parameters set incorrectly     ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 
-echo "=== TESTCASE 2a: param file is missing, show correct hint ..."    | tee -a $logfile
+echo "=== TESTCASE 2a: file tmp_utx.txt is missing, show correct hint ..." | tee -a $logfile
 echo "./tcls_sign.sh -f tmp_utx.txt -w XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0" >> $logfile 
 ./tcls_sign.sh -f tmp_utx.txt -w XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0 > tmp_tx_cfile
-chksum_ref="710d2b7c03bb71cfeea6fc35eaf2675411720888a5390aab89bd9533c72c90fd" 
+chksum_ref="597b2e5e247ed2da1d3b94b1d2026dc9c760617127737d22f4403730a82890b5" 
 chksum_prep
 echo " " | tee -a $logfile
 }
@@ -95,7 +95,9 @@ echo "=== TESTCASE 3a: use one TX-In and one TX-Out         " | tee -a $logfile
 echo "===  1 input from: 1JmPRDELzWZqRBKtdiak3iiyZrPQT3gxcM " >> $logfile
 echo "===  1 output to:  13GnHB51piDBf1avocPL7tSKLugK4F7U2B " >> $logfile
 echo "./tcls_sign.sh -v -f tmp_c_utx.txt -w KyP5KEp6DCmF222YM5EB9yGeMFxdVK1QWgtGvWnLRnDmiCtQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0" >> $logfile
+
 printf "010000000174fb6858c31a292d20c9744187032bddb7ddea02a3aa3ef523c8524a21481881010000001976a914c2df275d78e506e17691fd6f0c63c43d15c897fc88acffffffff01b08f0600000000001976a91418ec49b27624086a2b6f35f263d951d25dbe24b688ac0000000001000000" > tmp_c_utx.txt
+
 ./tcls_sign.sh -v -f tmp_c_utx.txt -w KyP5KEp6DCmF222YM5EB9yGeMFxdVK1QWgtGvWnLRnDmiCtQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0 > tmp_cfile
 head -n 38 tmp_cfile > tmp_tx_cfile
 echo " " >> tmp_tx_cfile
@@ -107,7 +109,7 @@ echo "### but this cannot be part of the checksum ###" >> tmp_tx_cfile
 echo "### --> it is itself changing everytime ... ###" >> tmp_tx_cfile
 echo "###############################################" >> tmp_tx_cfile
 echo " " >> tmp_tx_cfile
-chksum_ref="0bd2ae4ddd09e9cc1fd63150408c24df61eb50225dfa0de0f0f14b5000bdef38" 
+chksum_ref="62b9241ce41dc9c59ead71dfc76abb89720481bafd6dab02ca3fbc1cc69822a8" 
 chksum_prep
 ./tcls_tx2txt.sh -vv -f tmp_stx.txt > tmp_tcls_tx2txt.out
 #cat tmp_tcls_tx2txt.out >> $tmp_tx_cfile
@@ -129,7 +131,7 @@ echo "### but this cannot be part of the checksum ###" >> tmp_tx_cfile
 echo "### --> it is itself changing everytime ... ###" >> tmp_tx_cfile
 echo "###############################################" >> tmp_tx_cfile
 echo " " >> tmp_tx_cfile
-chksum_ref="71cc81927eb4953cb50585298f01a541abc40f10a7031f75c6308d6edfe96598" 
+chksum_ref="310688cf83edff3e9e6f3e689f80341e6f0cdcdd888b58e4eb5557df479c4c3a" 
 chksum_prep
 ./tcls_tx2txt.sh -vv -f tmp_stx.txt > tmp_tcls_tx2txt.out
 #cat tmp_tcls_tx2txt.out >> $tmp_tx_cfile
@@ -139,10 +141,57 @@ echo " " | tee -a $logfile
 }
 
 
+testcase4() {
+echo "================================================================" | tee -a $logfile
+echo "=== TESTCASE 4: create multisigs and check assembly          ===" | tee -a $logfile
+echo "================================================================" | tee -a $logfile
+echo "=== TESTCASE 4a: create multisig and check assembly via hash"     | tee -a $logfile
+echo "https://bitcoin.stackexchange.com/questions/60468/signature-scheme-for-p2sh" >> $logfile
+echo "The link in this message to https://pastebin.com/raw/21ucHYW7 shows:" >> $logfile
+echo " " >> $logfile
+
+echo "./tcls_create.sh -v -c 267c6d75851efa18afb7edeb2da00c09afc575231db84b3277fc7ea3e174ecbd 1 512102930a11e92103daefde0d30b552f57d303e94a128e763ca9e69ff2006446934442103e74d2113dec75d75cde09a5b46297b1067e4b8b35e63c4c32b8cdbadfdffda1e2103067fcc39ee36d2417684511d1055fdc7d35e54911cb9de9ae30c988b666f675c2102dfb1c2a1c3456c8cb76714706dba77b3f4e7fe5afffc2503b121323a48ebbdcf54ae 51150 24000 3Mxb2PtkzPBxF7cXzERJVyJ9TaDzeAeMyH ..." >> $logfile
+echo "./tcls_sign.sh -vv -m -f tmp_c_utx.txt -w KyP5KEp6DCmF222YM5EB9yGeMFxdVK1QWgtGvWnLRnDmiCtQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0 | grep -A2 'single sha256 and double sha256'" >> $logfile
+
+./tcls_create.sh -v -c 267c6d75851efa18afb7edeb2da00c09afc575231db84b3277fc7ea3e174ecbd 1 512102930a11e92103daefde0d30b552f57d303e94a128e763ca9e69ff2006446934442103e74d2113dec75d75cde09a5b46297b1067e4b8b35e63c4c32b8cdbadfdffda1e2103067fcc39ee36d2417684511d1055fdc7d35e54911cb9de9ae30c988b666f675c2102dfb1c2a1c3456c8cb76714706dba77b3f4e7fe5afffc2503b121323a48ebbdcf54ae 51150 24000 3Mxb2PtkzPBxF7cXzERJVyJ9TaDzeAeMyH  >> /dev/null 
+echo "    ..." > tmp_tx_cfile
+./tcls_sign.sh -vv -m -f tmp_c_utx.txt -w KyP5KEp6DCmF222YM5EB9yGeMFxdVK1QWgtGvWnLRnDmiCtQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0 | grep -A2 "double hash the raw unsigned TX" >> tmp_tx_cfile
+chksum_ref="93eb5edd55334c515a76adb824267328457489e55a4ffa5623005ccc8046f79b" 
+chksum_prep
+echo " dsha256 expected: 2bfbf441d056cd300de0a51c055da349beecfc6ae0d215590b662c5e1da81d79" >> $logfile
+echo " " >> $logfile
+echo " " >> $logfile
+
+
+echo "=== TESTCASE 4b: same as 4a, but sign assembled structure" | tee -a $logfile
+echo "expected result is:" >> $logfile
+echo "0100000001bdec74e1a37efc77324bb81d2375c5af090ca02debedb7af18fa1e85756d7c2601000000<length><fill_Byte00><sig><OP_SIGHASHALL>4c8b512102930a11e92103daefde0d30b552f57d303e94a128e763ca9e69ff2006446934442103e74d2113dec75d75cde09a5b46297b1067e4b8b35e63c4c32b8cdbadfdffda1e2103067fcc39ee36d2417684511d1055fdc7d35e54911cb9de9ae30c988b666f675c2102dfb1c2a1c3456c8cb76714706dba77b3f4e7fe5afffc2503b121323a48ebbdcf54aeffffffff01c05d00000000000017a914de5462e6e84cdab5064220343b9331a3af6dbbf18700000000" >> $logfile
+echo " " >> $logfile
+./tcls_sign.sh -vv -m -f tmp_c_utx.txt -w KyP5KEp6DCmF222YM5EB9yGeMFxdVK1QWgtGvWnLRnDmiCtQPcN4 -p 03cc5debc62369bd861900b167bc6add5f1a6249bdab4146d5ce698879988dced0 | tail -n10 | head -n9 >> $logfile
+
+./tcls_tx2txt.sh -vv -f tmp_stx.txt > tmp_svn
+# get some data into the compare file, without signature (which is changing everytime)
+echo "  ..." > tmp_tx_cfile
+cat tmp_svn | grep -A7 -B1 "decode SIG_script OPCODES" | sed 's/47/XX/g;s/48/XX/g;s/49/XX/g;s/71/xx/g;s/72/xx/g;s/73/xx/g;s/44/XX/g;s/45/XX/g;s/20/XX/g;s/21/XX/g;s/32/xx/g;s/33/xx/g' >> tmp_tx_cfile
+echo "        <SIG R>" >> tmp_tx_cfile
+cat tmp_svn | grep "this is SIG S" | sed 's/20/XX/g;s/21/XX/g;s/32/xx/g;s/33/xx/g' >> tmp_tx_cfile
+echo "        <SIG S>" >> tmp_tx_cfile
+echo "        strict sig checks ..." >> tmp_tx_cfile
+cat tmp_svn  | tail -n 65 >> tmp_tx_cfile
+echo " " >> tmp_tx_cfile
+# cat tmp_tx_cfile >> $logfile
+
+chksum_ref="adc4aae1fd92d3547a5184e4f6274b380af79b526a8e25de97941954c17889ce" 
+chksum_prep
+
+echo " " | tee -a $logfile
+}
+
 all_testcases() {
   testcase1 
   testcase2 
   testcase3 
+  testcase4 
 }
 
 #####################
@@ -206,12 +255,12 @@ while [ $# -ge 1 ]
 done
 
 # clean up
-for i in tmp*; do
-  if [ -f "$i" ]; then rm $i ; fi
-done
-for i in *hex; do
-  if [ -f "$i" ]; then rm $i ; fi
-done
+# for i in tmp*; do
+#   if [ -f "$i" ]; then rm $i ; fi
+# done
+# for i in *hex; do
+#   if [ -f "$i" ]; then rm $i ; fi
+# done
 for i in priv*; do
   if [ -f "$i" ]; then rm $i ; fi
 done

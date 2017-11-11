@@ -1,8 +1,9 @@
-GITHUB messes with the text and newlines, please view in "raw" mode...
+GITHUB messed up all new lines, maybe better to look at the file in RAW format.
 
 #######################################
-### 1. TX_CL_SUITE -  description: ###
+### 1. TX_CL_SUITE -  description:  ###
 #######################################
+
 A suite of shell scripts to work with Bitcoin transactions. Primary goal is to analyze a transaction. Display it in plain text, similiar to the Bitcoin core client or "www.blockchain.info" JSON output, just in plain text. Second goal is to create or sign transactions (and cold storage usage). 
 This suite is based on the previous „trx2txt“ tool, which is now discontinued.
 
@@ -24,6 +25,7 @@ On readability: current version of programs are heavily commented, to be able to
 ###########################
 ### file tcls_tx2txt.sh ###
 ###########################
+
 The main script. You'll want to start here :-) 
 The program checks the parameters, checks the version of the shell (for cases where POSIX compliance can not be achieved, in particular with arrays), checks availability for all necessary sub-programs (openssl, awk, bc, ...) to decode a transaction, and then begins to break down the transactions.
 
@@ -67,11 +69,13 @@ The displayed steps are derived from: https://en.bitcoin.it/wiki/Protocol_specif
 ###########################
 ### 2. Supporting files ###
 ###########################
+
 The supporting scripts are used by the main program (tcls_tx2txt.sh), but can also be used independantly, when provided with the correct parameters. Use the '-h' parameters with these scripts to explain. 
 
 ##################################
 ### file tcls_in_sig_script.sh ###
 ##################################
+
 This shell script tries to decode the TX-IN sig script via it's internal simple state diagram. The way the OPCodes are processed follows the picture "tcls_in_sig_state_machine.png". At anytime the script can be used "stand alone". Without parameters, it displays as per below, alternativly just provide a sig script as parameter (or as usual, use '-h'). 
 
    48: OP_DATA_0x48
@@ -102,6 +106,7 @@ This shell script tries to decode the TX-IN sig script via it's internal simple 
 ##################################
 ### file tcls_out_pk_script.sh ###
 ##################################
+
 This shell script tries to decode the TX-OUT public key script via it's internal simple state diagram. The way the OPCodes are processed follows the picture "tcls_out_pk_state_machine.png". At anytime the script can be used "stand alone". Without parameters, it displays as per below, alternativly just provide a sig script as parameter (or as usual, use '-h'). 
 
 76A9146AF1D17462C6146A8A61217E8648903ACD3335F188AC
