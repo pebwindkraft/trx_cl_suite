@@ -169,7 +169,7 @@ what happens, when we create a TX, which has a return address?
 what happens, when we create a TX, which has many TX-OUTs?
 
 
-I55: 07apr2017, svn:
+I55: 07apr2017, svn: - done
 ====================
 testcases_tcls_sign.sh: 
 Testcase 10i (?) in testcases_tcls_create.sh shall be reflected in "tcls_sign.sh", with the same input values, and then signed. The example to compare is here:
@@ -200,7 +200,7 @@ https://blockchain.info/tx/d276abe15791941649c3ca8425d79167cc1cf801f83aa99753fe7
 0100000001d0e67013c4c8512cb7e4cfbb64bcea38d854cab6db36b6af0113109ce489ee7201000000fdfd000048304502210096df80136e578ce721589d61cb2efcf5e4748c6a3a6ab7e34d0fc12e3e748e2c02201049e22331794a5d99856105b096e3adb60b053562ad40ef6fe28b8bb70ca8f40147304402203f49e5198e7b14aeb59c26dc42a4207ede9d0d4a291e2ae6f2eb1809fbdba21a022030e74e63e752296499e18f772e00d26c206972029f3b8c0b7d50298a1734241f014c69522103459d20315debcb8b4c47c5f0ff356c7764ea3b103487487a1ed2bbcac3f18bc221023b0fd344dbd13d25663adc5a31d269ceac90b6dfc3ac8af8d5b31aa10ba366fc21032233fc2b5916568cd5177e9b88feda049195418cbadb2c6741e8df8967ec84ab53aeffffffff030000000000000000106a0e69643a64616e6f6d6172722e69647c150000000000001976a9146ada8b2f3ce136abedd949e749ccf5574d867d5b88ac557d0c000000000017a9148e1719fb937c598ddd0760118b5455fc4f31891b8700000000
 
 
-I62: tcls_create.sh
+I62: tcls_create.sh - done
 ===================
 https://www.reddit.com/r/Bitcoin/comments/74375h/i_have_a_p2sh_multisig_redeem_script_that_is_over/
 multisig must not be over 520 bytes
@@ -291,7 +291,7 @@ ermöglicht Bitcoin, eine Schwelle der täglichen Auszahlung festzulegen, und er
 --> ALL|ANYONECANPAY
 This construction can be used to make a “crowdfunding”-style transaction. Someone attempting to raise funds can construct a transaction with a single out‐ put. The single output pays the “goal” amount to the fundraiser. Such a transac‐ tion is obviously not valid, as it has no inputs. However, others can now amend it by adding an input of their own, as a donation. They sign their own input with ALL|ANYONECANPAY. Unless enough inputs are gathered to reach the value of the output, the transaction is invalid. Each donation is a “pledge,” which cannot be collected by the fundraiser until the entire goal amount is raised.
 
-I72: Signature Verification:
+I72: Signature Verification: - done
 ============================
 https://bitcoin.stackexchange.com/questions/32305/how-does-the-ecdsa-verification-algorithm-work-during-transaction
 Decompose a tx to the 3 items:
@@ -299,6 +299,69 @@ Decompose a tx to the 3 items:
   b) signature 304502210099081[...cut...]d59290d2fddf25269ee0e
   c) hash of decomposed tx 692678553d1b85ccf87d4d4443095f276cdf600f2bb7dd44f6effbd7458fd4c2
 Pass these values to standard ECDSA verify method and you will receive the result: true or false.
+
+I73: tcls_sign.sh
+==================
+looking at the multisig example from Gavin (https://gist.githubusercontent.com/gavinandresen/3966071/raw/1f6cfa4208bc82ee5039876b4f065a705ce64df7/TwoOfThree.sh), his signatures show one byte less in length than my signatures in (testcase 5 in tcls_testcases_sign.sh):
+
+his example shows 0x48 for 0x0220 R Sig and 0x0221 S Sig 
+48304502200187AF928E9D155C4B1AC9C1C9118153239ABA76774F775D7C1F9C3E106FF33C0221008822B0F658EDEC22274D0B6AE9DE10EBF2DA06B1BBDAABA4E50EB078F39E3D7801
+
+my code generates 0x49 for 0x0220 R Sig and 0x0221 S Sig   
+4930450220494D2C9E461CEE7F8F31B294C479535C991CED8B8AA47C05D7A26A9A7B9E818E022100A5625FF149EAC1505160ACC5CEFAF3DD978C8A8370F1DEEBEFD3772AE1E00D7801
+
+why is it working??? 
+(If corrected, this will probably change all chksums of tcls_testcases_tx2txt.sh)
+
+--> same as in tmp_vfy.sh:
+echo "TX_IN Sig[1], double sha256, pubkey and signature:"
+echo 7dd923708617718b12080dd62441d66ca6eaf364812fcca59fe788550e7d25e5
+printf $( echo 7dd923708617718b12080dd62441d66ca6eaf364812fcca59fe788550e7d25e5 | sed 's/[[:xdigit:]]\{2\}/\\x&/g' ) > tmp_utx_dsha256.hex
+echo "The public key in HEX format: "
+echo 0491bba2510912a5bd37da1fb5b1673010e43d2c6d812c514e91bfa9f2eb129e1c183329db55bd868e209aac2fbc02cb33d98fe74bf23f0c235d6126b1d8334f86
+echo "The public key in PEM format: "
+echo "-----BEGIN PUBLIC KEY-----
+MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEkbuiUQkSpb032h+1sWcwEOQ9LG2BLFFO
+kb+p8usSnhwYMynbVb2GjiCarC+8Assz2Y/nS/I/DCNdYSax2DNPhg==
+-----END PUBLIC KEY-----" > pubkey.pem
+cat pubkey.pem
+echo "ScriptSig: "
+echo 3028022100b04d05475cfde8645fb936ee73e8ee224616422c8c62575b44b58e378bce808b022100a98abf9f53859123b752c72bcba810fdafa4685d49b6a36f1fa6e8e2e7828c17
+printf $( echo 3046022100b04d05475cfde8645fb936ee73e8ee224616422c8c62575b44b58e378bce808b022100a98abf9f53859123b752c72bcba810fdafa4685d49b6a36f1fa6e8e2e7828c17 | sed 's/[[:xdigit:]]\{2\}/\\x&/g' ) > tmp_sig.hex
+openssl pkeyutl <tmp_utx_dsha256.hex -verify -pubin -inkey pubkey.pem -sigfile tmp_sig.hex
+echo " "
+
+when changing this line:
+   echo "ScriptSig: "
+   echo 3048022100b04...
+to
+   echo 3027022100b04...
+the openssl utility would accept the signature anyways...
+
+
+I73: tcls_create.sh
+===================
+when creating a multisig tx with redeem scripts, need to calculate tx fees better.
+when redeemscript is given, decompose redeemscript (tcls_in_sig_script.sh), and 
+add 0x47, 0x48 or 0x49 (71,72 or 73 decimal) bytes. Take the average for each sig. 
+A multisig is normally n-of-m, so for each 'n' in each input (TX_IN) add 72 Bytes.
+
+
+I74: SegWit / Part II :-)
+=========================
+how to integrate SEGWIT details:
+https://bitcoincore.org/en/segwit_wallet_dev/
+
+I75: 25nov2017, svn:
+====================
+tcls_create.sh
+checksum for testnet addresses with network byte, also multisig (~line 527):
+--> step10_11() 
+  ...
+  # observation:
+  # after base58 decode of a multisig address, the network byte (05) is
+  # automatically included, need to remove it here...
+  # same for testnet addresses - what is the underlying logic?
 
 
 

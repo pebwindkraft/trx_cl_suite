@@ -349,11 +349,11 @@ chk_bc_address_hash() {
   vv_output "$s"
   s=$( echo $s | sed 's/[0-9]*/ 58*&+ /g' )
   vv_output "$s"
-  #          16o -> base is 16 for output
-  #           | 0d -> duplicate stack
-  #           | |   put out all the base58 remainders
-  #           | |   | sum everything up and "f" prints the content of the stack
-  #           | |   | |
+  #                     16o -> base is 16 for output
+  #                      | 0d -> duplicate stack
+  #                      | |   put out all the base58 remainders
+  #                      | |   | sum everything up and "f" prints the content of the stack
+  #                      | |   | |
   address_hash=$( echo "16o0d $s +f" | dc )
   leading_zeros
   vv_output " address_hash after leading 0s:     $address_hash"
@@ -388,12 +388,13 @@ chk_bc_address_hash() {
     vv_output " address_hash after leading1_cnt:   $address_hash"
   fi
    
-  # only for P2PKH adresses, get network bytes in front ... 
+  # get network bytes in front ... (only for P2PKH addresses?)
   if [ $msig_identifyer -eq 0 ] ; then 
     if [ $T_param_flag -eq 0 ] ; then 
       address_hash_nb=$( echo "00$address_hash" )
     else
-      address_hash_nb=$( echo "6f$address_hash" )
+      # address_hash_nb=$( echo "6f$address_hash" )
+      address_hash_nb=$( echo "$address_hash" )
     fi
   else
     address_hash_nb=$( echo "$address_hash" )
@@ -513,7 +514,7 @@ step10_11() {
   # when address starts with "2", do P2SH on test net
   # when address starts with "3", do P2SH on main net
   address_1st_char=$( echo $TARGET_Address | cut -b 1 )
-  if [ $address_1st_char -eq 2 ] || [ $address_1st_char -eq 3 ] ; then
+  if [ "$address_1st_char" == "2" ] || [ "$address_1st_char" == "3" ] ; then
     msig_identifyer=1
   fi
   chk_bc_address_hash
@@ -521,13 +522,13 @@ step10_11() {
   # observation:
   # after base58 decode of a multisig address, the network byte (05) is 
   # automatically included, need to remove it here...
-  # Why? needs further investigation. Can someone explain?
+  # same for testnet addresses - what is the underlying logic?
+  # needs further investigation... 
   #
-  if [ $msig_identifyer -eq 1 ] ; then
+  if [ $msig_identifyer -eq 1 ] || [ $T_param_flag -eq 1 ] ; then 
     address_hash=$( echo $address_hash | cut -b 3-42 )
     # echo $address_hash
   fi
-
 
   # first check length of address hash. It is always 20 Bytes (40 chars), in hex 0x14, right?
   if [ ${#address_hash} -ne 40 ] ; then
@@ -547,6 +548,7 @@ step10_11() {
       StepCode=$( echo $StepCode$OP_HASH160$tmpvar$redeemscripthash$OP_EQUAL )
       ;;
    m|n) T_param_flag=1
+      StepCode="19"
       StepCode=$( echo $StepCode$OP_DUP$OP_HASH160$tmpvar$address_hash$OP_EQUALVERIFY$OP_CHECKSIG )
       ;;
    *) echo "*** ERROR: could not check address type, unrecognized format for $TARGET_Address"

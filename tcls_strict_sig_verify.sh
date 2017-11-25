@@ -8,6 +8,7 @@
 # Version	by      date    comment
 # 0.1		svn     22aug16 initial release, extracted from "trx_create_sign.sh"
 # 0.2		svn	03nov17 added check for R value <=N/2
+# 0.3		svn	13nov17 load "global vars" from tcls.conf 
 # 
 # Permission to use, copy, modify, and distribute this software for any 
 # purpose with or without fee is hereby granted, provided that the above 
@@ -55,17 +56,20 @@
 ###########################
 # Some variables ...      #
 ###########################
-typeset -i Quiet=0
-typeset -i Verbose=0
-typeset -i VVerbose=0
+# typeset -i Quiet=0
+# typeset -i Verbose=0
+# typeset -i VVerbose=0
 
-typeset -i sig_min_length_chars=18
-typeset -i sig_max_length_chars=146
+# typeset -i sig_min_length_chars=18
+# typeset -i sig_max_length_chars=146
+
+# and source the global var's config file
+. ./tcls.conf
 
 typeset -i f_param_flag=0
 typeset -i o_param_flag=0
 infile=''
-outfile=''
+outfile=$sigtxt_tmp_fn
 ScriptSig=''
 
 #################################
@@ -499,18 +503,18 @@ fi
 if [ $value -eq 1 ] ; then 
   v_output  "yup...                   - ok"
   vv_output "    cool, R is smaller than N/2"
-  if [ $o_param_flag -eq 1 ] ; then
-    printf "$ScriptSig" > $outfile
-  fi
+# if [ $o_param_flag -eq 1 ] ; then
+#   printf "$ScriptSig" > $outfile
+    printf "$ScriptSig" > $sigtxt_tmp_fn
+# fi
 elif [ "$R_value" == "00" ] ; then 
   v_output  "R-value is zero padded   - ok"
 else
   v_output  "no...                   - nok"
   v_output "    --> R is not smaller than N/2, need new R-Value (new_r = N - r)"
   R_value=$( echo "obase=16;ibase=16;FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141 - $R_value_string" | bc )
-
   if [ ${#R_value} -ne 64 ] ; then 
-    R_value=$( zero_pad $S_value )
+    R_value=$( zero_pad $R_value )
   fi
   if [ ${#R_value} -ne 64 ] ; then 
     echo "*** ERROR: script sig verification for R-Value: "
@@ -555,17 +559,18 @@ else
     
     # and concatenate the new R-Value 
     ScriptSig=$( echo "$ScriptSig$R_value" )
-    if [ $o_param_flag -eq 1 ] ; then
-      printf "$ScriptSig" > $outfile
-    fi
 
     # and bring it into a tmp file, eventually required in other scripts
-    if [ -f tmp_trx_sig.hex ] ; then 
-      cp tmp_trx_sig.hex tmp_trx_sig_old.hex
+    if [ -f $sigtxt_tmp_fn ] ; then 
+      cp $sigtxt_tmp_fn tmp_sig_old.txt
+    fi
+    if [ -f $sighex_tmp_fn ] ; then 
+      cp $sighex_tmp_fn tmp_sig_old.hex
     fi
     v_output "    new signature=$ScriptSig" 
-    ScriptSig=$( echo $ScriptSig | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
-    printf "$ScriptSig" > tmp_trx_sig.hex
+    printf "$ScriptSig" > $outfile
+    result=$( echo $ScriptSig | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
+    printf "$result" > $sighex_tmp_fn
 
   fi
 fi
@@ -586,9 +591,10 @@ if [ $value -eq 1 ] ; then
   v_output  "yup...                   - ok"
   vv_output "    cool, S is smaller than N/2"
   v_output  "    strictly check DER-encoded signature                        - ok"
-  if [ $o_param_flag -eq 1 ] ; then
-    printf "$ScriptSig" > $outfile
-  fi
+# if [ $o_param_flag -eq 1 ] ; then
+#   printf "$ScriptSig" > $outfile
+    printf "$ScriptSig" > $sigtxt_tmp_fn
+# fi
 elif [ "$S_value" == "00" ] ; then 
   v_output  "S-value is zero padded   - ok"
   v_output  "    strictly check DER-encoded signature                        - ok"
@@ -643,17 +649,17 @@ else
     
     # and concatenate the new S-Value 
     ScriptSig=$( echo "$ScriptSig$S_value" )
-    if [ $o_param_flag -eq 1 ] ; then
+#   if [ $o_param_flag -eq 1 ] ; then
       printf "$ScriptSig" > $outfile
-    fi
+#   fi
 
     # and bring it into a tmp file, eventually required in other scripts
-    if [ -f tmp_trx_sig.hex ] ; then 
-      cp tmp_trx_sig.hex tmp_trx_sig_old.hex
+    if [ -f $sighex_tmp_fn ] ; then 
+      cp $sighex_tmp_fn tmp_tx_sig_old.hex
     fi
     v_output "    new signature=$ScriptSig" 
     ScriptSig=$( echo $ScriptSig | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
-    printf "$ScriptSig" > tmp_trx_sig.hex
+    printf "$ScriptSig" > $sighex_tmp_fn
 
   fi
 fi

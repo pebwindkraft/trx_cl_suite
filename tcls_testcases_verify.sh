@@ -62,7 +62,7 @@ chksum_prep
 
 echo "=== TESTCASE 1c: $chksum_cmd tcls_strict_sig_verify.sh" | tee -a $logfile
 cp tcls_strict_sig_verify.sh tmp_tx_cfile
-chksum_ref="18423e6270685705eba8fdbb853601a43510a351618e326a7d8ee50b986203cd"
+chksum_ref="0d9ea108a4cfd61a50969a1bf08fd2f1f94a1acb3f144ebfa235c7449ad70c12"
 chksum_prep
 
 echo "=== TESTCASE 1d: $chksum_cmd tcls_verify_hexkey.awk" | tee -a $logfile

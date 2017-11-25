@@ -5,13 +5,13 @@
 # Coded in Nov/Dec 2015 following this reference:
 #   https://en.bitcoin.it/wiki/Protocol_specification#tx
 #
-# included example trx:
+# included example tx:
 # https://blockchain.info/de/rawtx/
 #  cc8a279b0736e6a2cc20b324acc5aa688b3af7b63bbb002f46f6573c1ad84408?format=hex
 #
 # Version  by	date	comment
 #   0.1	   svn	01nov16	new release from trx_2txt (which is now discontinued)
-#   0.2	   svn	14dec16 created array for a trx, cause OpenBSD cut cannot 
+#   0.2	   svn	14dec16 created array for a tx, cause OpenBSD cut cannot 
 #			handle more than ~2000 chars (buffer size in pdksh?)
 #   0.3	   svn	29mar17	add TESTNET functionality (address prefix)
 #   0.4	   svn	26jun17	replace 'cut' were possible.
@@ -42,10 +42,11 @@ raw_TX_LINK=https://blockchain.info/de/rawtx/cc8a279b0736e6a2cc20b324acc5aa688b3
 raw_TX_LINK2HEX="?format=hex"
 raw_TX_DEFAULT=010000000253603b3fdb9d5e10de2172305ff68f4b5227310ba6bd81d4e1bf60c0de6183bc010000006a4730440220128487f04a591c43d7a6556fff9158999b46d6119c1a4d4cf1f5d0ac1dd57a94022061556761e9e1b1e656c0a70aa7b3e83454cd61662df61ebdc31e43196b5e0c10012102b12126a716ce7bbb84703bcfbf0afa80283c75a7304a48cd311a5027efd906c2ffffffff0e52c4701577287b6dd02f422c2a8033fa0b4614f75fa9f0a5c4ab69634b5ba7000000006b483045022100a428348ff55b2b59bc55ddacb1a00f4ecdabe282707ba5185d39fe9cdf05d7f0022074232dae76965b6311cea2d9e5708a0f137f4ea2b0e36d0818450c67c9ba259d0121025f95e8a33556e9d7311fa748e9434b333a4ecfb590c773480a196deab0dedee1ffffffff0290257300000000001976a914fca68658b537382e27a85522d292e1ad9543fe0488ac98381100000000001976a9146af1d17462c6146a8a61217e8648903acd3335f188ac00000000
 
-typeset -i sw_flag=0	# when handling a segwit tx
-typeset -i r_flag=0	# handling of -r param
-typeset -i t_flag=0	# handling of -t param
-typeset -i u_flag=0	# handling of -u param
+typeset -i sw_flag=0		# when handling a segwit tx
+typeset -i r_flag=0		# handling of -r param
+typeset -i t_flag=0		# handling of -t param
+typeset -i u_flag=0		# handling of -u param
+typeset -i trx_value_dec=0	# calculating in decimal
 var_int=0
 Verbose=0
 VVerbose=0
@@ -102,9 +103,9 @@ get_TX_section() {
   done 
 }
 
-############################################
-# procedure to check trx length (=64chars) #
-############################################
+###########################################
+# procedure to check tx length (=64chars) #
+###########################################
 check_trx_len() {
   if [ ${#TX_id} -ne 64 ] ; then
     echo "*** expecting a proper formatted Bitcoin TRANSACTION_ID."
@@ -113,9 +114,9 @@ check_trx_len() {
   fi
 }
 
-############################################
-# procedure to check trx length (=64chars) #
-############################################
+###########################################
+# procedure to check tx length (=64chars) #
+###########################################
 check_rawtrx_len() {
   if [ ${#raw_TX} -le 27 ] ; then
     echo "*** expecting a proper formatted Bitcoin RAW TRANSACTION."
@@ -409,7 +410,7 @@ check_tool tr
 ###############################################
 # 
 # if param -t was given, then a Bitcoin TRANSACTION_ID should be in variable "TX_id":
-#   ./trx2txt -t cc8a279b0736e6a2cc20b324acc5aa688b3af7b63bbb002f46f6573c1ad84408
+#   ./tcls_tx2txt -t cc8a279b0736e6a2cc20b324acc5aa688b3af7b63bbb002f46f6573c1ad84408
 # 
 # no we need to:
 # 1.) check if network interface is active ...
@@ -436,19 +437,19 @@ if [ "$TX_id" ] ; then
     if [ $? -ne 0 ] ; then
       echo "*** error - fetching raw_TX data:"
       echo "    $http_get_cmd https://blockchain.info/de/rawtx/$TX_id$raw_TX_LINK2HEX"
-      echo "    downoad manually, and call 'trx2txt -r ...'"
+      echo "    downoad manually, and call 'tcls_tx2txt -r ...'"
       exit 1
     fi
     if [ ${#raw_TX} -eq 0 ] ; then
       echo "*** error - fetching raw_TX data:"
-      echo "    The raw trx has a length of 0. Something failed."
-      echo "    downoad manually, and call 'trx2txt -r ...'"
+      echo "    The raw tx has a length of 0. Something failed."
+      echo "    downoad manually, and call 'tcls_tx2txt -r ...'"
       exit 0
     fi
     if [ "$raw_TX" == "Transaction not found" ] ; then
       echo "*** error - fetching raw_TX data:"
       echo "    Transaction not found"
-      echo "    downoad manually, and call 'trx2txt -r ...'"
+      echo "    downoad manually, and call 'tcls_tx2txt -r ...'"
       exit 0
     fi
   else
@@ -472,7 +473,7 @@ if [ "$shell_string" == "bash" ] ; then
 else [ "$shell_string" == "ksh" ] 
   set -A tx_array $result
 fi
-# v_output "number of tx_array elements: ${#tx_array[*]}, raw trx is this:"
+# v_output "number of tx_array elements: ${#tx_array[*]}, raw tx is this:"
 result=$( echo ${tx_array[*]} | tr -d " " )
 
 v_output " "
@@ -552,7 +553,7 @@ while [ $loopcounter -lt $tx_in_count_dec ]
   v_output " TX_IN[$loopcounter]"
   # TX_IN consists of the following fields:
   # Size Description       Data type Comments
-  # 36   previous_output   outpoint, the previous output trx reference
+  # 36   previous_output   outpoint, the previous output tx reference
   #      OutPoint structure: (The first output is 0, etc.)
   #      32   hash         char[32]  the hash of the referenced transaction (reversed).
   #       4   index        uint32_t  the index of the specific output in the transaction. 
@@ -630,7 +631,7 @@ while [ $loopcounter -lt $tx_in_count_dec ]
   if [ "$VVerbose" -eq 1 ] && [ "$script_length_dec" -ne 0 ] ; then
     if [ $u_flag -eq 1 ] ; then
       echo "  Working on an unsigned raw TX. This is the pubkey script "
-      echo "  of previous trx, for which you'll need the privkey to sign:"
+      echo "  of previous tx, for which you'll need the privkey to sign:"
       # decode_pkscript $sig_script
       sh ./tcls_in_sig_script.sh -v $sig_script
     else
@@ -834,9 +835,9 @@ if [ $sw_flag -eq 1 ] ; then
   done
 fi
   
-###################################################################################
-### STEP 14 - LOCK_TIME: block number or timestamp, at which this trx is locked ###
-###################################################################################
+##################################################################################
+### STEP 14 - LOCK_TIME: block number or timestamp, at which this tx is locked ###
+##################################################################################
 ### Size: 4, Data type uint32_t  
 ###      Value        Description
 ###      0            Always locked
