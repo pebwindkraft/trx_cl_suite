@@ -8,8 +8,9 @@
 # 0.2	  svn	30mar17 added logic for TESTNET
 # 0.3	  svn	27jun17 replace "echo xxx | cut -b ..." with ss_array
 # 0.4	  svn	16oct17 update for smart contracts with CSV and CLTV
+# 0.5	  svn	14nov17 update for proper multisig handling
 # 
-# Copyright (c) 2015, 2016 Volker Nowarra 
+# Copyright (c) 2015, 2016, 2017 Sven Volker Nowarra 
 # Complete rewrite of code in June 2016 from following reference:
 #   https://en.bitcoin.it/wiki/Protocol_specification#tx
 #   https://en.bitcoin.it/wiki/Script
@@ -47,8 +48,15 @@
 
 typeset -i ss_array_ptr=0
 typeset -i sig_offset=0
-typeset -i cur_opcode_dec
-typeset -i msig_n
+typeset -i cur_opcode_dec=0
+typeset -i prev_opcode_dec=0     # used in multisig section
+# typeset -i Multisig=0       # check during multisig signing
+typeset -i msig_m=0              # the "m" counter for m-of-n multisig
+typeset -i msig_n=0              # the "n" counter for m-of-n multisig
+typeset -i msig_sig_counter=0    # keep the number of signatures 
+
+typeset -i rs_loopcounter=0      # a counter to decompose redeem script
+
 offset=1
 msig_redeem_str=''
 output=''
@@ -61,6 +69,9 @@ Verbose=0
 VVerbose=0
 TESTNET=0
 param=483045022100A428348FF55B2B59BC55DDACB1A00F4ECDABE282707BA5185D39FE9CDF05D7F0022074232DAE76965B6311CEA2D9E5708A0F137F4EA2B0E36D0818450C67C9BA259D0121025F95E8A33556E9D7311FA748E9434B333A4ECFB590C773480A196DEAB0DEDEE1
+
+# and source the global var's config file
+. ./tcls.conf
 
 #################################
 ### Some procedures first ... ###
@@ -76,6 +87,22 @@ vv_output() {
   if [ $VVerbose -eq 1 ] ; then
     echo "$1"
   fi
+}
+
+proc_help() {
+  echo "  "
+  echo "usage: tcls_in_sig_script.sh [-h|-m|-T] [-q] [-v|-vv] hex_string"
+  echo "  "
+  echo "convert a raw hex string from a bitcoin tx-out into it's OpCodes. "
+  echo "if no hex string is given, the data from a demo tx is used. "
+  echo "  "
+  echo "  -h  show this help text"
+  echo "  -m  used when signing a multisig (spending) tx"
+  echo "  -q  quite - show only minimum output"
+  echo "  -T  use with Testnet"
+  echo "  -v  be verbose"
+  echo "  -vv be very verbose"
+  echo "  "
 }
 
 #####################
@@ -109,10 +136,10 @@ show_redeem_script() {
   while [ $rs_array_ptr -lt ${#rs_array[*]} ]
    do
     opcode=${rs_array[$rs_array_ptr]} 
-    # modulus 8 and modulus 16 to beautify output:
-    if [ $(( $rs_array_ptr % 16 )) -eq 0 ]; then
+    # modulus 8, 16 or 32 to beautify output:
+    if [ $(( $rs_array_ptr % 32 )) -eq 0 ]; then
       printf "%s\n        " $opcode
-    elif [ $(( $rs_array_ptr % 8 )) -eq 0 ]; then
+    elif [ $(( $rs_array_ptr % 16 )) -eq 0 ]; then
       printf "%s:" $opcode
     else
       printf "%s" $opcode
@@ -191,10 +218,10 @@ s02_SIGTYPE() {
     44) echo "    $cur_opcode: OP_LENGTH_0x44:      length of R + S"
         s03_LENGTH 
         ;;
-    45) echo "    $cur_opcode: OP_LENGTH_0x44:      length of R + S"
+    45) echo "    $cur_opcode: OP_LENGTH_0x45:      length of R + S"
         s03_LENGTH 
         ;;
-    46) echo "    $cur_opcode: OP_LENGTH_0x44:      length of R + S"
+    46) echo "    $cur_opcode: OP_LENGTH_0x46:      length of R + S"
         s03_LENGTH 
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
@@ -314,6 +341,7 @@ s08_SIG() {
   else
     ./tcls_strict_sig_verify.sh -q $sig_string
   fi
+  msig_sig_counter=$(( $msig_sig_counter + 1 ))
 }
 #####################################
 ### STATUS 0a (s0a_SIG_LEN)       ###
@@ -428,7 +456,7 @@ s21_HASH160() {
     14) echo "    $cur_opcode: OP_Data:             $cur_opcode_dec bytes on the stack"
         op_data_show
         if [ $Verbose -eq 1 ] ; then
-          echo   "        base58check encoding $ret_string"
+          # echo   "        base58check encoding ..."
           printf "        bitcoin address is"
           if [ $TESTNET -eq 1 ] ; then
             sh ./tcls_base58check_enc.sh -T -q -p2pkh $ret_string
@@ -513,8 +541,8 @@ s31_P2SH() {
 #####################################
 s40_OP_1TO16() {
   vv_output "s40_OP_1TO16()"
-  # in case the prev OpCode was OP_1-16, we save it into msig_n, cause it can be multisig
-  msig_n=$cur_opcode_dec
+  # in case the prev OpCode was OP_1-16, we save it into msig_m, cause it can be multisig
+  prev_opcode_dec=$cur_opcode_dec
   msig_redeem_str=$cur_opcode
   get_next_opcode
   if [ "$cur_opcode" == "B1" ] ; then
@@ -525,6 +553,43 @@ s40_OP_1TO16() {
     s4b_CSV 
   elif [ "$cur_opcode" == "21" ] || [ "$cur_opcode" == "41" ] || [ $cur_opcode_dec -gt 81 ] && [ $cur_opcode_dec -lt 96 ] ; then
     echo "        ################### we go multisig ####################################"
+    # when signing a partially signed multisig, need to separate 
+    # previous signature from redeem script, both going into their 
+    # own files for use in tcls_sign.sh (required there to reassemble 
+    # original unsigned tx, double hash256 it, and sign it). 
+    # Here we are already pointing in the arrray at the beginning of 
+    # the pubkeys (0x21 or 0x41) of the redeem script. If there is a 
+    # partially signed tx, somewhere before must be a signature ending 
+    # with "01", and array_ptr is greater than 70 (0x47). or there is no sig at all. 
+    # not very nice logic and code yet ...
+    # 
+    # if array_ptr is greater than than 70 (hex 0x47). 
+    #    there is a signature
+    #    need to go four or five chars back to find the '01'. 
+    #    cat from beginning of array to '01' into a file
+    # else 
+    #    there is no signature, only redeem script, nothing to do ...
+    # 
+    if [ $Multisig -eq 1 ] && [ $ss_array_ptr -gt 70 ] ; then
+      cur_array_cnt=$(( $ss_array_ptr - 4 ))
+      if [ "${ss_array[$cur_array_cnt]}" != "01" ] ; then
+        cur_array_cnt=$(( $ss_array_ptr - 5 ))
+      fi
+      if [ "${ss_array[$cur_array_cnt]}" != "01" ] ; then
+        echo "*** ERROR: could not find '01' to terminate previous signatures."
+        echo "           don't know, how to proceed, exiting gracefully..."
+        echo " "
+        exit 1
+      fi
+      while [ $rs_loopcounter -le $cur_array_cnt ]  
+       do
+        cur_opcode=$( printf ${ss_array[$rs_loopcounter]} )
+        prevsig=$prevsig$cur_opcode
+        rs_loopcounter=$(( rs_loopcounter + 1 ))
+      done
+      echo $prevsig > $sig_prev_fn
+    fi 
+    msig_m=$prev_opcode_dec
     rs_loopcounter=1
     ss_array_ptr=$(( $ss_array_ptr - 1 ))
     while [ $rs_loopcounter -le 16 ]  
@@ -543,10 +608,10 @@ s40_OP_1TO16() {
               else
                 ./tcls_base58check_enc.sh -q -p2pkh $result
               fi
-              msig_redeem_str=$msig_redeem_str$ret_string
-              # vv_output "        msig_redeem_str=$msig_redeem_str"
-              ret_string=''
             fi
+            msig_redeem_str=$msig_redeem_str$ret_string
+            # vv_output "        msig_redeem_str=$msig_redeem_str"
+            ret_string=''
             ;;
         41) echo "    $cur_opcode: OP_DATA_0x41:        uncompressed pub key (65 Bytes)"
             op_data_show
@@ -559,10 +624,10 @@ s40_OP_1TO16() {
               else
                 ./tcls_base58check_enc.sh -q -p2pkh $result
               fi
-              msig_redeem_str=$msig_redeem_str$ret_string
-              # vv_output "        msig_redeem_str=$msig_redeem_str"
-              ret_string=''
             fi
+            msig_redeem_str=$msig_redeem_str$ret_string
+            # vv_output "        msig_redeem_str=$msig_redeem_str"
+            ret_string=''
             ;;
 
         *)  cur_opcode_dec=$(( $cur_opcode_dec - 80 ))
@@ -571,7 +636,8 @@ s40_OP_1TO16() {
             else
               printf "    %s: OP_%d:               the number %d is pushed onto stack\n" $cur_opcode $cur_opcode_dec $cur_opcode_dec
             fi
-            echo "        ################### $msig_n-of-$cur_opcode_dec Multisig ###################################"
+            msig_n=$cur_opcode_dec
+            echo "        ################### $msig_m-of-$msig_n Multisig ###################################"
             break
             ;;
       esac
@@ -583,14 +649,31 @@ s40_OP_1TO16() {
 ################################
 ### STATUS 41 (s41_OP_1TO16) ###
 ################################
+# need to do multisig rules check: maxlength = 520 Bytes (as of April 2017)
+# As the redeem script is [m pubkey1 pubkey2 ... n OP_CHECKMULTISIG], it
+# follows that the length of all public keys together plus the number of
+# public keys must not be over 517. Usually sigs are 73 chars:
+#   For compressed public keys, this means up to n=15
+#     m*73 + n*34 <= 496 (up to 1-of-12, 2-of-10, 3-of-8 or 4-of-6).
+#   For uncompressed ones, up to n=7
+#     m*73 + n*66 <= 496 (up to 1-of-6, 2-of-5, 3-of-4).
 s41_OP_1TO16() {
   vv_output "s41_OP_1TO16()"
   get_next_opcode
   case $cur_opcode in
     AE) echo "    $cur_opcode: OP_CHECKMULTISIG:    terminating multisig"
         msig_redeem_str=$msig_redeem_str$cur_opcode
+        printf "%s" $msig_redeem_str > $redeemscript_fn
         if [ $Verbose -eq 1 ] ; then
           show_redeem_script $msig_redeem_str
+          # msig_redeemscript_maxlen=520
+          if [ ${#msig_redeem_str} -gt $msig_redeemscript_maxlen ] ; then 
+            echo "*** ERROR: Multisig rules violation:"
+            echo "           current length=${#msig_redeem_str}, max length=520 bytes"
+            echo "           exiting gracefully..."
+            echo " "
+            exit 1
+          fi
           ret_string=$msig_redeem_str
           printf "        corresponding bitcoin address is: "
           rmd160_sha256
@@ -599,7 +682,7 @@ s41_OP_1TO16() {
           else
             ./tcls_base58check_enc.sh -q -p2sh $result
           fi
-          ret_string=''
+          # ret_string=''
           msig_redeem_str=''
         fi
         ;;
@@ -721,6 +804,14 @@ s99_UNKNOWN() {
 while [ $# -ge 1 ] 
  do
   case "$1" in
+    -h)
+       proc_help 
+       exit 0
+       ;;
+    -m)
+       Multisig=1
+       shift
+       ;;
     -q)
        Quiet=1
        shift
@@ -737,14 +828,6 @@ while [ $# -ge 1 ]
        Verbose=1
        VVerbose=1
        shift
-       ;;
-    -?|-h|--help)
-       echo "usage: tcls_in_sig_script.sh [-?|-h|--help|-q|-T|-v|-vv] hex_string"
-       echo "  "
-       echo "convert a raw hex string from a bitcoin tx-out into it's OpCodes. "
-       echo "if no hex string is given, the data from a demo tx is used. "
-       echo "  "
-       exit 0
        ;;
     *)
        param=$( echo $1 | tr "[:lower:]" "[:upper:]" )
@@ -821,6 +904,9 @@ fi
       49) echo "    $cur_opcode: OP_DATA_0x49:        push hex 49 (decimal 73) bytes on stack"
           s01_SIG_LEN
           ;;
+      4A) echo "    $cur_opcode: OP_DATA_0x4A:        push hex 49 (decimal 74) bytes on stack"
+          s01_SIG_LEN
+          ;;
       4C) echo "    $cur_opcode: OP_PUSHDATA1:        next byte is # of bytes that go onto stack" 
 	  s5a_PUSHDATA1
           ;;
@@ -874,5 +960,16 @@ fi
     # limits P2SH scripts to 520 bytes as the redeemScript is pushed to the stack).
     #
   done
+
+if [ $Multisig -eq 1 ] && [ $msig_sig_counter -lt $msig_m ] ; then
+  echo "        this is $msig_m-of-$msig_n multisig. Found $msig_sig_counter signature(s)."
+  if [ $msig_sig_counter -eq 0 ] ; then
+    echo "        unsigned"
+  else
+    echo "        incomplete"
+  fi
+elif [ $Multisig -eq 1 ] ; then
+  echo "        complete"
+fi 
 
 

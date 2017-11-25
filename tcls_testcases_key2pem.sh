@@ -18,6 +18,7 @@
 # 
 
 typeset -i LOG=0
+typeset -i no_cleanup=0
 logfile=$0.log
 
 chksum_verify() {
@@ -42,6 +43,40 @@ result=$( $chksum_cmd tmp_tx_cfile | cut -d " " -f 2 )
 chksum_verify "$result" "$chksum_ref"
 if [ $LOG -eq 1 ] ; then to_logfile ; fi
 }
+
+proc_help() {
+  echo "  "
+  echo "usage: $0 -h|-k|-l [1-4]"
+  echo "  "
+  echo "script does several testcases, mostly with checksums for verification"
+  echo "  "
+  echo "  -h help"
+  echo "  -k keep all the temp files (don't do cleanup)"
+  echo "  -l log output to file $0.log"
+  echo "  "
+}
+
+cleanup() {
+  for i in tmp*; do
+    if [ -f "$i" ]; then rm $i ; fi
+  done
+  for i in *hex; do
+    if [ -f "$i" ]; then rm $i ; fi
+  done
+  for i in ossl*; do
+    if [ -f "$i" ]; then rm $i ; fi
+  done
+  for i in *pem; do
+    if [ -f "$i" ]; then rm $i ; fi
+  done
+  for i in priv*; do
+    if [ -f "$i" ]; then rm $i ; fi
+  done
+  for i in pub*; do
+    if [ -f "$i" ]; then rm $i ; fi
+  done
+}
+
 
 testcase1() {
 echo "=============================================================" | tee -a $logfile
@@ -256,14 +291,16 @@ fi
 while [ $# -ge 1 ] 
  do
   case "$1" in
-  -h|--help)
-     echo "usage: testcases_tcls_key2pem.sh [-?|-h|-l|1-8]"
-     echo "  "
-     echo "script does several testcases, mostly with checksums for verification"
-     echo "  "
+  -h)
+     proc_help
      exit 0
      ;;
-  -l|--log)
+  -k)
+     # keep all the temp files = no_cleanup!
+     no_cleanup=1
+     shift
+     ;;
+  -l)
      LOG=1
      shift
      ;;
@@ -278,14 +315,8 @@ while [ $# -ge 1 ]
   esac
 done
 
-# clean up
-for i in tmp*; do
-  if [ -f "$i" ]; then rm $i ; fi
-done
-for i in *hex; do
-  if [ -f "$i" ]; then rm $i ; fi
-done
-for i in *pem; do
-  if [ -f "$i" ]; then rm $i ; fi
-done
+# clean up?
+if [ $no_cleanup -eq 0 ] ; then 
+  cleanup
+fi
 

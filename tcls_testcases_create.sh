@@ -18,6 +18,7 @@
 # 
 
 typeset -i LOG=0
+typeset -i no_cleanup=0
 logfile=$0.log
 
 create_cmd=tcls_create.sh
@@ -45,6 +46,31 @@ chksum_verify "$result" "$chksum_ref"
 if [ $LOG -eq 1 ] ; then to_logfile ; fi
 }
 
+proc_help() {
+  echo "  "
+  echo "usage: $0 -h|-k|-l [1-9]"
+  echo "  "
+  echo "script does several testcases, mostly with checksums for verification"
+  echo "  "
+  echo "  -h help"
+  echo "  -k keep all the temp files (don't do cleanup)"
+  echo "  -l log output to file $0.log"
+  echo "  "
+}
+
+cleanup() {
+  for i in tmp*; do
+    if [ -f "$i" ]; then rm $i ; fi
+  done
+  for i in *hex; do
+    if [ -f "$i" ]; then rm $i ; fi
+  done
+  for i in *pem; do
+    if [ -f "$i" ]; then rm $i ; fi
+  done
+}
+
+
 testcase1() {
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 1: get the checksums of all necessary files     ===" | tee -a $logfile
@@ -52,7 +78,7 @@ echo "================================================================" | tee -a
 
 echo "=== TESTCASE 1a: $chksum_cmd tcls_create.sh" | tee -a $logfile
 cp tcls_create.sh tmp_cfile
-chksum_ref="32dda81018f005482468c861b25cf0fe46b21ff2e834397cb880f37615a5cace" 
+chksum_ref="e00bc2c4b1080570fd1ae17ff2b750def840dd2626ddf845fa596187ba60f822" 
 chksum_prep
 
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
@@ -258,7 +284,7 @@ echo "./$create_cmd -v -c 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d363
 ./$create_cmd -v -c 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 117000 100000 1111KiuFyqUXJFji8KQnoHC5Rtqa5d5e | sed 's/bitcoinfees.*/bitcoinfees.21.co: LINE REPLACED BY TESTCASE SCRIPT, SEE HEADER ... ###/' > tmp_cfile
 echo "./tcls_tx2txt.sh -vv -f tmp_c_utx.txt -u" >> $logfile
 ./tcls_tx2txt.sh -vv -f tmp_c_utx.txt -u >> tmp_cfile
-chksum_ref="5ef919f7b21a5aa83a30ecf831c7a46d3d6ac08642d4cc2174b849b5d4fb5900"
+chksum_ref="4ad1915d7f87b6f17ad800f72295c39cd3bcdf0ffd35cd705cd1550161f00bd7"
 chksum_prep
 
 echo "=== TESTCASE 5f: 1111LexYVhKvaQY69Paj774F9gnjhDrr " | tee -a $logfile
@@ -266,7 +292,7 @@ echo "./$create_cmd -vv -c 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36
 ./$create_cmd -vv -c 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 117000 100000 1111LexYVhKvaQY69Paj774F9gnjhDrr | sed 's/bitcoinfees.*/bitcoinfees.21.co: LINE REPLACED BY TESTCASE SCRIPT, SEE HEADER ... ###/' > tmp_cfile
 echo "./tcls_tx2txt.sh -vv -f tmp_c_utx.txt -u" >> $logfile
 ./tcls_tx2txt.sh -vv -f tmp_c_utx.txt -u >> tmp_cfile
-chksum_ref="818095f0bbe009fd3f977368c9719ca597009a6a03fe719801e16606d679138a"
+chksum_ref="370838b91d2e23a19c2ff91528a1991cafcacda5be1931d6eaf357e1e521f4b5"
 chksum_prep
 
 echo "=== TESTCASE 5g: 111113CRATaaDmCcWzokzTGhM886kj2bs" | tee -a $logfile
@@ -274,7 +300,7 @@ echo "./$create_cmd -vv -c 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36
 ./$create_cmd -vv -c 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 117000 100000 111113CRATaaDmCcWzokzTGhM886kj2bs | sed 's/bitcoinfees.*/bitcoinfees.21.co: LINE REPLACED BY TESTCASE SCRIPT, SEE HEADER ... ###/' > tmp_cfile
 echo "./tcls_tx2txt.sh -vv -f tmp_c_utx.txt -u" >> $logfile
 ./tcls_tx2txt.sh -vv -f tmp_c_utx.txt -u >> tmp_cfile
-chksum_ref="94b5db76695c0f84512db48fa047db0dfddcee2b5743e96ba3269a767fc5bfef"
+chksum_ref="9a6dd2bf9ff2f4a671b309219c79c87a75566d66c50cb8e0f0ef75af586305d0"
 chksum_prep
 
 echo "=== TESTCASE 5h: 1111111111111111111114oLvT2 " | tee -a $logfile
@@ -282,7 +308,7 @@ echo "./$create_cmd -vv -c 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36
 ./$create_cmd -vv -c 7423fd7c2c135958e3417bb4d192c33680bcda2c5cb8549209d36323275338f9 1 1976a9147A8911A06EF9A75A6CB6AF47D72A99A9B6ECB77988ac 117000 100000 1111111111111111111114oLvT2 | sed 's/bitcoinfees.*/bitcoinfees.21.co: LINE REPLACED BY TESTCASE SCRIPT, SEE HEADER ... ###/' > tmp_cfile
 echo "./tcls_tx2txt.sh -vv -f tmp_c_utx.txt -u" >> $logfile
 ./tcls_tx2txt.sh -vv -f tmp_c_utx.txt -u >> tmp_cfile
-chksum_ref="642f8b278eff0776d72c7b77c4064aebd5b24aa138b2c26e0e48b5f2e192ddd9" 
+chksum_ref="41b09e9f9b1b78a6865f83275ac195f7e2248fd8ed5e8ddbcf7c3897a3b9714f" 
 chksum_prep
 
 echo " " | tee -a $logfile
@@ -674,6 +700,41 @@ chksum_prep
 echo " " | tee -a $logfile
 }
 
+testcase11() {
+echo "================================================================" | tee -a $logfile
+echo "=== TESTCASE 11: Testnet multisig (carbide 80 and 81)        ===" | tee -a $logfile
+echo "================================================================" | tee -a $logfile
+echo "=== TESTCASE 11a: create redeemscript and multisig address"       | tee -a $logfile
+echo "carbide80: " >> $logfile
+echo "   pubkey:  0343947d178f20b8267488e488442650c27e1e9956c824077f646d6ce13a285d84" >> $logfile
+echo "   address: mirQLRn6ciqa3WwJSSe7RSJNVfAE9zLkS5" >> $logfile
+echo "carbide81: " >> $logfile
+echo "   pubkey:  0287f9169e265380a87cfd717ec543683f572db8b5a6d06231ff59c43429063ae4" >> $logfile
+echo "   address: mpzXCDpitVhGe1WofQXjzC1zgxGA5GCfg5" >> $logfile
+echo "redeemscript: <2><pk carbide81><pk carbide80><2>: " >> $logfile
+echo "   address: 2MxKEf2su6FGAUfCEAHreGFQvEYrfYNHvL7" >> $logfile
+echo "./tcls_create.sh -T -m 2 2 0287f9169e265380a87cfd717ec543683f572db8b5a6d06231ff59c43429063ae4,0343947d178f20b8267488e488442650c27e1e9956c824077f646d6ce13a285d84" >> $logfile
+./tcls_create.sh -T -m 2 2 0287f9169e265380a87cfd717ec543683f572db8b5a6d06231ff59c43429063ae4,0343947d178f20b8267488e488442650c27e1e9956c824077f646d6ce13a285d84 > tmp_cfile 
+chksum_ref="3a0f51a3cc45d2a9c24c63d38a70a66cc5b74c3cd290a59f3d90001c29b1e08b"
+chksum_prep
+echo " " >> $logfile
+
+echo "=== TESTCASE 11b: create the multisig spending tx"  | tee -a $logfile
+echo "carbide80:" >> $logfile
+echo " TX_IN address:   7649b33b6d80f7b5c866fbdb413419e04223974b0a5d6a3ca54944f30474d2bf" >> $logfile
+echo " TX_IN vout:      0" >> $logfile
+echo " TX_OUT address:  mirQLRn6ciqa3WwJSSe7RSJNVfAE9zLkS5" >> $logfile
+echo " TX_OUT amount:   50" >> $logfile
+echo "./tcls_create.sh -T -vv -c 7649b33b6d80f7b5c866fbdb413419e04223974b0a5d6a3ca54944f30474d2bf 0 4752210287f9169e265380a87cfd717ec543683f572db8b5a6d06231ff59c43429063ae4210343947d178f20b8267488e488442650c27e1e9956c824077f646d6ce13a285d8452ae 5000022000 5000000000 mirQLRn6ciqa3WwJSSe7RSJNVfAE9zLkS5" >> $logfile
+./tcls_create.sh -T -vv -c 7649b33b6d80f7b5c866fbdb413419e04223974b0a5d6a3ca54944f30474d2bf 0 4752210287f9169e265380a87cfd717ec543683f572db8b5a6d06231ff59c43429063ae4210343947d178f20b8267488e488442650c27e1e9956c824077f646d6ce13a285d8452ae 5000022000 5000000000 mirQLRn6ciqa3WwJSSe7RSJNVfAE9zLkS5 > tmp_cfile
+chksum_ref="02b24b4854cdf7e27c3514b192bc146b79d8d9cedfe80780ab19a01cb2136984"
+chksum_prep
+echo " " >> $logfile
+
+echo " " | tee -a $logfile
+}
+
+
 all_testcases() {
   testcase1 
   testcase2 
@@ -685,6 +746,7 @@ all_testcases() {
   testcase8 
   testcase9 
   testcase10
+  testcase11
 }
 
 #####################
@@ -726,35 +788,31 @@ while [ $# -ge 1 ]
  do
   case "$1" in
   -h)
-     echo "usage: $0 -h|-l [1-9]"
-     echo "  "
-     echo "script does several testcases, mostly with checksums for verification"
-     echo "  "
+     proc_help
      exit 0
+     ;;
+  -k)
+     no_cleanup=1
+     shift
      ;;
   -l)
      LOG=1
      shift
      ;;
-  1|2|3|4|5|6|7|8|9|10)
+  1|2|3|4|5|6|7|8|9|10|11)
      testcase$1 
      shift
      ;;
   *)
-     echo "unknown parameter(s), try -h, exiting gracefully ..."
+     proc_help
+     echo "unknown parameter(s), exiting gracefully ..."
      exit 0
      ;;
   esac
 done
 
-# clean up
-for i in tmp*; do
-  if [ -f "$i" ]; then rm $i ; fi
-done
-for i in *hex; do
-  if [ -f "$i" ]; then rm $i ; fi
-done
-for i in *pem; do
-  if [ -f "$i" ]; then rm $i ; fi
-done
+# clean up?
+if [ $no_cleanup -eq 0 ] ; then 
+  cleanup
+fi
 
