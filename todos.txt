@@ -306,6 +306,14 @@ OP_ENDIF
 and now bring in CSV or CLTV ! How?
 
 
+I77: 02dec2017, svn, sigscript
+===============================
+tcls_in_sig_script.sh: needs to work with testnet addresses!
+when running with testnet addresses, worng addresses are displayed.
+See testcase "tcls_testcases_create.sh -l 11" and webpage https://people.xiph.org/~greg/escrowexample.txt
+testcase 11a is ok (create a tx), testcase 11b is technically ok, but tcls_tx2txt.sh calls 
+tcls_in_sig_script.sh, and this interprets addresses incorrectly.
+
 
 
 #####################################

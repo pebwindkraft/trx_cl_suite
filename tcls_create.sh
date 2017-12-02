@@ -741,7 +741,7 @@ proc_msig() {
   echo "$redeemscript"
   echo " "
   echo "WARNING: YOU MUST NOT LOSE THE REDEEM SCRIPT, especially"
-  echo "if you don’t have a record of which public keys you used"
+  echo "if you don't have a record of which public keys you used"
   echo "to create the P2SH multisig address. You need the redeem"
   echo "script to spend any bitcoins sent to the P2SH address."
   echo "(https://bitcoin.org/en/developer-examples#p2sh-multisig)"
