@@ -13,6 +13,7 @@
 # 0.4     svn     19may17 improved fee handling and presentation at the end
 # 0.5     svn     06jul17 if creating a tx to an address beginning with "3", the script
 #                         should detect this (p2sh), and use OP_HASH160 OP_DATA_20 OP_EQUAL ...
+# 0.6     svn     02dec17 I19: trx validation and limits (100kb, max 400 input/output, ...)
 # 
 # Permission to use, copy, modify, and distribute this software for any 
 # purpose with or without fee is hereby granted, provided that the above 
@@ -31,9 +32,6 @@
 ###########################
 # Some variables ...      #
 ###########################
-Verbose=0
-VVerbose=0
-
 typeset -i i=0
 
 # flags used when calling the script with different parameters
@@ -70,15 +68,14 @@ RETURN_Address=''
 typeset -i msig_reqsigs=0
 typeset -i msig_reqkeys=0
 typeset -i msig_identifyer=0
+typeset -i msig_compressed_pubkeys=0
+typeset -i msig_uncompressed_pubkeys=0
 msig_cs_pubkeys=''
 
 RAW_TX=''
 RAW_TX_LINK2HEX="?format=hex"
 
 filename=''
-typeset -r c_utx_fn=tmp_c_utx.txt   # create unsigned, raw tx file (for later signing)
-typeset -r prawtx_fn=tmp_rawtx.txt  # partial raw tx file, used to extract data
-
 StepCode=''
 typeset -i StepCode_decimal=0
 typeset -i P2PKH_leading1_cnt=0
@@ -612,16 +609,9 @@ calc_adjusted_amount() {
 ### Multisig: create msig address and redeemscript, then exit ###
 #################################################################
 # validity rules require that the P2SH redeem script is at most 520 bytes. 
-# As the redeem script is [m pubkey1 pubkey2 ... n OP_CHECKMULTISIG], it 
-# follows that the length of all public keys together plus the number of 
-# public keys must not be over 517. Usually sigs are 73 chars:
-#   For compressed public keys, this means up to n=15
-#     m*73 + n*34 <= 496 (up to 1-of-12, 2-of-10, 3-of-8 or 4-of-6).
-#   For uncompressed ones, up to n=7
-#     m*73 + n*66 <= 496 (up to 1-of-6, 2-of-5, 3-of-4).
-#
+ 
 proc_msig() {
-  # 0.) verify, that $opcode_msig_reqkeys is not greater max, and sigs <= keys
+  # 0.) verify, that msig_sigs is not greater msig_required_pubkeys
   # 1.) convert msig_reqsigs into OP1-OP15 (dez 81-96, hex 0x51-0x60) for redeemscript
   # 2.) parse msig_cs_pubkeys, and separate into single public keys
   # 3.) verify, that we have amount of $msig_reqkeys in $msig_cs_pubkeys
@@ -629,13 +619,13 @@ proc_msig() {
   # 5.) get each pubkey's length
   # 6.) assemble redeemscript (example 2of3)
   #     <OP_2><len pubkey_A><pubkey_A><len PK_B><PKB><len PK_C><PK_C><OP_3><OP_CHECKMULTISIG>
-  # 7.) create P2SH adress from redeem script
+  # 7.) check for these max values:
+  #     msig_redeemscript_maxlen=520
+  #     msig_max_uncompressed_keys=6
+  #     msig_max_compressed_pubkeys=12
+  # 8.) create P2SH adress from redeem script
   #     RIPEMD160(SHA256(redeemscript))
   #     base58_encode("05", redeemscriptHash)
-  # 8.) check for these max values:
-  #     msig_redeemscript_maxlen=520
-  #     msig_max_uncompressed_keys=7
-  #     msig_max_compressed_keys=15
 
   i=0
   len_pubkey=0
@@ -645,12 +635,7 @@ proc_msig() {
   v_output " msig: required keys:            $msig_reqkeys"
   v_output " msig: comma separated pubkeys:  $msig_cs_pubkeys"
 
-  # STEP 0: verify we don't have more than x of 15 ...
-  if [ $msig_reqkeys -gt $msig_max_compressed_keys ] ; then
-    echo "*** ERROR: required msig keys ($msig_reqkeys) is greater than possible max value ($msig_max_compressed_keys)."
-    echo "  * Exiting gracefully..."
-    exit 1
-  fi 
+  # STEP 0: verify, that msig_reqsigs is not greater msig_reqkeys
   if [ $msig_reqsigs -gt $msig_reqkeys ] ; then
     echo "*** ERROR: required signatures ($msig_reqsigs) must be less or equal required keys ($msig_reqkeys)."
     echo "  * Exiting gracefully..."
@@ -669,7 +654,7 @@ proc_msig() {
   done  
   if [ $i -ne $msig_reqkeys ] ; then
     echo "*** Mismatch: comma separated key list does not contain $msig_reqkeys required keys."
-    echo "  * found only $i key(s). Exiting gracefully..."
+    echo "  * found $i key(s). Exiting gracefully..."
     exit 1
   else
     v_output " msig: found $i of $msig_reqkeys required keys in comma separated key list - good"
@@ -689,11 +674,66 @@ proc_msig() {
     # echo $pubkey
     # printf "%s" $pubkey | wc -c 
     len_pubkey=$( printf "%s" $pubkey | wc -c )
+    # compressed pubkeys are $hex_pubkey_compr_len (66)
+    # uncompressed pubkeys are $hex_pubkey_uncompr_len (130)
+    if [ $len_pubkey -eq $hex_pubkey_compr_len ] ; then
+      msig_compressed_pubkeys=$(( msig_compressed_pubkeys + 1 ))
+    fi
+    if [ $len_pubkey -eq $hex_pubkey_uncompr_len ] ; then
+      msig_uncompressed_pubkeys=$(( msig_uncompressed_pubkeys + 1 ))
+    fi
     len_hex=$( echo "obase=16;$len_pubkey/2" | bc )
 
     # STEP 6: assemble redeemscript
     redeemscript=$redeemscript$len_hex$pubkey
   done
+
+  # STEP 7: check against these limits (in tcls.conf):
+  # msig_redeemscript_maxlen=520
+  # msig_max_uncompressed_keys=7
+  # msig_max_compressed_pubkeys=15
+  # As the redeem script is [m pubkey1 pubkey2 ... n OP_CHECKMULTISIG], it 
+  # follows that the length of all public keys together plus the number of 
+  # public keys must not be over 517. Usually sigs are 73 chars:
+  #  For compressed public keys, this means up to n=15
+  #    m*73 + n*34 <= 496 (up to 1-of-12, 2-of-10, 3-of-8 or 4-of-6).
+  #  For uncompressed ones, up to n=7
+  #    m*73 + n*66 <= 496 (up to 1-of-6, 2-of-5, 3-of-4).
+  #
+  # which can be combined to: 
+  # if ($msig_reqsigs * 73bytes) + ($msig_reqkeys * 33bytes) + ($msig_reqkeys * 65bytes) >= 520
+  #
+
+  # echo "$msig_compressed_pubkeys $msig_max_compressed_pubkeys"
+  if [ $msig_compressed_pubkeys -gt $msig_max_compressed_pubkeys ] ; then 
+    echo "*** compressed pubkeys=$msig_compressed_pubkeys, max=$msig_max_compressed_pubkeys"
+    echo "    length of redeemscr would exceed limits"
+    echo "    Exiting gracefully ... "
+    echo "  "
+    exit 0
+  fi
+  # echo "$msig_uncompressed_pubkeys $msig_max_uncompressed_pubkeys"
+  if [ $msig_uncompressed_pubkeys -gt $msig_max_uncompressed_pubkeys ] ; then 
+    echo "*** uncompressed pubkeys=$msig_uncompressed_pubkeys, max=$msig_max_uncompressed_pubkeys"
+    echo "    length of redeemscr would exceed limits"
+    echo "    Exiting gracefully ... "
+    echo "  "
+    exit 0
+  fi
+  # printf "(%s * %s / 2) + " $msig_reqsigs $sig_max_length_chars
+  # printf "(%s * %s / 2) + " $msig_compressed_pubkeys $hex_pubkey_compr_len
+  # printf "(%s * %s / 2) \n" $msig_uncompressed_pubkeys $hex_pubkey_uncompr_len
+  len_redeemscr=$(( ($msig_reqsigs * $sig_max_length_chars / 2) + \
+                    ($msig_compressed_pubkeys * $hex_pubkey_compr_len / 2) + \
+                    ($msig_uncompressed_pubkeys * $hex_pubkey_uncompr_len / 2) ))
+  # echo "len_redeemscr=$len_redeemscr"
+  if [ $len_redeemscr -gt $msig_redeemscript_maxlen ] ; then 
+    echo "*** This combination of $msig_reqsigs-of-$msig_reqkeys exceeds limits."
+    echo "    len_redeemscr ($len_redeemscr) will exceed max length ($msig_redeemscript_maxlen)"
+    echo "    Exiting gracefully ... "
+    echo "  "
+    exit 0
+  fi
 
   redeemscript=$redeemscript$opcode_msig_reqkeys$OP_CHECKMULTISIG
   echo " "
@@ -701,7 +741,7 @@ proc_msig() {
   echo "$redeemscript"
   echo " "
   echo "WARNING: YOU MUST NOT LOSE THE REDEEM SCRIPT, especially"
-  echo "if you don’t have a record of which public keys you used"
+  echo "if you don't have a record of which public keys you used"
   echo "to create the P2SH multisig address. You need the redeem"
   echo "script to spend any bitcoins sent to the P2SH address."
   echo "(https://bitcoin.org/en/developer-examples#p2sh-multisig)"
@@ -711,24 +751,20 @@ proc_msig() {
   echo "script is permanently visible in the blockchain."
   echo " "
 
-  # STEP 7a: RIPEMD160(SHA256(redeemscript))
+  # STEP 8a: RIPEMD160(SHA256(redeemscript))
   tmpvar=$( echo $redeemscript | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
   result=$( printf "$tmpvar" | openssl dgst -sha256 | cut -d " " -f 2 )
   result=$( echo $result | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
   result=$( printf "$result" | openssl dgst -rmd160 | cut -d " " -f 2 )
   param=$result
 
-  # STEP 7b: base58_encode("05", redeemscriptHash)
+  # STEP 8b: base58_encode("05", redeemscriptHash)
   echo "The P2SH address:"
   if [ $T_param_flag -eq 0 ] ; then ./tcls_base58check_enc.sh -q -p2sh $result; fi
   if [ $T_param_flag -eq 1 ] ; then ./tcls_base58check_enc.sh -q -T -p2sh $result; fi
 
-# STEP 8: check against these values:
-# msig_redeemscript_maxlen=520
-# msig_max_uncompressed_keys=7
-# msig_max_compressed_keys=15
+  # here we are done with multisig redeem script, we can exit without error :-)  
   exit 0
-
 }
 
 

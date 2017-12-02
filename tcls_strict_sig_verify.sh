@@ -271,7 +271,7 @@ scriptsig_len=$(( $scriptsig_len_chars / 2 ))
 # 18 chars < scriptsig_len < 146 chars #
 ########################################
 if [ "$scriptsig_len_chars" -gt $sig_min_length_chars ] && \
-   [ "$scriptsig_len_chars" -lt $sig_max_length_chars ] ; then
+   [ "$scriptsig_len_chars" -le $sig_max_length_chars ] ; then
   v_output  "    Minimum and maximum size constraints                        - ok"
   vv_output "    Scriptsig length: $scriptsig_len_chars, good ($sig_min_length_chars < scriptsig_len < $sig_max_length_chars )"
 else

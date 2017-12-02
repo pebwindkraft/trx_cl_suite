@@ -90,7 +90,7 @@ chksum_prep
 
 echo "=== TESTCASE 1c: $chksum_cmd tcls_strict_sig_verify.sh" | tee -a $logfile
 cp tcls_strict_sig_verify.sh tmp_tx_cfile
-chksum_ref="0d9ea108a4cfd61a50969a1bf08fd2f1f94a1acb3f144ebfa235c7449ad70c12" 
+chksum_ref="50bf08de6166ebbb3ca520ae92f93360aad48f5a4c6d3fa0f71575736b0b9169" 
 chksum_prep
 
 echo " " | tee -a $logfile
@@ -258,7 +258,7 @@ echo "  expected redeemScript: 52410491bba2510912a5bd37da1fb5b1673010e43d2c6d812
 printf "  found redeemScript:    " >> $logfile
 grep -A1 "The redeemscript" tmp_tx_cfile  | tail -n1 >> $logfile
 echo " " >> $logfile
-chksum_ref="d840054e811d468780bc5dc5c653de483822c4468ad1c309e12aae9aaa368bb4" 
+chksum_ref="912c6862f98dcdfa895432492671ddccb54aeaaefb10a3e10108c39c953df1d1" 
 chksum_prep
 echo " " >> $logfile
 
@@ -281,15 +281,15 @@ echo "./tcls_sign.sh -vv -m -f tmp_c_utx.txt -w 5JaTXbAUmfPYZFRwrYaALK48fN6sFJp4
 ./tcls_create.sh -v -c 3c9018e8d5615c306d72397f8f5eef44308c98fb576a88e030c25456b4f3a7ac 0 52410491bba2510912a5bd37da1fb5b1673010e43d2c6d812c514e91bfa9f2eb129e1c183329db55bd868e209aac2fbc02cb33d98fe74bf23f0c235d6126b1d8334f864104865c40293a680cb9c020e7b1e106d8c1916d3cef99aa431a56d253e69256dac09ef122b1a986818a7cb624532f062c1d1f8722084861c5c3291ccffef4ec687441048d2455d2403e08708fc1f556002f1b6cd83f992d085097f9974ab08a28838f07896fbab08f39495e15fa6fad6edbfb1e754e35fa1c7844c41f322a1863d4621353ae 1134000 1000000 1GtpSrGhRGY5kkrNz4RykoqRQoJuG2L6DS >> /dev/null
 ./tcls_sign.sh -vv -m -f tmp_c_utx.txt -w 5JaTXbAUmfPYZFRwrYaALK48fN6sFJp4rHqq2QSXs8ucfpE4yQU -p 0491bba2510912a5bd37da1fb5b1673010e43d2c6d812c514e91bfa9f2eb129e1c183329db55bd868e209aac2fbc02cb33d98fe74bf23f0c235d6126b1d8334f86 >> /dev/null
 
-./tcls_tx2txt.sh -vv -f tmp_stx.txt -u > tmp_svn
+./tcls_tx2txt.sh -vv -f tmp_stx.txt -u > tmp_svn_5c
 # get some data into the compare file, without signature (which is changing everytime)
 echo "  ..." > tmp_tx_cfile
-cat tmp_svn | grep -A7 -B1 "decode SIG_script OPCODES" | sed 's/44/XX/g;s/45/XX/g;s/46/XX/g;s/47/XX/g;s/48/XX/g;s/49/XX/g;s/70/xx/g;s/71/xx/g;s/72/xx/g;s/73/xx/g;s/20/XX/g;s/21/XX/g;s/32/xx/g;s/33/xx/g' >> tmp_tx_cfile
+cat tmp_svn_5c | grep -A7 -B1 "decode SIG_script OPCODES" | sed 's/44/XX/g;s/45/XX/g;s/46/XX/g;s/47/XX/g;s/48/XX/g;s/49/XX/g;s/70/xx/g;s/71/xx/g;s/72/xx/g;s/73/xx/g;s/20/XX/g;s/21/XX/g;s/32/xx/g;s/33/xx/g' >> tmp_tx_cfile
 echo "        <SIG R>" >> tmp_tx_cfile
-cat tmp_svn | grep "this is SIG S" | sed 's/20/XX/g;s/21/XX/g;s/32/xx/g;s/33/xx/g' >> tmp_tx_cfile
+cat tmp_svn_5c | grep "this is SIG S" | sed 's/20/XX/g;s/21/XX/g;s/32/xx/g;s/33/xx/g' >> tmp_tx_cfile
 echo "        <SIG S>" >> tmp_tx_cfile
 echo "        strict sig checks ..." >> tmp_tx_cfile
-cat tmp_svn  | tail -n 66 >> tmp_tx_cfile
+cat tmp_svn_5c  | tail -n 66 >> tmp_tx_cfile
 echo " " >> tmp_tx_cfile
 chksum_ref="e170c8c03f5b807f5b9255e77a7da0bd178e6bdfe7da1f9e6df67bcd7a3e730b"
 chksum_prep
@@ -297,26 +297,26 @@ chksum_prep
 echo "=== TESTCASE 5d: ... and sign again with second sig" | tee -a $logfile
 # we take the last two lines of the tcls_sign.sh script into the file, which 
 # will be checksummed. This way we assure that the script went through successfully.
-echo "./tcls_sign.sh -vv -m -f tmp_stx.txt -w 5JFjmGo5Fww9p8gvx48qBYDJNAzR9pmH5S389axMtDyPT8ddqmw -p 048d2455d2403e08708fc1f556002f1b6cd83f992d085097f9974ab08a28838f07896fbab08f39495e15fa6fad6edbfb1e754e35fa1c7844c41f322a1863d46213 | tail -n2 >> tmp_tx_cfile" >> $logfile
-./tcls_sign.sh -vv -m -f tmp_stx.txt -w 5JFjmGo5Fww9p8gvx48qBYDJNAzR9pmH5S389axMtDyPT8ddqmw -p 048d2455d2403e08708fc1f556002f1b6cd83f992d085097f9974ab08a28838f07896fbab08f39495e15fa6fad6edbfb1e754e35fa1c7844c41f322a1863d46213 | tail -n2 >> tmp_tx_cfile
+echo "./tcls_sign.sh -vv -m -f tmp_stx.txt -w 5JFjmGo5Fww9p8gvx48qBYDJNAzR9pmH5S389axMtDyPT8ddqmw -p 048d2455d2403e08708fc1f556002f1b6cd83f992d085097f9974ab08a28838f07896fbab08f39495e15fa6fad6edbfb1e754e35fa1c7844c41f322a1863d46213 | tail -n2 > tmp_tx_cfile" >> $logfile
+./tcls_sign.sh -vv -m -f tmp_stx.txt -w 5JFjmGo5Fww9p8gvx48qBYDJNAzR9pmH5S389axMtDyPT8ddqmw -p 048d2455d2403e08708fc1f556002f1b6cd83f992d085097f9974ab08a28838f07896fbab08f39495e15fa6fad6edbfb1e754e35fa1c7844c41f322a1863d46213 | tail -n2 > tmp_tx_cfile
 # we verify the output with tcls_tx2txt.sh, and search and replace numbers, 
 # where signature's data is included (which is changing everytime).
 # the first sig was already checked in testcase 5c, so only need to check 2nd sig
-./tcls_tx2txt.sh -vv -f tmp_stx.txt > tmp_svn
-echo "  ..." > tmp_tx_cfile
-cat tmp_svn | grep -A7 -B1 "decode SIG_script OPCODES" | sed 's/44/XX/g;s/45/XX/g;s/46/XX/g;s/47/XX/g;s/48/XX/g;s/49/XX/g;s/70/xx/g;s/71/xx/g;s/72/xx/g;s/73/xx/g;s/20/XX/g;s/21/XX/g;s/32/xx/g;s/33/xx/g' >> tmp_tx_cfile
+./tcls_tx2txt.sh -vv -f tmp_stx.txt > tmp_svn_5d
+echo "  ..." >> tmp_tx_cfile
+cat tmp_svn_5d | grep -A7 -B1 "decode SIG_script OPCODES" | sed 's/44/XX/g;s/45/XX/g;s/46/XX/g;s/47/XX/g;s/48/XX/g;s/49/XX/g;s/70/xx/g;s/71/xx/g;s/72/xx/g;s/73/xx/g;s/20/XX/g;s/21/XX/g;s/32/xx/g;s/33/xx/g' >> tmp_tx_cfile
 echo "        <SIG R>" >> tmp_tx_cfile
-cat tmp_svn | grep "this is SIG S" | sed 's/20/XX/g;s/21/XX/g;s/32/xx/g;s/33/xx/g' >> tmp_tx_cfile
+cat tmp_svn_5d | grep "this is SIG S" | sed 's/20/XX/g;s/21/XX/g;s/32/xx/g;s/33/xx/g' >> tmp_tx_cfile
 echo "        <SIG S>" >> tmp_tx_cfile
 echo "        strict sig checks ..." >> tmp_tx_cfile
-cat tmp_svn  | tail -n 66 >> tmp_tx_cfile
+cat tmp_svn_5d  | tail -n 66 >> tmp_tx_cfile
 echo " " >> tmp_tx_cfile
 # we verify the signature with the script tmp_vfy.sh, which is created by tcls_sign.sh 
 # again, we take only the last line, to avoid ever changing signature data
 echo "### tmp_vfy.sh:" >> tmp_tx_cfile
 ./tmp_vfy.sh | tail -n2 >> tmp_tx_cfile
 echo " " >> tmp_tx_cfile
-chksum_ref="07895ae96ff509ffe5120ccd625f50e58ef79e4610f3aa5def30409f3f59594c"
+chksum_ref="6d296943903c2bf3125b86ac46a10a17a0684e9f12d484a9124bbbc58541791b"
 chksum_prep
 
 echo " " | tee -a $logfile

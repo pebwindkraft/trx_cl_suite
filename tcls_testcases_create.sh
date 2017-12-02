@@ -78,7 +78,7 @@ echo "================================================================" | tee -a
 
 echo "=== TESTCASE 1a: $chksum_cmd tcls_create.sh" | tee -a $logfile
 cp tcls_create.sh tmp_cfile
-chksum_ref="e00bc2c4b1080570fd1ae17ff2b750def840dd2626ddf845fa596187ba60f822" 
+chksum_ref="64c849cee8be7305802ebc4f846c1da6aaddda131f470b1b95210417d914acae" 
 chksum_prep
 
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
@@ -550,49 +550,58 @@ echo "================================================================" | tee -a
 echo "=== TESTCASE 9a: msig, 2of3, only 1 address"                      | tee -a $logfile
 echo "./$create_cmd -m 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm" >> $logfile
 ./$create_cmd -m 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm > tmp_cfile
-chksum_ref="fd4bdec669f3bb7662411b8e302b4a73333e254a76d68c5c4bf14bcb8eff1249"
+chksum_ref="823c57a3b40eab50a0a2df5332c0152f6a29b149cf2a22f3d8644f1b1a87dfda"
 chksum_prep
 
 echo "=== TESTCASE 9b: msig, 2of3, only 2 addresses" | tee -a $logfile 
 echo "./$create_cmd -m 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM" >> $logfile 
 ./$create_cmd -m 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM > tmp_cfile
-chksum_ref="7358768f3bdd03de24d5457c02aaaa476b220cac7518ad9558865a4cd8ebacbb"
+chksum_ref="2b78bc9570b165b7e68d4e207b2f73df3bcab32cad22b84d3d700469adb51cc0"
 chksum_prep
 
-echo "=== TESTCASE 9c: msig, 2of16, invalid, max=15" | tee -a $logfile
-echo "./$create_cmd -m 2 16 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
-./$create_cmd -m 2 16 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
-chksum_ref="519dc5ceeaa85193fe0667d20b14c53b620d7f1b82faea3f66855e86ea2862c9"
-chksum_prep
-
-echo "=== TESTCASE 9d: msig, 3of2, invalid, 3of2 does not work :-)" | tee -a $logfile
+echo "=== TESTCASE 9c: msig, 3of2, invalid, 3of2 does not work :-)" | tee -a $logfile
 echo "./$create_cmd -v -m 3 2 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
 ./$create_cmd -v -m 3 2 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
 chksum_ref="b1fbc0198b8c2afd362631fc59a4db3c9438d45e564bb99d937cddaf214f27da"
 chksum_prep
 
-echo "=== TESTCASE 9e: -m and -f params - that clashes!" | tee -a $logfile
+echo "=== TESTCASE 9d: -m and -f params - that clashes!" | tee -a $logfile
 echo "./$create_cmd -v -m -f 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
 ./$create_cmd -v -m -f 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
 chksum_ref="f078cb8b0b8915a9bc9d5d0f4e80b3b8d8649c26bb584bec79fa96985d6ae934"
 chksum_prep
 
-echo "=== TESTCASE 9f: -m and -c params - that clashes!" | tee -a $logfile
+echo "=== TESTCASE 9e: -m and -c params - that clashes!" | tee -a $logfile
 echo "./$create_cmd -v -m -c 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
 ./$create_cmd -v -m -c 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
 chksum_ref="f078cb8b0b8915a9bc9d5d0f4e80b3b8d8649c26bb584bec79fa96985d6ae934"
 chksum_prep
 
-echo "=== TESTCASE 9g: -m and -t params - that clashes!" | tee -a $logfile
+echo "=== TESTCASE 9f: -m and -t params - that clashes!" | tee -a $logfile
 echo "./$create_cmd -v -m -t 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
 ./$create_cmd -v -m -t 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
 chksum_ref="f078cb8b0b8915a9bc9d5d0f4e80b3b8d8649c26bb584bec79fa96985d6ae934"
 chksum_prep
 
-echo "=== TESTCASE 9h: msig, 2of3, but wrong bitcoin pubkeys" | tee -a $logfile
+echo "=== TESTCASE 9g: msig, 2of3, but wrong bitcoin pubkeys" | tee -a $logfile
 echo "./$create_cmd -m 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM" >> $logfile
 ./$create_cmd -m 2 3 1runeksijzfVxyrpiyCY2LCBvYsSiFsCm,16UwLL9Risc3QfPqBUvKofHmBQ7wMtjvM,12GTF5ARSrqJ2kZd4C9XyGPesoVgP5qCdM > tmp_cfile
 chksum_ref="233c0a616e2e8690ce886fb9ed415a73adf0aaa278a92181660e2c071165ec75"
+chksum_prep
+
+echo "=== TESTCASE 9h: msig, exceeding max number of keys and max length of redeem script" | tee -a $logfile
+echo "./$create_cmd -m 1 13 <pubkey 1> ... <pubkey 13>" >> $logfile
+./$create_cmd -m 1 13 03310188e911026cf18c3ce274e0ebb5f95b007f230d8cb7d09879d96dbeab1aff,0243930746e6ed6552e03359db521b088134652905bd2d1541fa9124303a41e956,029e03a901b85534ff1e92c43c74431f7ce72046060fcf7a95c37e148f78c77255,03310188e911026cf18c3ce274e0ebb5f95b007f230d8cb7d09879d96dbeab1aff,0243930746e6ed6552e03359db521b088134652905bd2d1541fa9124303a41e956,029e03a901b85534ff1e92c43c74431f7ce72046060fcf7a95c37e148f78c77255,03310188e911026cf18c3ce274e0ebb5f95b007f230d8cb7d09879d96dbeab1aff,0243930746e6ed6552e03359db521b088134652905bd2d1541fa9124303a41e956,029e03a901b85534ff1e92c43c74431f7ce72046060fcf7a95c37e148f78c77255,03310188e911026cf18c3ce274e0ebb5f95b007f230d8cb7d09879d96dbeab1aff,0243930746e6ed6552e03359db521b088134652905bd2d1541fa9124303a41e956,029e03a901b85534ff1e92c43c74431f7ce72046060fcf7a95c37e148f78c77255,03310188e911026cf18c3ce274e0ebb5f95b007f230d8cb7d09879d96dbeab1aff > tmp_cfile
+
+echo "./$create_cmd -m 1 7 <pubkey 1> ... <pubkey 7>" >> $logfile
+./$create_cmd -m 1 7 0491bba2510912a5bd37da1fb5b1673010e43d2c6d812c514e91bfa9f2eb129e1c183329db55bd868e209aac2fbc02cb33d98fe74bf23f0c235d6126b1d8334f86,04865c40293a680cb9c020e7b1e106d8c1916d3cef99aa431a56d253e69256dac09ef122b1a986818a7cb624532f062c1d1f8722084861c5c3291ccffef4ec6874,048d2455d2403e08708fc1f556002f1b6cd83f992d085097f9974ab08a28838f07896fbab08f39495e15fa6fad6edbfb1e754e35fa1c7844c41f322a1863d46213,0491bba2510912a5bd37da1fb5b1673010e43d2c6d812c514e91bfa9f2eb129e1c183329db55bd868e209aac2fbc02cb33d98fe74bf23f0c235d6126b1d8334f86,0491bba2510912a5bd37da1fb5b1673010e43d2c6d812c514e91bfa9f2eb129e1c183329db55bd868e209aac2fbc02cb33d98fe74bf23f0c235d6126b1d8334f86,0491bba2510912a5bd37da1fb5b1673010e43d2c6d812c514e91bfa9f2eb129e1c183329db55bd868e209aac2fbc02cb33d98fe74bf23f0c235d6126b1d8334f86,0491bba2510912a5bd37da1fb5b1673010e43d2c6d812c514e91bfa9f2eb129e1c183329db55bd868e209aac2fbc02cb33d98fe74bf23f0c235d6126b1d8334f86 >> tmp_cfile
+
+echo "./$create_cmd -m 2 12 <compr. pubkey 1> ... <compr. pubkey 12>" >> $logfile
+./$create_cmd -m 2 12 03310188e911026cf18c3ce274e0ebb5f95b007f230d8cb7d09879d96dbeab1aff,0243930746e6ed6552e03359db521b088134652905bd2d1541fa9124303a41e956,029e03a901b85534ff1e92c43c74431f7ce72046060fcf7a95c37e148f78c77255,03310188e911026cf18c3ce274e0ebb5f95b007f230d8cb7d09879d96dbeab1aff,0243930746e6ed6552e03359db521b088134652905bd2d1541fa9124303a41e956,029e03a901b85534ff1e92c43c74431f7ce72046060fcf7a95c37e148f78c77255,03310188e911026cf18c3ce274e0ebb5f95b007f230d8cb7d09879d96dbeab1aff,0243930746e6ed6552e03359db521b088134652905bd2d1541fa9124303a41e956,029e03a901b85534ff1e92c43c74431f7ce72046060fcf7a95c37e148f78c77255,03310188e911026cf18c3ce274e0ebb5f95b007f230d8cb7d09879d96dbeab1aff,0243930746e6ed6552e03359db521b088134652905bd2d1541fa9124303a41e956,029e03a901b85534ff1e92c43c74431f7ce72046060fcf7a95c37e148f78c77255 >> tmp_cfile
+
+echo "./$create_cmd -m 2 6 <uncompr. pubkey 1> ... <uncompr. pubkey 6>" >> $logfile
+./$create_cmd -m 2 6 0491bba2510912a5bd37da1fb5b1673010e43d2c6d812c514e91bfa9f2eb129e1c183329db55bd868e209aac2fbc02cb33d98fe74bf23f0c235d6126b1d8334f86,04865c40293a680cb9c020e7b1e106d8c1916d3cef99aa431a56d253e69256dac09ef122b1a986818a7cb624532f062c1d1f8722084861c5c3291ccffef4ec6874,048d2455d2403e08708fc1f556002f1b6cd83f992d085097f9974ab08a28838f07896fbab08f39495e15fa6fad6edbfb1e754e35fa1c7844c41f322a1863d46213,0491bba2510912a5bd37da1fb5b1673010e43d2c6d812c514e91bfa9f2eb129e1c183329db55bd868e209aac2fbc02cb33d98fe74bf23f0c235d6126b1d8334f86,0491bba2510912a5bd37da1fb5b1673010e43d2c6d812c514e91bfa9f2eb129e1c183329db55bd868e209aac2fbc02cb33d98fe74bf23f0c235d6126b1d8334f86,0491bba2510912a5bd37da1fb5b1673010e43d2c6d812c514e91bfa9f2eb129e1c183329db55bd868e209aac2fbc02cb33d98fe74bf23f0c235d6126b1d8334f86 >> tmp_cfile
+chksum_ref="6d75a8e8ce6f8d2224d471de31cd8c94979509fc5a0c8fca46c2158f6a2e6cdd"
 chksum_prep
 
 echo "=== TESTCASE 9i: msig 2of3, uncompressed pubkeys, ok ..."          | tee -a $logfile
@@ -600,38 +609,38 @@ echo "    https://gist.githubusercontent.com/gavinandresen/3966071/raw/" >> $log
 echo "    1f6cfa4208bc82ee5039876b4f065a705ce64df7/TwoOfThree.sh"        >> $logfile
 echo "./$create_cmd -v -m 2 3 0491bba2510912a5bd37da1fb5b1673010e43d2c6d812c514e91bfa9f2eb129e1c183329db55bd868e209aac2fbc02cb33d98fe74bf23f0c235d6126b1d8334f86,04865c40293a680cb9c020e7b1e106d8c1916d3cef99aa431a56d253e69256dac09ef122b1a986818a7cb624532f062c1d1f8722084861c5c3291ccffef4ec6874,048d2455d2403e08708fc1f556002f1b6cd83f992d085097f9974ab08a28838f07896fbab08f39495e15fa6fad6edbfb1e754e35fa1c7844c41f322a1863d46213" >> $logfile
 ./$create_cmd -v -m 2 3 0491bba2510912a5bd37da1fb5b1673010e43d2c6d812c514e91bfa9f2eb129e1c183329db55bd868e209aac2fbc02cb33d98fe74bf23f0c235d6126b1d8334f86,04865c40293a680cb9c020e7b1e106d8c1916d3cef99aa431a56d253e69256dac09ef122b1a986818a7cb624532f062c1d1f8722084861c5c3291ccffef4ec6874,048d2455d2403e08708fc1f556002f1b6cd83f992d085097f9974ab08a28838f07896fbab08f39495e15fa6fad6edbfb1e754e35fa1c7844c41f322a1863d46213 > tmp_cfile
-chksum_ref="d68b3d83ece6eec5462da55087d0f2246c945f4467c025b625b35f985635964a"
+chksum_ref="556e0f91c0c313807ca0bb02e3cc7313639779d14c031d2a11dd926035316d65"
 chksum_prep
 
 echo "=== TESTCASE 9j: msig 2of3, uncompressed pubkeys, ok ..."          | tee -a $logfile
 echo "    https://bitcointalk.org/index.php?topic=82213.msg906833#msg906833" >> $logfile
 echo "./$create_cmd -v -m 2 3 0446fc07bc99bef8e7a875249657c65e1f1793fd0bf45e2c39d539b6f8fcd44676acc552ab886c11eb08f4a275e7bb7dc4fdaf9c4b2228856f168a69df7d216fbc,04df70eb0107ed08e1ddcd4b4d85d26bf8cca301f5c98fd15f5efef12ba4de72bfef7287f964e304207164c003029449740aaae2d6af1ff7ae3f6bb27f3012296c,046003581a3ff5bc3dedaa6da4834ce7bcd49d3f114ce15791f6b5de8b0cec81a46db2eb8cf84d2db845854c57788c7283ab4040aeb3595bc5c68303a17fdde7c8" >> $logfile
 ./$create_cmd -v -m 2 3 0446fc07bc99bef8e7a875249657c65e1f1793fd0bf45e2c39d539b6f8fcd44676acc552ab886c11eb08f4a275e7bb7dc4fdaf9c4b2228856f168a69df7d216fbc,04df70eb0107ed08e1ddcd4b4d85d26bf8cca301f5c98fd15f5efef12ba4de72bfef7287f964e304207164c003029449740aaae2d6af1ff7ae3f6bb27f3012296c,046003581a3ff5bc3dedaa6da4834ce7bcd49d3f114ce15791f6b5de8b0cec81a46db2eb8cf84d2db845854c57788c7283ab4040aeb3595bc5c68303a17fdde7c8 > tmp_cfile
-chksum_ref="acb5aeb10e01e3c106ad7065212e62f3c69f595448520d7a3ad98dc051072a2b"
+chksum_ref="aa475c26b3b4cb1f8dbbdae57111b2558cf25ccb81167e9a445ac79146120ad1"
 chksum_prep
 
 echo "=== TESTCASE 9k: msig 2of3, uncompressed pubkeys, ok ..." | tee -a $logfile
 echo "./$create_cmd -v -m 2 3 04a882d414e478039cd5b52a92ffb13dd5e6bd4515497439dffd691a0f12af9575fa349b5694ed3155b136f09e63975a1700c9f4d4df849323dac06cf3bd6458cd,046ce31db9bdd543e72fe3039a1f1c047dab87037c36a669ff90e28da1848f640de68c2fe913d363a51154a0c62d7adea1b822d05035077418267b1a1379790187,0411ffd36c70776538d079fbae117dc38effafb33304af83ce4894589747aee1ef992f63280567f52f5ba870678b4ab4ff6c8ea600bd217870a8b4f1f09f3a8e83" >> $logfile
 ./$create_cmd -v -m 2 3 04a882d414e478039cd5b52a92ffb13dd5e6bd4515497439dffd691a0f12af9575fa349b5694ed3155b136f09e63975a1700c9f4d4df849323dac06cf3bd6458cd,046ce31db9bdd543e72fe3039a1f1c047dab87037c36a669ff90e28da1848f640de68c2fe913d363a51154a0c62d7adea1b822d05035077418267b1a1379790187,0411ffd36c70776538d079fbae117dc38effafb33304af83ce4894589747aee1ef992f63280567f52f5ba870678b4ab4ff6c8ea600bd217870a8b4f1f09f3a8e83 > tmp_cfile
-chksum_ref="03fcccb51d0079b4d39588ae6e686bd0d1ae1483398b04e1c100204be4981ebb"
+chksum_ref="84e1e32a04e58ccc38ca08da51f31be3b6a9de642b3e55e159472b149155339b"
 chksum_prep
 
 echo "=== TESTCASE 9l: msig with testnet 2of3, ok ..." | tee -a $logfile
 echo "./$create_cmd -T -v -m 2 3 03834bd129bf0a2e03d53b74bc2eef8d9a5faed93f37b4938ae7127d430804a3cf,03fae2fa202fbfd9d0a8650f537df154158761ce9ad2460793aed74b946babb9f4,038cbc733032dcbed878c727840bef9c2aeb01447e1701c372c46a2ef00f48e02c" >> $logfile
 ./$create_cmd -T -v -m 2 3 03834bd129bf0a2e03d53b74bc2eef8d9a5faed93f37b4938ae7127d430804a3cf,03fae2fa202fbfd9d0a8650f537df154158761ce9ad2460793aed74b946babb9f4,038cbc733032dcbed878c727840bef9c2aeb01447e1701c372c46a2ef00f48e02c > tmp_cfile
-chksum_ref="fb8cd92c1654d8a33b4c8a302982b85d49cf93128f1244ec108814f41c2cd48f"
+chksum_ref="0036216f998ff6a294429753b9dd8c54d30fbd63153f6b6939e64478d34b4449"
 chksum_prep
 
 echo "=== TESTCASE 9m: msig: https://bitcoin.org/en/developer-examples#p2sh-multisig" | tee -a $logfile
 echo "./$create_cmd -T -v -m 2 3 03310188e911026cf18c3ce274e0ebb5f95b007f230d8cb7d09879d96dbeab1aff,0243930746e6ed6552e03359db521b088134652905bd2d1541fa9124303a41e956,029e03a901b85534ff1e92c43c74431f7ce72046060fcf7a95c37e148f78c77255" >> $logfile
 ./$create_cmd -T -v -m 2 3 03310188e911026cf18c3ce274e0ebb5f95b007f230d8cb7d09879d96dbeab1aff,0243930746e6ed6552e03359db521b088134652905bd2d1541fa9124303a41e956,029e03a901b85534ff1e92c43c74431f7ce72046060fcf7a95c37e148f78c77255 > tmp_cfile
-chksum_ref="fcc424c693eccb492410f4e510da152155b43b9c1cd085861294d8099d0dade7"
+chksum_ref="cd6564b769ec203bf632d00698ad2bedd0e62dd73a3b6c589f416a2ae6e9ff46"
 chksum_prep
 
 echo "=== TESTCASE 9n: msig: tbd ..." | tee -a $logfile
 echo "./$create_cmd -T -v -m 2 3 ..." >> $logfile
 ./$create_cmd -T -v -m 2 3 ... > tmp_cfile
-chksum_ref="ac11872b9eb8e4caab4f6e819892251a006467c02ef249c26795abf675702ade"
+chksum_ref="3b15a2cc976acea85075f5aeeabbe749cab498370ade538fa0ea7ce3ead60b05"
 chksum_prep
 
 echo " " | tee -a $logfile
@@ -700,6 +709,7 @@ chksum_prep
 echo " " | tee -a $logfile
 }
 
+
 testcase11() {
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 11: Testnet multisig (carbide 80 and 81)        ===" | tee -a $logfile
@@ -715,7 +725,7 @@ echo "redeemscript: <2><pk carbide81><pk carbide80><2>: " >> $logfile
 echo "   address: 2MxKEf2su6FGAUfCEAHreGFQvEYrfYNHvL7" >> $logfile
 echo "./tcls_create.sh -T -m 2 2 0287f9169e265380a87cfd717ec543683f572db8b5a6d06231ff59c43429063ae4,0343947d178f20b8267488e488442650c27e1e9956c824077f646d6ce13a285d84" >> $logfile
 ./tcls_create.sh -T -m 2 2 0287f9169e265380a87cfd717ec543683f572db8b5a6d06231ff59c43429063ae4,0343947d178f20b8267488e488442650c27e1e9956c824077f646d6ce13a285d84 > tmp_cfile 
-chksum_ref="3a0f51a3cc45d2a9c24c63d38a70a66cc5b74c3cd290a59f3d90001c29b1e08b"
+chksum_ref="0b17df1f53ef9b7ed69c35bdde915a6550433070588bd091302b360fa14e16de"
 chksum_prep
 echo " " >> $logfile
 
@@ -727,7 +737,55 @@ echo " TX_OUT address:  mirQLRn6ciqa3WwJSSe7RSJNVfAE9zLkS5" >> $logfile
 echo " TX_OUT amount:   50" >> $logfile
 echo "./tcls_create.sh -T -vv -c 7649b33b6d80f7b5c866fbdb413419e04223974b0a5d6a3ca54944f30474d2bf 0 4752210287f9169e265380a87cfd717ec543683f572db8b5a6d06231ff59c43429063ae4210343947d178f20b8267488e488442650c27e1e9956c824077f646d6ce13a285d8452ae 5000022000 5000000000 mirQLRn6ciqa3WwJSSe7RSJNVfAE9zLkS5" >> $logfile
 ./tcls_create.sh -T -vv -c 7649b33b6d80f7b5c866fbdb413419e04223974b0a5d6a3ca54944f30474d2bf 0 4752210287f9169e265380a87cfd717ec543683f572db8b5a6d06231ff59c43429063ae4210343947d178f20b8267488e488442650c27e1e9956c824077f646d6ce13a285d8452ae 5000022000 5000000000 mirQLRn6ciqa3WwJSSe7RSJNVfAE9zLkS5 > tmp_cfile
-chksum_ref="02b24b4854cdf7e27c3514b192bc146b79d8d9cedfe80780ab19a01cb2136984"
+chksum_ref="eefa0aaae8eac7a7f27feffe1c2920a8ea81f46a996049dd99369f77665a7654"
+chksum_prep
+echo " " >> $logfile
+
+echo " " | tee -a $logfile
+}
+
+
+testcase12() {
+echo "================================================================" | tee -a $logfile
+echo "=== TESTCASE 12: Testing tx limit (100kb, empty inputs, ...) ===" | tee -a $logfile
+echo "================================================================" | tee -a $logfile
+echo "=== TESTCASE 12a: check neither in or out lists are empty"        | tee -a $logfile
+chksum_ref="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+chksum_prep
+echo " " >> $logfile
+
+echo "=== TESTCASE 12b: Size in bytes <= max_trx_size"  | tee -a $logfile
+chksum_ref="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+chksum_prep
+echo " " >> $logfile
+
+echo " " | tee -a $logfile
+echo "=== TESTCASE 12c: 0 <= (each output value and total) <= 21mio BTC"  | tee -a $logfile
+chksum_ref="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+chksum_prep
+echo " " >> $logfile
+
+echo " " | tee -a $logfile
+echo "=== TESTCASE 12d: none of the inputs have hash=0, n>=0"  | tee -a $logfile
+chksum_ref="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+chksum_prep
+echo " " >> $logfile
+
+echo " " | tee -a $logfile
+echo "=== TESTCASE 12e: sum of input values >= sum of output values"  | tee -a $logfile
+chksum_ref="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+chksum_prep
+echo " " >> $logfile
+
+echo " " | tee -a $logfile
+echo "=== TESTCASE 12f: reject, if referenced output does not exist"  | tee -a $logfile
+chksum_ref="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+chksum_prep
+echo " " >> $logfile
+
+echo " " | tee -a $logfile
+echo "=== TESTCASE 12g: tx size in bytes >= 100"  | tee -a $logfile
+chksum_ref="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 chksum_prep
 echo " " >> $logfile
 
@@ -799,7 +857,7 @@ while [ $# -ge 1 ]
      LOG=1
      shift
      ;;
-  1|2|3|4|5|6|7|8|9|10|11)
+  1|2|3|4|5|6|7|8|9|10|11|12)
      testcase$1 
      shift
      ;;
