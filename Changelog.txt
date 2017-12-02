@@ -47,4 +47,5 @@ yymmmdd
  					     get multisig working correctly in signing
 17nov14 svn   tcls_sign.sh              I72: Signature Verification included in shell 
                                              script "tmp_vfy.sh"
+17nov29 svn   tcls_create.sh            ???: fix msig redeemscript limits (max length, max keys)
 

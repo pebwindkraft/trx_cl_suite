@@ -260,7 +260,7 @@ s04_R_LENGTH() {
         op_data_show
         s05_SIG_R
         ;;
-    21) echo "    $cur_opcode: OP_LENGTH_0x20:      this is SIG R (33 Bytes)"
+    21) echo "    $cur_opcode: OP_LENGTH_0x21:      this is SIG R (33 Bytes)"
         op_data_show
         s05_SIG_R
         ;;
