@@ -13,7 +13,7 @@
 # 0.4     svn     19may17 improved fee handling and presentation at the end
 # 0.5     svn     06jul17 if creating a tx to an address beginning with "3", the script
 #                         should detect this (p2sh), and use OP_HASH160 OP_DATA_20 OP_EQUAL ...
-# 0.6     svn     02dec17 I19: trx validation and limits (100kb, max 400 input/output, ...)
+# 0.6     svn     02dec17 I19: trx validation and limits 
 # 
 # Permission to use, copy, modify, and distribute this software for any 
 # purpose with or without fee is hereby granted, provided that the above 
@@ -62,6 +62,7 @@ typeset -i TX_amount=0              # the requested TX amount
 typeset -i prev_tx_utxo_amount=0    # to calculate tx fee
 typeset -i file_utxo_amount=0       # utxo amounts from a file
 typeset -i d_amount=0               # delta amount (input - output - txfees)
+typeset -i LockTime=0               # set default to 0 
 RETURN_Address=''
 
 # multisig vars 
@@ -142,6 +143,68 @@ vv_output() {
   fi
 }
 
+###########################################################
+### check numeric values of utxo_OutPoint and TX_amount ###
+###########################################################
+chk_numeric() {
+  if ! expr "$1" : '[0-9]*$'>/dev/null; then
+    echo " "
+    echo "*** ERROR: Non numeric parameter $1 for $2."
+    echo "           Please fix. Exiting gracefully ..."
+    echo " "
+    exit 1
+  fi
+}
+
+###########################################################
+### check that amounts are in the valid bitcoin range   ###
+###########################################################
+chk_min_max() {
+  if [ $1 -gt $v_in__v_out_max_amount ] || [ $1 -lt 0 ] ; then
+    echo "    "
+    echo "*** ERROR: prev $2 ($1) exceeds limits."
+    echo "           It must be 1 <= $2 <= 21mio BTC"
+    echo "           exiting gracefully"
+    echo "    "
+    exit 1
+  fi
+}
+
+###########################################################
+### check tx ID (len=32 bytes, only alphanumeric chars  ###
+###########################################################
+chk_tx_ID() {
+  if [ $VVerbose -eq 1 ]; then
+    printf " checking length of tx ID (32 hex Bytes=64 alphanumeric chars)"
+  fi
+  if [ ${#utxo_TX_ID} -ne 64 ] ; then
+    echo " "
+    echo "*** ERROR: expecting a proper formatted Bitcoin TRANSACTION_ID."
+    echo "    Please provide 64 alphanumeric chars (aka 32 hex chars)"
+    echo "    current length: ${#utxo_TX_ID}, utxo_TX_ID:"
+    echo "    $utxo_TX_ID"
+    echo " "
+    exit 1 
+  fi
+
+#  this seems not to be portable betwenn shell versions ...
+#  case $utxo_TX_ID in
+#   *[^a-fA-F0-9]*)
+#   *[:xdigit]*)
+#   ;;
+#  esac
+  if [ -z "${utxo_TX_ID##*[![:xdigit:]]*}" ] ; then
+    echo " "
+    echo "*** ERROR: expecting a proper formatted Bitcoin TRANSACTION_ID."
+    echo "    Please provide 64 alphanumeric chars (aka 32 hex chars [a-fA-F0-9])"
+    echo "    $utxo_TX_ID"
+    exit 1
+  fi
+  if [ $VVerbose -eq 1 ]; then
+    printf " - ok \n" 
+  fi
+}
+
 ################################################
 # procedure to concatenate string for a raw tx #
 ################################################
@@ -199,26 +262,6 @@ check_tool() {
   fi
 }
 
-##################################
-# Check length of provided tx ID #
-##################################
-chk_tx_len() {
-  if [ $VVerbose -eq 1 ]; then
-    printf "        checking length of tx ID (32Bytes/64chars)"
-  fi
-  if [ ${#utxo_TX_ID} -ne 64 ] ; then
-    echo " "
-    echo "*** ERROR: expecting a proper formatted Bitcoin TRANSACTION_ID."
-    echo "    Please provide a 64 bytes string (aka 32 hex chars)"
-    echo "    Hint: empty lines in file are not allowed!"
-    echo "    current length: ${#utxo_TX_ID}, utxo_TX_ID:"
-    echo "    $utxo_TX_ID"
-    exit 1 
-  fi
-  if [ $VVerbose -eq 1 ]; then
-    printf " - ok \n" 
-  fi
-}
 
 ###################################################
 ### GET_TX_VALUES() - fetch required tx values  ###
@@ -255,6 +298,7 @@ get_tx_values() {
   # STEP6_SCRIPTSIG=$( grep -A1 -B1 pk_script $prawtx_fn | tail -n1 | tr -d "[:space:]" )
   #
   prev_tx_utxo_amount=$( awk -F "=|," '/bitcoin/ { print $6 }' $prawtx_fn )
+  chk_min_max $prev_tx_utxo_amount "previous file's tx_utxo_amount"
   STEP5_SCRIPT_LEN=$( awk -F ",|=" 'NR==5 { print $2 }' $prawtx_fn )
   STEP6_SCRIPTSIG=$( awk '/pk_script/ { getline;print $1}' $prawtx_fn )
   RAW_TX=''
@@ -482,6 +526,7 @@ step3to7() {
 # a 8-byte reversed hex field, e.g.: 3a01000000000000"
 step9() {
   v_output "###  9. TX_OUT, tx_out amount (in Satoshis): $amount"
+  chk_min_max $amount "tx_out amount"
   StepCode=$( echo "obase=16;$amount"|bc -l ) 
   StepCode=$( zero_pad $StepCode 16 )
   StepCode_rev=$( reverse_hex $StepCode ) 
@@ -728,7 +773,7 @@ proc_msig() {
                     ($msig_uncompressed_pubkeys * $hex_pubkey_uncompr_len / 2) ))
   # echo "len_redeemscr=$len_redeemscr"
   if [ $len_redeemscr -gt $msig_redeemscript_maxlen ] ; then 
-    echo "*** This combination of $msig_reqsigs-of-$msig_reqkeys exceeds limits."
+    echo "*** Error: This combination of $msig_reqsigs-of-$msig_reqkeys exceeds limits."
     echo "    len_redeemscr ($len_redeemscr) will exceed max length ($msig_redeemscript_maxlen)"
     echo "    Exiting gracefully ... "
     echo "  "
@@ -765,17 +810,6 @@ proc_msig() {
 
   # here we are done with multisig redeem script, we can exit without error :-)  
   exit 0
-}
-
-
-###########################################################
-### check numeric values of utxo_OutPoint and TX_amount ###
-###########################################################
-chk_numeric() {
-  if ! expr "$1" : '[0-9]*$'>/dev/null; then
-    echo "Non numeric parameter $1 for $2. Please fix. Exiting gracefully ..."
-    exit 1
-  fi
 }
 
 
@@ -842,6 +876,7 @@ else
            exit 0
          fi
          utxo_TX_ID=$1
+         chk_tx_ID
          shift 
          chk_numeric $1 utxo_OutPoint
          utxo_OutPoint=$1
@@ -849,9 +884,11 @@ else
          utxo_PKScript=$1
          shift 
          chk_numeric $1 utxo_Amount
+         chk_min_max $1 utxo_Amount
          utxo_Amount=$1
          shift 
          chk_numeric $1 TX_amount
+         chk_min_max $1 TX_amount
          TX_amount=$1
          shift 
          TARGET_Address=$1
@@ -861,19 +898,20 @@ else
          # TX fees shouldn't have 9 digits of satoshis (aka more than a bitcoin)...
          # otherwise it is the return address, and txfee needs to get calculated automatically.
          if [ $# -eq 1 ] ; then
-           if [ ${#txfee_per_byte} -lt 10 ] ; then
+           RETURN_Address=$1
+           # if length of RETURN_Address is <= 10, then it is the tx_fee ...
+           if [ ${#RETURN_Address} -lt 10 ] ; then
              txfee_param_flag=1
              chk_numeric $1 txfee_per_byte
              txfee_per_byte=$1
-             shift
-           else
-             RETURN_Address=$1
-             shift
+             RETURN_Address=''
            fi
+           shift
          fi
          if [ $# -eq 2 ] ; then
            txfee_param_flag=1
            chk_numeric $1 txfee_per_byte
+           chk_min_max $1 txfee_per_byte
            txfee_per_byte=$1
            RETURN_Address=$2
            shift
@@ -905,6 +943,7 @@ else
          filename=$1
          shift 
          chk_numeric $1 TX_amount
+         chk_min_max $1 TX_amount
          TX_amount=$1
          shift 
          TARGET_Address=$1
@@ -914,17 +953,19 @@ else
          # TX fees shouldn't have 9 digits of satoshis (aka more than a bitcoin)...
          # otherwise it is the return address, and txfee needs to get calculated automatically.
          if [ $# -eq 1 ] ; then
-           if [ ${#txfee_per_byte} -lt 9 ] ; then
+           RETURN_Address=$1
+           if [ ${#RETURN_Address} -lt 10 ] ; then
              txfee_param_flag=1
+             chk_numeric $1 txfee_per_byte
              txfee_per_byte=$1
-             shift
-           else
-             RETURN_Address=$1
-             shift
+             RETURN_Address=''
            fi
+           shift
          fi
          if [ $# -eq 2 ] ; then
            txfee_param_flag=1
+           chk_numeric $1 txfee_per_byte
+           chk_min_max $1 txfee_per_byte
            txfee_per_byte=$1
            RETURN_Address=$2
            shift
@@ -983,6 +1024,7 @@ else
          shift 
          TX_amount=$1
          chk_numeric $1 TX_amount
+         chk_min_max $1 TX_amount
          shift 
          TARGET_Address=$1
          shift 
@@ -991,17 +1033,19 @@ else
          # TX fees shouldn't have 9 digits of satoshis (aka more than a bitcoin)...
          # otherwise it is the return address, and txfee needs to get calculated automatically.
          if [ $# -eq 1 ] ; then
-           if [ ${#txfee_per_byte} -lt 9 ] ; then
+           RETURN_Address=$1
+           if [ ${#RETURN_Address} -lt 9 ] ; then
              txfee_param_flag=1
+             chk_numeric $1 txfee_per_byte
              txfee_per_byte=$1
-             shift
-           else
-             RETURN_Address=$1
-             shift
+             RETURN_Address=''
            fi
+           shift
          fi
          if [ $# -eq 2 ] ; then
            txfee_param_flag=1
+           chk_numeric $1 txfee_per_byte
+           chk_min_max $1 txfee_per_byte
            txfee_per_byte=$1
            RETURN_Address=$2
            shift
@@ -1058,6 +1102,14 @@ if [ $txfee_per_byte -ne 0 ] ; then
   v_output " txfee_per_byte  $txfee_per_byte"
 fi
 if [ "$RETURN_Address" != "" ] ; then
+  echo $RETURN_Address | awk -f tcls_verify_bc_address.awk > /dev/null
+  if [ $? -ne 0 ] ; then
+    echo " "
+    echo "*** ERROR: $RETURN_Address is not a valid bitcoin address"
+    echo "           Please correct, and retry. Exiting gracefully ... "
+    echo " "
+    exit 1
+  fi 
   v_output " RETURN_Address  $RETURN_Address"
 fi
 
@@ -1137,7 +1189,7 @@ if [ $? -eq 0 ]; then
     # 3.) pass everything into the variable "RAW_TX"
     # 
     vv_output " going for this TX: $utxo_TX_ID"
-    chk_tx_len 
+    chk_tx_ID 
     if [ $VVerbose -eq 1 ]; then
       printf " check if we can reach www.blockchain.info (ping)" 
     fi
@@ -1199,11 +1251,24 @@ if [ "$f_param_flag" -eq 1 ] ; then
     #   StepCode=$( wc -l test.txt | cut -d " " -f 8 )
     # convert to the decimal wc -l result to hex
     if [ $StepCode_decimal -gt 1024 ] ; then
-      echo "*** not yet prepared to work with more than 1000 lines."
-      echo "    need to wait for next release - sorry!"
+      echo "*** ERROR: not yet prepared to work with more than 1000 lines."
+      echo "           need to wait for next release - sorry!"
+      echo "           exiting gracefully"
+      exit 1
+    fi
+
+    # $max_tx_size check
+    # a typical V_IN with prev_tx, prev_output idx, sigscript & sequence will have ~140 Bytes
+    # if number of ( V_INs * 140 ) >= $max_tx_size then error!!
+    TX_chars=$(( $StepCode_decimal * 140 ))
+    if [ $TX_chars -gt $max_tx_size ] ; then
+      echo "*** ERROR: tx max size exceeds bitcoin limit ($max_tx_size bytes)."
+      echo "    $StepCode_decimal V_INs @ ~140 Bytes = $TX_chars bytes"
+      echo "    see also bitcoin source code, in file policy.h"
       echo "    exiting gracefully"
       exit 1
     fi
+
     if [ $StepCode_decimal -lt 10 ] ; then
       StepCode=0$( echo "obase=16;$StepCode_decimal"|bc ) 
     else
@@ -1232,13 +1297,18 @@ if [ "$f_param_flag" -eq 1 ] ; then
   while IFS=" " read utxo_TX_ID utxo_OutPoint utxo_PKScript prev_tx_utxo_amount
    do
     v_output  "####### TX_IN: line item $line_items"
-    # for every line item we need to check the tx, and get the values:
-    chk_tx_len 
+    # for every line item we need to check the tx, and get the values.
+    # need to bring in this ugly construct, to beautify output :-)
+    if [ $VVerbose -eq 1 ]; then
+      printf "       "
+    fi
+    chk_tx_ID 
     # if only utxo_TX_ID is given, we could fetch remaining items with 'get_tx_values' ?
     vv_output "        utxo_TX_ID=$utxo_TX_ID"
     vv_output "        utxo_OutPoint=$utxo_OutPoint"
     vv_output "        utxo_PKScript=$utxo_PKScript"
     vv_output "        prev_tx_utxo_amount=$prev_tx_utxo_amount"
+    chk_min_max $prev_tx_utxo_amount prev_tx_utxo_amount
     step3to7 
     line_items=$(( $line_items + 1 ))
     file_utxo_amount=$(( $file_utxo_amount + $prev_tx_utxo_amount ))
@@ -1292,10 +1362,18 @@ if [ ${#RETURN_Address} -gt 28 ] ; then
 fi 
 
 ###########################################################################
-### STEP 12 - LOCK_TIME: block nor timestamp at which this tx is locked ###
+### STEP 12 - LOCK_TIME: block or timestamp at which this tx is locked  ###
 ###########################################################################
+# there is no parameter yet to change LockTime, may come in future versions
+# already check, that it does not exceed limits.
 v_output "### 12. LOCK_TIME: block or timestamp at which this tx is locked"
-StepCode="00000000" 
+if [ $LockTime -gt $LockTime_max_value ] ; then 
+  echo "*** Error: $LockTime >= $LockTime_max_value"
+  echo "           Please adjust. Exiting gracefully ... "
+  echo "  "
+  exit 0
+fi
+StepCode=$( printf "%08d" $LockTime )
 tx_concatenate
 
 ##############################################################################
@@ -1310,6 +1388,25 @@ echo $RAW_TX > $c_utx_fn
 ### Finished, presenting results ...                                       ###
 ##############################################################################
 echo " "
+
+###############################################
+### verifying (again) tx min and max length ###
+###############################################
+# min and max tx_size check
+TX_chars=$(( ${#RAW_TX} / 2 ))
+if [ $TX_chars -le $min_tx_size ] ; then
+  echo "*** ERROR: tx max size less than lower limit ($min_tx_size bytes)."
+  echo "           Exiting gracefully..."
+  echo " "
+  exit 1
+fi
+
+if [ $TX_chars -gt $max_tx_size ] ; then
+  echo "*** ERROR: tx max size exceeds bitcoin limit ($max_tx_size bytes)."
+  echo "           Exiting gracefully..."
+  echo " "
+  exit 1
+fi
 
 ##########################################
 ### verifying input and output amounts ###

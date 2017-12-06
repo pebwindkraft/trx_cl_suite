@@ -2,9 +2,9 @@
 ### Issues / errors in processing ###
 #####################################
 
-I19: 09Oct2016, svn:
+I19: 09Oct2016, svn: - done
 ====================
-I think the maximum size of a trx is 100 kb. How many trx does that make? 
+I think the maximum size of a trx is 10 kb. How many trx does that make? 
 How can this be implemented?
 --> minimum signature is ~50 Bytes, prev trx = 32 Bytes + PKScript 20 Bytes plus, plus, plus... so a minimum trx is roughly 227 Bytes. This would limit to ~440 particular trx? And if a trx has many inputs and many outputs?
 
@@ -52,17 +52,6 @@ Each node verifies every transaction against a long checklist of criteria:
     Reject if the sum of input values is less than sum of output values.
     Reject if transaction fee would be too low to get into an empty block.
     The unlocking scripts for each input must validate against the corresponding output locking scripts.
-
-
-I26: 19Oct2016, svn: - done
-====================
-use a config file, having default values like:
-min_trxfee=50
-max_trx_size=100 # kilobytes
-SIG_MIN_LENGTH_CHARS=18
-SIG_MAX_LENGTH_CHARS=146
-...
---> apr2017: already in use for tcls_create.sh
 
 
 I39: 16nov2016, svn:
@@ -313,6 +302,21 @@ when running with testnet addresses, worng addresses are displayed.
 See testcase "tcls_testcases_create.sh -l 11" and webpage https://people.xiph.org/~greg/escrowexample.txt
 testcase 11a is ok (create a tx), testcase 11b is technically ok, but tcls_tx2txt.sh calls 
 tcls_in_sig_script.sh, and this interprets addresses incorrectly.
+
+
+I75: 03dec2017, svn:
+====================
+awk scripts to check for length and characters:
+can the awk script be replaced? (tcls_verify_hexkey.awk, tcls_verify_bc_address.awk)
+tcls_create.sh: see line ~190 in procedure chk_tx_ID:
+--> if [ -z "${utxo_TX_ID##*[![:xdigit:]]*}" ] ; then ...
+
+I76: 03dec2017, svn:
+====================
+tcls_create.sh: can a tx with many outputs be created? 
+there are no testcases to produce a tx with many outputs?
+and then create a testcase in the TESTCASE 4 section, which rejects tx, if the sum of input values < sum of output values
+
 
 
 
