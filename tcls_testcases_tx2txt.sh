@@ -78,7 +78,7 @@ echo "================================================================" | tee -a
 echo "=== TESTCASE 1: checksums of all necessary files             ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 1a: $chksum_cmd tcls_tx2txt.sh" | tee -a $logfile
-chksum_ref="b3d71646d55401f857d7ab470a35e1ce53489bedd66283a9a8fac54f724f28bc"
+chksum_ref="1ba1838d6be0ed3eb5e2ee7d12112b210f24731ce8b14f7e84120531d34e3b56"
 cp tcls_tx2txt.sh tmpfile
 chksum_prep
  
@@ -189,7 +189,7 @@ testcase3() {
 echo "================================================================" | tee -a $logfile
 echo "=== TESTCASE 3: a fairly simple trx, 1 input, 1 output       ===" | tee -a $logfile
 echo "===  we check functionality to load data via -t parameter    ===" | tee -a $logfile
-echo "===  from https://blockchain.info ...                        ===" | tee -a $logfile
+echo "===  requires network connection (https://blockchain.info)   ===" | tee -a $logfile
 echo "================================================================" | tee -a $logfile
 echo "https://blockchain.info/de/rawtx/30375f40adcf361f5b2a5074b615ca75e5696909e8bc2f8e553c69631826fcf6" >> $logfile
 
@@ -343,11 +343,11 @@ echo " " | tee -a $logfile
 
 
 testcase9() {
-echo "=============================================================" | tee -a $logfile
-echo "=== TESTCASE 9: 4 inputs and 2 outputs (P2SH multisig!)   ===" | tee -a $logfile
-echo "===  This is a long transaction, which is fetched via     ===" >> $logfile
-echo "===  the -t parameter.                                    ===" >> $logfile
-echo "=============================================================" | tee -a $logfile
+echo "================================================================" | tee -a $logfile
+echo "=== TESTCASE 9: 4 inputs and 2 outputs (P2SH multisig!)      ===" | tee -a $logfile
+echo "===  a long tx, which is fetched via the -t parameter.       ===" >> $logfile
+echo "===  requires network connection (https://blockchain.info)   ===" | tee -a $logfile
+echo "================================================================" | tee -a $logfile
 echo "https://blockchain.info/de/rawtx/734c48124d391bfff5750bbc39bd18e6988e8ac873c418d64d31cfdc31cc64ac" >> $logfile
 
 echo "=== TESTCASE 9a: " | tee -a $logfile

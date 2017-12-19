@@ -324,7 +324,8 @@ openssl enc -base64 -in tmp_key2pem >> pubkey.pem
 echo "-----END PUBLIC KEY-----"     >> pubkey.pem
 rm tmp_key2pem
 if [ $VVerbose -eq 1 ] ; then
-  cat pubkey.pem | sed -e 's/^/    /'
+  # cat pubkey.pem | sed -e 's/^/    /'
+  sed -e 's/^/    /' pubkey.pem 
 fi
 v_output "    openssl asn1parse pubkey"
 openssl asn1parse -in pubkey.pem > tmp_asn1parse.txt

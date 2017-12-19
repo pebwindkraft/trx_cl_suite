@@ -2,59 +2,7 @@
 ### Issues / errors in processing ###
 #####################################
 
-I19: 09Oct2016, svn: - done
-====================
-I think the maximum size of a trx is 10 kb. How many trx does that make? 
-How can this be implemented?
---> minimum signature is ~50 Bytes, prev trx = 32 Bytes + PKScript 20 Bytes plus, plus, plus... so a minimum trx is roughly 227 Bytes. This would limit to ~440 particular trx? And if a trx has many inputs and many outputs?
-
-trx validation:
-https://en.bitcoin.it/wiki/Protocol_rules#.22tx.22_messages
-    Check syntactic correctness
-    Make sure neither in or out lists are empty
-    Size in bytes <= MAX_BLOCK_SIZE (or as above, 100k max?)
-    Each output value, as well as the total, must be in legal money range
-    Make sure none of the inputs have hash=0, n=-1 (coinbase transactions)
-    Check that nLockTime <= INT_MAX[1], size in bytes >= 100[2], and sig opcount <= 2[3]
-    Reject "nonstandard" transactions: scriptSig doing anything other than pushing numbers on the stack, or scriptPubkey not matching the two usual forms[4]
-    Reject if we already have matching tx in the pool, or in a block in the main branch
-    For each input, if the referenced output exists in any other tx in the pool, reject this transaction.[5]
-    For each input, look in the main branch and the transaction pool to find the referenced output transaction. If the output transaction is missing for any input, this will be an orphan transaction. Add to the orphan transactions, if a matching transaction is not in there already.
-    For each input, if the referenced output transaction is coinbase (i.e. only 1 input, with hash=0, n=-1), it must have at least COINBASE_MATURITY (100) confirmations; else reject this transaction
-    For each input, if the referenced output does not exist (e.g. never existed or has already been spent), reject this transaction[6]
-    Using the referenced output transactions to get input values, check that each input value, as well as the sum, are in legal money range
-    Reject if the sum of input values < sum of output values
-    Reject if transaction fee (defined as sum of input values minus sum of output values) would be too low to get into an empty block
-    Verify the scriptPubKey accepts for each input; reject if any are bad
-    Add to transaction pool[7]
-    "Add to wallet if mine"
-    Relay transaction to peers
-    For each orphan transaction that uses this one as one of its inputs, run all these steps (including this one) recursively on that orphan
-
-and here from Andreas book in chapter 8:
-Each node verifies every transaction against a long checklist of criteria:
-
-    The transaction’s syntax and data structure must be correct.
-    Neither lists of inputs or outputs are empty.
-    The transaction size in bytes is less than MAX_BLOCK_SIZE.
-    Each output value, as well as the total, must be within the allowed range of values (less than 21m coins, more than 0).
-    None of the inputs have hash=0, N=–1 (coinbase transactions should not be relayed).
-    nLockTime is less than or equal to INT_MAX.
-    The transaction size in bytes is greater than or equal to 100.
-    The number of signature operations contained in the transaction is less than the signature operation limit.
-    The unlocking script (scriptSig) can only push numbers on the stack, and the locking script (scriptPubkey) must match isStandard forms (this rejects "nonstandard" transactions).
-    A matching transaction in the pool, or in a block in the main branch, must exist.
-    For each input, if the referenced output exists in any other transaction in the pool, the transaction must be rejected.
-    For each input, look in the main branch and the transaction pool to find the referenced output transaction. If the output transaction is missing for any input, this will be an orphan transaction. Add to the orphan transactions pool, if a matching transaction is not already in the pool.
-    For each input, if the referenced output transaction is a coinbase output, it must have at least COINBASE_MATURITY (100) confirmations.
-    For each input, the referenced output must exist and cannot already be spent.
-    Using the referenced output transactions to get input values, check that each input value, as well as the sum, are in the allowed range of values (less than 21m coins, more than 0).
-    Reject if the sum of input values is less than sum of output values.
-    Reject if transaction fee would be too low to get into an empty block.
-    The unlocking scripts for each input must validate against the corresponding output locking scripts.
-
-
-I39: 16nov2016, svn:
+I39: 16nov2016, svn: - done
 ====================
 Gerade in Schleifen sind immer neu gestartete Unterprozesse für jede Menge Ressourcenverbrauch verantwortlich. Ein kurzer Benchmark durchsuchte knapp 3 300 Dateien nach einem Suchstring. Die Variante in Listing 2 braucht daher 3 300 Prozesse mehr als die kürzere Variante in Listing 3. Das zweite Skript benötigte 88 Prozent mehr Laufzeit als das erste. Hängt man hinten an die Pipe ein weiteres, nutzloses »| cat« an, so dauert dies 153 Prozent länger als ein einzelnes »grep«. Zwei solche Aufrufe benötigen schon zusätzliche 239 Prozent und dreimal »cat« schlägt mit einer Zugabe von gesalzenen 322 Prozent zu Buche. Die letzteren Werte leiden überdurchschnittlich an den begrenzten Ressourcen auf dem Testrechner und lasten ihn vollständig aus. Dennoch zeigt das durchaus praxisnahe Beispiel, dass sich zusätzliche Prozesse erheblich im Schleifenrumpf auswirken.
 

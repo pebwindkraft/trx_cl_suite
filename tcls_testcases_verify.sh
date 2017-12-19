@@ -52,12 +52,12 @@ echo "================================================================" | tee -a
 
 echo "=== TESTCASE 1a: $chksum_cmd tcls_verify_sig.sh" | tee -a $logfile
 cp tcls_verify_sig.sh tmp_tx_cfile
-chksum_ref="2d4cfa45e5de065c3ab101265d0ffa000b43e29268c486ca8f1cd6cccee9e1c0" 
+chksum_ref="da5e0fd5e6437b112d7f30ce403fe89762ae2da911cb0cbfa7929c80522767a1" 
 chksum_prep
 
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
 cp tcls_key2pem.sh tmp_tx_cfile
-chksum_ref="0b5fb56e663368f7e011e49b8caf3560aff87c3176c1608b482f398c1deaaf1f" 
+chksum_ref="aab5ccc4d4d9329039ea08ef13e6cbc63642e1af19c3111d95f4ac708b7040e3" 
 chksum_prep
 
 echo "=== TESTCASE 1c: $chksum_cmd tcls_strict_sig_verify.sh" | tee -a $logfile

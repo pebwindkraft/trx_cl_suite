@@ -49,5 +49,5 @@ yymmmdd
                                              script "tmp_vfy.sh"
 17nov29 svn   tcls_create.sh            I26: fix msig redeemscript limits (max length, max keys)
 17dec02 svn   tcls_create.sh            I19: implement tx limit checks (max size, values, ...)
-
+17dec18 svn   all *.sh                  I39: improve shell scripts to speed up (less pipes)
 

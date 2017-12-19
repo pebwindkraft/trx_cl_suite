@@ -268,7 +268,8 @@ else
       -f)
          if [ ${#2} -gt 0 ] ; then 
            if [ -f "$2" ] ; then
-             raw_TX=$( cat $2 | sed 's/[[:xdigit:]]\{2\}/& /g' )
+             # raw_TX=$( cat $2 | sed 's/[[:xdigit:]]\{2\}/& /g' )
+             raw_TX=$( sed 's/[[:xdigit:]]\{2\}/& /g' $2 )
            else
              echo "ERROR: file not found, exiting gracefully ..."
              echo " "

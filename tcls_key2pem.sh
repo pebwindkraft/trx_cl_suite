@@ -583,7 +583,7 @@ if [ $VVerbose -eq 1 ] ; then
     echo   "  the pubkey  : $pubkey"
     echo $pre_pubstr_c$pubkey > pubkey_m_hex.txt
   fi
-  printf $( cat pubkey_m_hex.txt | sed 's/[[:xdigit:]]\{2\}/\\x&/g' ) > tmp_key2pem
+  printf $( sed 's/[[:xdigit:]]\{2\}/\\x&/g' pubkey_m_hex.txt ) > tmp_key2pem
   vv_output " "
   vv_output "### base64 pubkey_m_hex.txt file and put some nice surroundings"
   vv_output "openssl enc -base64 -in tmp_key2pem"

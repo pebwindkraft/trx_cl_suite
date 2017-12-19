@@ -850,7 +850,7 @@ while [ $TX_SIG_Current -le $TX_IN_Count_dec ]
     exit 1
   fi
 
-  result=$( cat $sigtxt_tmp_fn | tr [:upper:] [:lower:] )
+  result=$( tr [:upper:] [:lower:] <$sigtxt_tmp_fn )
   if [ "$Script_Sig" != "$result" ] ; then 
     echo "# *** signature replaced after strict DER sig verification with:" >> $tmp_vfy_fn
     echo $result > $sigtxt_tmp_fn
@@ -880,7 +880,7 @@ while [ $TX_SIG_Current -le $TX_IN_Count_dec ]
   # Strict DER checking (in step 16) had it's output in file "$sigtxt_tmp_fn"
   # if multisig, need to add the "00" as two chars to the length
   # and of course we convert to hex
-  result=$( cat $sigtxt_tmp_fn | wc -c )
+  result=$( wc -c <$sigtxt_tmp_fn )
   if [ $Multisig -eq 1 ] ; then 
     result=$( echo "obase=16;($result + 2) / 2" | bc )
   else
