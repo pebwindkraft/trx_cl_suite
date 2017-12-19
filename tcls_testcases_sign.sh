@@ -80,12 +80,12 @@ echo "================================================================" | tee -a
 
 echo "=== TESTCASE 1a: $chksum_cmd tcls_sign.sh" | tee -a $logfile
 cp tcls_sign.sh tmp_tx_cfile
-chksum_ref="eff95bc71786f6eafd5c219a04f0404f383edf1bcb3e3573b5bb7998705886ec" 
+chksum_ref="0a4ba80a16767210666463cc1fbaca03f4404a4d086a998900e4974aaadad5eb" 
 chksum_prep
 
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
 cp tcls_key2pem.sh tmp_tx_cfile
-chksum_ref="0b5fb56e663368f7e011e49b8caf3560aff87c3176c1608b482f398c1deaaf1f" 
+chksum_ref="aab5ccc4d4d9329039ea08ef13e6cbc63642e1af19c3111d95f4ac708b7040e3" 
 chksum_prep
 
 echo "=== TESTCASE 1c: $chksum_cmd tcls_strict_sig_verify.sh" | tee -a $logfile

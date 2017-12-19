@@ -402,13 +402,16 @@ chk_bc_address_hash() {
   # checksum verification: 
   # get last 8 chars of address_hash (the reference checksum)
   # remove last 8 chars, double sha256 the string, 
-  # and the first 8 chars should match the reference checksum
-  len=${#address_hash}
   from=$(( $len - 7 ))
   chksum_l8=$( echo $address_hash | cut -b $from-$len )
   to=$(( $len - 8 ))
-  address_hash=$( echo $address_hash | cut -b 1-$to )
-  vv_output " address_hash without last 8 chars: $address_hash, chksum=$chksum_l8"
+  # echo "  len=$len, from=$from, to=$to, address_hash=$address_hash"
+  if [ $to -ne 0  ] ; then
+    address_hash=$( echo $address_hash | cut -b 1-$to )
+    vv_output " address_hash without last 8 chars: $address_hash, chksum=$chksum_l8"
+  else
+    address_hash=""
+  fi
 
   # only for P2PKH adresses, verify leading "1s" 
   # https://bitcointalk.org/index.php?topic=1026.0
