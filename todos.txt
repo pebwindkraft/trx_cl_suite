@@ -266,6 +266,12 @@ there are no testcases to produce a tx with many outputs?
 and then create a testcase in the TESTCASE 4 section, which rejects tx, if the sum of input values < sum of output values
 
 
+I77: 03dec2017, svn:
+====================
+https://bitcoin.stackexchange.com/questions/66197/step-by-step-example-to-redeem-a-p2sh-output-required
+can this be verified in create/sign?
+
+
 
 
 #####################################

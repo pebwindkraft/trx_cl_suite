@@ -83,7 +83,7 @@ cp tcls_tx2txt.sh tmpfile
 chksum_prep
  
 echo "=== TESTCASE 1b: $chksum_cmd trx_in_sig_script.sh" | tee -a $logfile
-chksum_ref="d23d2de3f86f0ea9e6619cd5ecd0969be84a6323c2a9aedefa2a5b207b5f3b5b" 
+chksum_ref="a293d19fcf79ad62952c0ba1286dc3e36bc27ff72d56bc8205f4d6871ee64c99" 
 cp tcls_in_sig_script.sh tmpfile
 chksum_prep
 
@@ -93,7 +93,7 @@ cp tcls_out_pk_script.sh tmpfile
 chksum_prep
 
 echo "=== TESTCASE 1d: $chksum_cmd tcls_base58check_enc.sh" | tee -a $logfile
-chksum_ref="5ec23ff90c5f5dadf03de6eb634c3d9babb7d376e1fd36ce03eff96f75810af0" 
+chksum_ref="9edf43a7e7aad6ae511c2dd9bc311a9b63792d0b669c7e72d7d1321887213179" 
 cp tcls_base58check_enc.sh tmpfile
 chksum_prep
 echo " " | tee -a $logfile

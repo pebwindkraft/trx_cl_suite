@@ -29,12 +29,12 @@
 # USE OR PERFORMANCE OF THIS SOFTWARE. 
 #
  
-PREFIX_PUBKEY_HASH=00
-PREFIX_TESTNET_PUBKEY_HASH=05
-PREFIX_SCRIPT_HASH=6F
-PREFIX_TESTNET_SCRIPT_HASH=C4
-ECDSA_PK=0
-ECDSA_PKH=0
+Prefix_PUBKEY_HASH=00
+Prefix_TESTNET_PUBKEY_HASH=05
+Prefix_SCRIPT_HASH=6F
+Prefix_TESTNET_SCRIPT_HASH=C4
+ECDSA_PubKey=0
+ECDSA_PubKeyHash=0
 P2SH=0
 QUIET=0
 TESTNET=0
@@ -102,13 +102,13 @@ else
          shift
          ;;
       -p2pk)
-         ECDSA_PK=1
+         ECDSA_PubKey=1
          param=$2
          shift
          shift 
          ;;
       -p2pkh)
-         ECDSA_PKH=1
+         ECDSA_PubKeyHash=1
          param=$2
          shift
          shift 
@@ -159,7 +159,7 @@ if [ $QUIET -eq 0 ] ; then
 fi
 
 len_result=${#param} 
-if [ $ECDSA_PK -eq 1 ] ; then 
+if [ $ECDSA_PubKey -eq 1 ] ; then 
   ####################################
   ### 1: ECDSA pubkey              ###
   ####################################
@@ -202,7 +202,7 @@ fi
 ###    hex 6F for testnet Pubkey hash (P2PKH address)
 ###    hex C4 for testnet Script hash (P2SH address) 
 ####################################
-if [ $ECDSA_PKH -eq 1 ] ; then 
+if [ $ECDSA_PubKeyHash -eq 1 ] ; then 
   ### ECDSA Public Key Hash are 20 hex Bytes (40 decimal)
   if [ $VERBOSE -eq 1 ] ; then
     printf "   length of parameter: $len_result chars, "
@@ -215,19 +215,20 @@ if [ $ECDSA_PKH -eq 1 ] ; then
     exit 1
   fi
 fi
+
 if [ $TESTNET -eq 1 ] ; then
   v_output "4: add testnet address prefix 0x6F for P2PKH, or 0xC4 for P2SH" 
   if [ $P2SH -eq 1 ] ; then 
-    result="c4$param"
+    result="$Prefix_TESTNET_SCRIPT_HASH$param"
   else
-    result="6f$param"
+    result="$Prefix_SCRIPT_HASH$param"
   fi
 else
   v_output "4: add address prefix 0x00 for P2PKH, 0x05 for P2SH"
   if [ $P2SH -eq 1 ] ; then 
-    result="05$param"
+    result="$Prefix_TESTNET_PUBKEY_HASH$param"
   else
-    result="00$param"
+    result="$Prefix_PUBKEY_HASH$param"
   fi
 fi
 result4=$result

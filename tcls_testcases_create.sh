@@ -78,7 +78,7 @@ echo "================================================================" | tee -a
 
 echo "=== TESTCASE 1a: $chksum_cmd tcls_create.sh" | tee -a $logfile
 cp tcls_create.sh tmp_cfile
-chksum_ref="015442a200ddedd987eb3cc3a5d0b66d1224888b6521af26b46b0b3ee4ddee08" 
+chksum_ref="52d654f9ad121b0e6ef77b8a43fa64c3d6ac4e13dcd5fa762f4dcb27697d8f6a" 
 chksum_prep
 
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
@@ -86,12 +86,17 @@ cp tcls_key2pem.sh tmp_cfile
 chksum_ref="aab5ccc4d4d9329039ea08ef13e6cbc63642e1af19c3111d95f4ac708b7040e3" 
 chksum_prep
 
-echo "=== TESTCASE 1c: $chksum_cmd tcls_verify_bc_address.awk" | tee -a $logfile
+echo "=== TESTCASE 1c: $chksum_cmd tcls_base58check_enc.sh" | tee -a $logfile
+cp tcls_base58check_enc.sh tmp_cfile
+chksum_ref="9edf43a7e7aad6ae511c2dd9bc311a9b63792d0b669c7e72d7d1321887213179" 
+chksum_prep " " | tee -a $logfile
+
+echo "=== TESTCASE 1d: $chksum_cmd tcls_verify_bc_address.awk" | tee -a $logfile
 cp tcls_verify_bc_address.awk tmp_cfile
 chksum_ref="c944ff89ff49454ca03b0ea8f3ce8ebbd44e33e8d87ab48ae00ad4d6544099f6" 
 chksum_prep
 
-echo "=== TESTCASE 1d: $chksum_cmd tcls_verify_hexkey.awk" | tee -a $logfile
+echo "=== TESTCASE 1e: $chksum_cmd tcls_verify_hexkey.awk" | tee -a $logfile
 cp tcls_verify_hexkey.awk tmp_cfile
 chksum_ref="055b79074a8f33d0aa9aa7634980d29f4e3eb0248a730ea784c7a88e64aa7cfd" 
 chksum_prep " " | tee -a $logfile
@@ -818,7 +823,7 @@ echo " TX_OUT address:  mirQLRn6ciqa3WwJSSe7RSJNVfAE9zLkS5" >> $logfile
 echo " TX_OUT amount:   50" >> $logfile
 echo "./tcls_create.sh -T -vv -c 7649b33b6d80f7b5c866fbdb413419e04223974b0a5d6a3ca54944f30474d2bf 0 4752210287f9169e265380a87cfd717ec543683f572db8b5a6d06231ff59c43429063ae4210343947d178f20b8267488e488442650c27e1e9956c824077f646d6ce13a285d8452ae 5000022000 5000000000 mirQLRn6ciqa3WwJSSe7RSJNVfAE9zLkS5" >> $logfile
 ./tcls_create.sh -T -vv -c 7649b33b6d80f7b5c866fbdb413419e04223974b0a5d6a3ca54944f30474d2bf 0 4752210287f9169e265380a87cfd717ec543683f572db8b5a6d06231ff59c43429063ae4210343947d178f20b8267488e488442650c27e1e9956c824077f646d6ce13a285d8452ae 5000022000 5000000000 mirQLRn6ciqa3WwJSSe7RSJNVfAE9zLkS5 > tmp_cfile
-chksum_ref="8a1d2d5fd3fdbe40dfc604aaa0d3cc4633221e9b72042ad979110c27d30a2b7a"
+chksum_ref="24337a69f7cf37a1fe879a706d1a21622c73b26e1b8d7b41299c89428483673a"
 chksum_prep
 echo " " >> $logfile
 
