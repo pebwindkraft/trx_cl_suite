@@ -74,7 +74,7 @@ typeset -i msig_uncompressed_pubkeys=0
 msig_cs_pubkeys=''
 
 RAW_TX=''
-RAW_TX_LINK2HEX="?format=hex"
+RAW_TX_Link2Hex="?format=hex"
 
 filename=''
 StepCode=''
@@ -1207,11 +1207,11 @@ if [ $? -eq 0 ]; then
       if [ $VVerbose -eq 1 ]; then
         printf " - yes \n fetch data from blockchain.info \n"
       fi
-      RAW_TX=$( $http_get_cmd https://blockchain.info/de/rawtx/$utxo_TX_ID$RAW_TX_LINK2HEX )
+      RAW_TX=$( $http_get_cmd https://blockchain.info/de/rawtx/$utxo_TX_ID$RAW_TX_Link2Hex )
       if [ $? -ne 0 ] ; then
         echo " "
         echo "*** ERROR: fetching RAW_TX data:"
-        echo "    $http_get_cmd https://blockchain.info/de/rawtx/$utxo_TX_ID$RAW_TX_LINK2HEX"
+        echo "    $http_get_cmd https://blockchain.info/de/rawtx/$utxo_TX_ID$RAW_TX_Link2Hex"
         echo "    downoad manually, and call 'tcls_tx2txt.sh -r ...'"
         exit 1
       fi
