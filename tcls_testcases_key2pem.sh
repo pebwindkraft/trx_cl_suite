@@ -2,7 +2,7 @@
 # some testcases for the shell script "tcls_key2pem.sh"
 #
 # Copyright (c) 2015, 2016 Volker Nowarra 
-# updated regularly with the root shell script
+# updated regularly with the root shell script
 # 
 # Permission to use, copy, modify, and distribute this software for any 
 # purpose with or without fee is hereby granted, provided that the above 
