@@ -2,34 +2,6 @@
 ### Issues / errors in processing ###
 #####################################
 
-I39: 16nov2016, svn: - done
-====================
-Gerade in Schleifen sind immer neu gestartete Unterprozesse für jede Menge Ressourcenverbrauch verantwortlich. Ein kurzer Benchmark durchsuchte knapp 3 300 Dateien nach einem Suchstring. Die Variante in Listing 2 braucht daher 3 300 Prozesse mehr als die kürzere Variante in Listing 3. Das zweite Skript benötigte 88 Prozent mehr Laufzeit als das erste. Hängt man hinten an die Pipe ein weiteres, nutzloses »| cat« an, so dauert dies 153 Prozent länger als ein einzelnes »grep«. Zwei solche Aufrufe benötigen schon zusätzliche 239 Prozent und dreimal »cat« schlägt mit einer Zugabe von gesalzenen 322 Prozent zu Buche. Die letzteren Werte leiden überdurchschnittlich an den begrenzten Ressourcen auf dem Testrechner und lasten ihn vollständig aus. Dennoch zeigt das durchaus praxisnahe Beispiel, dass sich zusätzliche Prozesse erheblich im Schleifenrumpf auswirken.
-
-Listing 2: Suche mit »cat«
-01 #!/bin/bash
-02 find $HOME/Artikel/2009/1* -type f |
-03 while read i
-04 do
-05     cat "$i" | grep bashing > /dev/null
-06 done
-
-Listing 3: Suche ohne »cat«
-01 #!/bin/bash
-02 find $HOME/Artikel/2009/1* -type f |
-03 while read i
-04 do
-05     grep bashing "$i" > /dev/null
-06 done
-
-
-I41: 14dec2016, svn:
-====================
-tcls_*.sh:
-it is generally not a good idea, to have capital letters as variable names in shell scripts. They might interfere with shell variables! 
-Maybe rework all *.sh files - low priority...
-
-
 I42: 16nov2016, svn:
 ====================
 make a copy of wallet and priv keys from SuSE cold and from Mac Bitcoin client into new virtual machine, to see that copying of wallets works well ...
@@ -44,7 +16,7 @@ tcls_create.sh:
 --> assume we have -f and -t, then we can read values from network?   
 
 
-I44: 25dec2016, svn:
+I44: 25dec2016, svn: - done
 ====================
 tcls_base58check_enc.sh
 add testcase file for all testcases in the file "Address_Generation_Test.txt" in the Bitcoin directory. Each line is a step of the key conversion, beginning with priv key, then pubkey, then sha and so on... until base58 encoded Bitcoin address... like this:
@@ -270,6 +242,12 @@ I77: 03dec2017, svn:
 ====================
 https://bitcoin.stackexchange.com/questions/66197/step-by-step-example-to-redeem-a-p2sh-output-required
 can this be verified in create/sign?
+
+I78: 31dec2017, svn:
+====================
+Segwit, see answer by MeshCollider in this stackexchange question:
+https://bitcoin.stackexchange.com/questions/65404/calculate-segwit-address-from-public-address/65470?noredirect=1#comment77749_65470
+
 
 
 
