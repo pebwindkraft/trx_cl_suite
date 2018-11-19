@@ -30,8 +30,8 @@
 #
  
 Prefix_PUBKEY_HASH=00
-Prefix_TESTNET_PUBKEY_HASH=05
-Prefix_SCRIPT_HASH=6F
+Prefix_TESTNET_PUBKEY_HASH=6F
+Prefix_SCRIPT_HASH=05
 Prefix_TESTNET_SCRIPT_HASH=C4
 ECDSA_PubKey=0
 ECDSA_PubKeyHash=0
@@ -221,12 +221,12 @@ if [ $TESTNET -eq 1 ] ; then
   if [ $P2SH -eq 1 ] ; then 
     result="$Prefix_TESTNET_SCRIPT_HASH$param"
   else
-    result="$Prefix_SCRIPT_HASH$param"
+    result="$Prefix_TESTNET_PUBKEY_HASH$param"
   fi
 else
   v_output "4: add address prefix 0x00 for P2PKH, 0x05 for P2SH"
   if [ $P2SH -eq 1 ] ; then 
-    result="$Prefix_TESTNET_PUBKEY_HASH$param"
+    result="$Prefix_SCRIPT_HASH$param"
   else
     result="$Prefix_PUBKEY_HASH$param"
   fi

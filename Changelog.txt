@@ -9,8 +9,8 @@
 date    by    file                   todo comment
 yymmmdd 
 16sep12 svn   all :-)                   ??? initial release
-16sep12 svn   all                       ??? created a new version out of trx2txt, cause it is more
-                                            than simply trx to txt. It became a complete tool suite
+16sep12 svn   all                       ??? created a new version out of trx2txt, cause it is 
+                                            more than simply trx to txt, more a complete tool.
                                             "trx2txt" suite is discontinued with this release.
 16oct02 svn   all files                 ??? further updated all naming convention, also inside files
 16oct23 svn   all testcases             ??? harmonized output of all testcases files
@@ -50,5 +50,9 @@ yymmmdd
 17nov29 svn   tcls_create.sh            I26: fix msig redeemscript limits (max length, max keys)
 17dec02 svn   tcls_create.sh            I19: implement tx limit checks (max size, values, ...)
 17dec18 svn   all *.sh                  I39: improve shell scripts to speed up (less pipes)
-30dec18 svn   tcls_base58check_enc.sh   I44: new file tcls_testcases_base58check_enc.sh
-
+17dec19 svn   tcls_base58check_enc.sh   I44: new file tcls_testcases_base58check_enc.sh
+18mar07 svn   tcls_create.sh            I63: removed bitcoinfees.21.co, improve output & testnet 
+18mar07 svn   tcls_create.sh            I75: make script work correctly for testnet and regtest
+18mar07 svn   tcls_key2pem.sh                make script work correctly for testnet and regtest
+18apr11 svn   tcls_s2u.sh               I81: new file, to convert from signed to unsigned tx
+18nov19 svn   tcls_tx2txt.sh            I77: preparations to work on I77 (only tcls_tx2txt.sh)

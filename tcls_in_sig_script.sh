@@ -341,6 +341,9 @@ s08_SIG() {
 }
 #####################################
 ### STATUS 0a (s0a_SIG_LEN)       ###
+### THIS CODE SEEMS TO BE REDUNDANT ###
+### It is called from mainloop with ###
+### opcode "3C" ? This is not sig ? ###
 #####################################
 s0a_SIG_LEN() {
   vv_output "s0a_SIG_LEN"
@@ -542,10 +545,10 @@ s40_OP_1TO16() {
   msig_redeem_str=$cur_opcode
   get_next_opcode
   if [ "$cur_opcode" == "B1" ] ; then
-    echo "    $cur_opcode: OP_CHECKLOCKTIMEVERIFY: see documentation..."
+    echo "    $cur_opcode: OP_CHECKLOCKTIMEVERIFY: see https://en.bitcoin.it/wiki/Script"
     s4a_CLTV
   elif [ "$cur_opcode" == "B2" ] ; then
-    echo "    $cur_opcode: OP_CHECKSEQUENCEVERIFY: see documentation..."
+    echo "    $cur_opcode: OP_CHECKSEQUENCEVERIFY: see https://en.bitcoin.it/wiki/Script"
     s4b_CSV 
   elif [ "$cur_opcode" == "21" ] || [ "$cur_opcode" == "41" ] || [ $cur_opcode_dec -gt 81 ] && [ $cur_opcode_dec -lt 96 ] ; then
     echo "        ################### we go multisig ####################################"
@@ -640,6 +643,9 @@ s40_OP_1TO16() {
       rs_loopcounter=$(( rs_loopcounter + 1 ))
     done
     s41_OP_1TO16
+  else
+    # we go back to the main loop, and "hand back" the pointer
+    ss_array_ptr=$(( $ss_array_ptr - 1 ))
   fi
 }
 ################################
@@ -721,7 +727,7 @@ s51_SHA256() {
   vv_output "s51_SHA256()"
   get_next_opcode
   case $cur_opcode in
-    20) echo "    $cur_opcode: OP_Data:             Hash these 32 Bytes"
+    20) echo "    $cur_opcode: OP_Data:             next 32 bytes is data to be pushed on stack"
         op_data_show
         s52_DATA
         ;;
@@ -738,8 +744,10 @@ s52_DATA() {
   case $cur_opcode in
     87) echo "    $cur_opcode: OP_Equal:            Returns 1 if inputs are equal, 0 otherwise"
         ;;
+    88) echo "    $cur_opcode: OP_EQUALVERIFY:      Same as OP_EQUAL, but runs OP_VERIFY afterward"
+        ;;
     *)  echo "    $cur_opcode: unknown opcode "
-        s98_RET
+#       s98_RET
         ;;
   esac
 }
@@ -921,9 +929,21 @@ fi
       76) echo "    $cur_opcode: OP_DUP:              duplicates the top stack item"
           s20_DUP
           ;;
+      77) echo "    $cur_opcode: OP_NIP:              Removes second-to-top stack item"
+          ;;
+      79) echo "    $cur_opcode: OP_PICK:             item n back in stack is copied to top"
+          ;;
+      7C) echo "    $cur_opcode: OP_SWAP:             top two items on stack are swapped"
+          ;;
+      82) echo "    $cur_opcode: OP_SIZE:             Push string length of top element of stack (without popping it)"
+          ;;
       87) echo "    $cur_opcode: OP_EQUAL:            Returns 1 if the inputs are exactly equal, 0 otherwise"
           ;;
       88) echo "    $cur_opcode: OP_EQUALVERIFY:      Same as OP_EQUAL, but runs OP_VERIFY afterward"
+          ;;
+      9A) echo "    $cur_opcode: OP_BOOLAND:          If both a and b are not "" (null string), the output is 1, otherwise 0"
+          ;;
+      A5) echo "    $cur_opcode: OP_WITHIN:           Returns 1 if x is within specified range (left-inclusive), 0 otherwise"
           ;;
       A8) echo "    $cur_opcode: OP_SHA256:           input is hashed using SHA-256"
           s51_SHA256 
@@ -931,14 +951,21 @@ fi
       A9) echo "    $cur_opcode: OP_HASH160:          input is hashed with SHA-256 and RIPEMD-160"
           s30_HASH160
           ;;
+      AA) echo "    $cur_opcode: OP_SHA256:           input is hashed using SHA-256"
+          s30_HASH160
+          ;;
+      AB) echo "    $cur_opcode: OP_CODESEPARATOR     see https://en.bitcoin.it/wiki/Script"
+          ;;
       AC) echo "    $cur_opcode: OP_CHECKSIG:         sig must be a valid sig for hash and pubkey"
           ;;
       AD) echo "    $cur_opcode: OP_CHECKSIGVERIFY:   Same as OP_CHECKSIG, but OP_VERIFY is executed afterward"
           ;;
-      B1) echo "    $cur_opcode: OP_CHECKLOCKTIMEVERIFY: see documentation..."
+      AE) echo "    $cur_opcode: OP_CHECKMULTISIG:    terminating multisig"
+          ;;
+      B1) echo "    $cur_opcode: OP_CHECKLOCKTIMEVERIFY: see https://en.bitcoin.it/wiki/Script"
           s4a_CLTV
           ;;
-      B2) echo "    $cur_opcode: OP_CHECKSEQUENCEVERIFY: see documentation..."
+      B2) echo "    $cur_opcode: OP_CHECKSEQUENCEVERIFY: see https://en.bitcoin.it/wiki/Script"
           s4b_CSV
           ;;
       *)  s97_NA_or_1TO16

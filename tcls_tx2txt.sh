@@ -630,12 +630,12 @@ while [ $loopcounter -lt $tx_in_count_dec ]
   ### STEP 7 - TX_IN, signature script decoding                              ###
   ##############################################################################
   if [ "$VVerbose" -eq 1 ] && [ "$script_length_dec" -ne 0 ] ; then
-    if [ $u_flag -eq 1 ] ; then
-      echo "  Working on an unsigned raw TX. This is the pubkey script "
-      echo "  of previous tx, for which you'll need the privkey to sign:"
-      # decode_pkscript $sig_script
-      sh ./tcls_in_sig_script.sh -v $sig_script
-    else
+#   if [ $u_flag -eq 1 ] ; then
+#     echo "  Working on an unsigned raw TX. This is the pubkey script "
+#     echo "  of previous tx, for which you'll need the privkey to sign:"
+#     # decode_pkscript $sig_script
+#     sh ./tcls_in_sig_script.sh -v $sig_script
+#   else
       if [ "$TESTNET" -eq 1 ] ; then
         if [ "$VVerbose" -eq 1 ] ; then
           ./tcls_in_sig_script.sh -T -v $sig_script 
@@ -650,7 +650,7 @@ while [ $loopcounter -lt $tx_in_count_dec ]
         fi 
       fi 
     fi
-  fi
+# fi
 
   ##############################################################################
   ### STEP 8 - TX_IN, SEQUENCE: normally 0xffffffff, also others possible... ###

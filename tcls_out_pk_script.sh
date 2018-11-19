@@ -275,7 +275,7 @@ S11_OP_DATA33() {
 ### STATUS 12 (P2PK)              ###
 #####################################
 S12_P2PK() {
-    echo "This is a P2PK script:"
+    echo "  This is a P2PK script:"
 }
 #####################################
 ### STATUS 13 (OP_1)              ###
@@ -352,7 +352,7 @@ S18_OP_1to16() {
   get_next_opcode
   case $cur_opcode in
     AE) echo "    $cur_opcode: OP_CHECKMULTISIG"
-        echo "   This is a MULTISIG script:"
+        echo "  This is a MULTISIG script:"
         ;;
     *)  echo "    $cur_opcode: unknown opcode "
         ;;
@@ -364,7 +364,7 @@ S18_OP_1to16() {
 S24_OP_RETURN() {
   cur_opcode_dec=$opcode_array_elements
   op_data_mnshow
-  echo "This is a NULLDATA script"
+  echo "  This is a NULLDATA script"
   exit 0
 }
 #####################################
