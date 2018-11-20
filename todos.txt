@@ -224,7 +224,7 @@ testcase 11a is ok (create a tx), testcase 11b is technically ok, but tcls_tx2tx
 tcls_in_sig_script.sh, and this interprets addresses incorrectly.
 
 
-I75: 03dec2017, svn:
+I78: 03dec2017, svn:
 ====================
 awk scripts to check for length and characters:
 can the awk script be replaced? (tcls_verify_hexkey.awk, tcls_verify_bc_address.awk)
@@ -232,46 +232,46 @@ tcls_create.sh: see line ~190 in procedure chk_tx_ID:
 --> if [ -z "${utxo_TX_ID##*[![:xdigit:]]*}" ] ; then ...
 
 
-I76: 03dec2017, svn:
+I79: 03dec2017, svn:
 ====================
 tcls_create.sh: can a tx with many outputs be created? 
 there are no testcases to produce a tx with many outputs?
 and then create a testcase in the TESTCASE 4 section, which rejects tx, if the sum of input values < sum of output values
 
 
-I77: 03dec2017, svn:
+I80: 03dec2017, svn:
 ====================
 https://bitcoin.stackexchange.com/questions/66197/step-by-step-example-to-redeem-a-p2sh-output-required
 can this be verified in create/sign?
 
 
-I78: 31dec2017, svn:
+I81: 31dec2017, svn:
 ====================
 Segwit, see answer by MeshCollider in this stackexchange question:
 https://bitcoin.stackexchange.com/questions/65404/calculate-segwit-address-from-public-address/65470?noredirect=1#comment77749_65470
 
 
-I79, 11Jan2018, svn:
+I82, 11Jan2018, svn:
 ====================
 smart contract: can this be done?
 https://bitcointalk.org/index.php?topic=2723908.0
 
 
-I80, 15Feb2018, svn - tcls_tx2txt.sh
+I83, 15Feb2018, svn - tcls_tx2txt.sh
 ====================================
 decoding of scripts in thsi tx with many segwit bc1 addresses does not work - howto?
 https://blockchain.info/de/tx/6e58d8c695e3e42c5a7807e2ed99ad7f7731658dfb0d62cdfef44dad8964b350
 https://bitcointalk.org/index.php?topic=2664728.0
 
 
-I81, 25Feb2018, svn - tcls_verify_sig.sh
+I84, 25Feb2018, svn - tcls_verify_sig.sh
 =========================================
 How can this program verify a tx of the blockchain? 
 --> it would need to de-assemble a tx, get its double hash, along with sig, pubkey.
 For the signatures: without length parameter and without "Sighash_All"?
 
 
-I82: 07mar2018, svn, tcls_in_sig_script.sh, line 346:
+I85: 07mar2018, svn, tcls_in_sig_script.sh, line 346:
 =====================================================
 #####################################
 ### STATUS 0a (s0a_SIG_LEN)       ###
@@ -283,7 +283,7 @@ s0a_SIG_LEN()
 --> is it old code? not used anymore? Why would "3C" be signature?
 
 
-I83: 08mar2018, svn, tcls_strict_sig_verify.sh:
+I86: 08mar2018, svn, tcls_strict_sig_verify.sh:
 ===============================================
 verify code to sig checking. 
 look here: http://bitcoin-development.narkive.com/OOU2XVSG/bitcoin-development-who-is-creating-non-der-signatures
@@ -296,7 +296,7 @@ from being interpreted as a negative number.
 --> so, only if highest bit is 1, then zero pad?
 
 
-I84: 14mar2018, svn, tcls_in_sig_script.sh
+I87: 14mar2018, svn, tcls_in_sig_script.sh
 ==========================================
 https://bitcoin.stackexchange.com/questions/72471/getrawtransaction-asm-returns-with-all-should-it-be/72484#72484
 correction of displayed signatures, as per Pieter's comment:
@@ -305,14 +305,14 @@ It's strange to prefix all those things with "OP_". They're not opcodes; just pa
 yup, sure. Got that, no Op_Codes, maybe operators, or TT for type tags. In the ASN1 specs they talk a lot about byte values, maybe BV instead. – pebwindkraft yesterday   
 
 
-I85: 15Apr2018, svn, tcls_s2u.sh:
+I88: 15Apr2018, svn, tcls_s2u.sh:
 =================================
 if the tx has many inputs, how will the scriptSigs/pubkeys be displayed? 
 Currently, when more than one input is involved, the program sets values to hex 0x00.
 need a second loop to present the double hash with signature[n] and pubkey[n] ...
 
 
-I86: 15May2018, svn, tcls_key2pem:
+I89: 15May2018, svn, tcls_key2pem:
 ==================================
 is this useful for implementation?
 https://bitcoin.stackexchange.com/questions/59644/how-do-these-openssl-commands-create-a-bitcoin-private-key-from-a-ecdsa-keypair/59646#59646
@@ -320,7 +320,7 @@ look at all comments sections...
 
 
 
-I87: 05Jun2018, svn, SegWit:
+I90: 05Jun2018, svn, SegWit:
 ============================
 https://blockchain.info/rawtx/497e90946be5ac4076497476c221d5165549e45040700d06f0b10091e2f144d5
 this tx is not correctly displayed at the end with the witness data - the index counters always start at 0. Also the input script parts are not decoded ("220020...") 
@@ -328,13 +328,13 @@ this tx is not correctly displayed at the end with the witness data - the index 
 
 
 
-I88: 05Jun2018, svn, SegWit:
+I91: 05Jun2018, svn, SegWit:
 ============================
 see, if the answer from Mike D can be integrated in the picture "keys.png":
 https://bitcoin.stackexchange.com/questions/75910/how-to-generate-a-native-segwit-address-and-p2sh-segwit-address-from-a-standard
 
 
-I89: 10Jul2018, svn, signature verification:
+I92: 10Jul2018, svn, signature verification:
 ============================================
 Verify a P2SH tx signature with OpenSSL at the command line?
 In the case of a P2SH tx, I don't have a public key. I have a redeemscript. 
@@ -343,12 +343,12 @@ In case of MultiSig: which pubkey?
 
 
 
-I90: 10Jul2018, svn, tcls_p2sh_sc.sh:
+I93: 10Jul2018, svn, tcls_p2sh_sc.sh:
 =====================================
 https://bitcointalk.org/index.php?topic=4641339.0
 --> creterawtransaction und das "data" keyword!
 
-I91: 01Nov2018, svn, tcls_out_pk_script.sh:
+I94: 01Nov2018, svn, tcls_out_pk_script.sh:
 ===========================================
 This script on testnet provides wrong data, decoding shows:
   TX_OUT[0] pk_script (uchar[])

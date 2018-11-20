@@ -14,6 +14,7 @@
 # 0.5     svn     06jul17 if creating a tx to an address beginning with "3", the script
 #                         should detect this (p2sh), and use OP_HASH160 OP_DATA_20 OP_EQUAL ...
 # 0.6     svn     02dec17 I19: trx validation and limits 
+# 0.7     svn     17mar18 I63: removed external fee source, improved output
 # 
 # Permission to use, copy, modify, and distribute this software for any 
 # purpose with or without fee is hereby granted, provided that the above 
@@ -49,6 +50,8 @@ utxo_PKScript=''
 utxo_Amount=''
 
 # variables for output and txfee calculation
+# compressed pubkey, tx size =   a*148 + b*34 + 10 +/- 1
+# uncompressed pubkey, tx size = a*180 + b*34 + 10 +/- 1
 typeset -i amount=0
 typeset -i txfee_param_flag=0       # to calculate tx fee
 typeset -i txfee_per_byte=0         # txfee from the parameter to the script
@@ -56,8 +59,8 @@ typeset -i a_txfee_per_byte=0       # adjusted tx fee in Satoshi per byte
 typeset -i a_txfee=0                # calculated adjusted tx fee
 typeset -i c_txfee=0                # calculated tx fee
 typeset -i f_txfee=0                # file tx fee
-typeset -i BF21_txfee_per_byte=0    # bitcoinfees.21.co/api/v1/fees/recommended
-typeset -i BF21_txfee=0             # calculated txfees based on bitcoinfees.21.co
+# typeset -i BF21_txfee_per_byte=0    # bitcoinfees.21.co/api/v1/fees/recommended
+# typeset -i BF21_txfee=0             # calculated txfees based on bitcoinfees.21.co
 typeset -i TX_amount=0              # the requested TX amount
 typeset -i prev_tx_utxo_amount=0    # to calculate tx fee
 typeset -i file_utxo_amount=0       # utxo amounts from a file
@@ -162,8 +165,8 @@ chk_numeric() {
 chk_min_max() {
   if [ $1 -gt $v_in__v_out_max_amount ] || [ $1 -lt 0 ] ; then
     echo "    "
-    echo "*** ERROR: prev $2 ($1) exceeds limits."
-    echo "           It must be 1 <= $2 <= 21mio BTC"
+    echo "*** ERROR: $2 ($1) exceeds limits."
+    echo "           Value must be between 1 and 21mio BTC"
     echo "           exiting gracefully"
     echo "    "
     exit 1
@@ -258,7 +261,7 @@ check_tool() {
     printf " \n" 
     echo "*** ERROR: $1 not found, please install $1."
     echo "exiting gracefully ..." 
-    exit 0
+    exit 1
   fi
 }
 
@@ -380,7 +383,7 @@ get_chksum() {
 #
 chk_bc_address_hash() {
   echo $TARGET_Address | awk -f tcls_verify_bc_address.awk > /dev/null
-  if [ $? -eq 1 ] ; then
+  if [ $? -ge 1 ] ; then
     echo "*** ERROR: invalid address: $s"
     echo "    exiting gracefully ..."
     exit 1
@@ -430,16 +433,16 @@ chk_bc_address_hash() {
     done
     address_hash=$( echo "$leading_zero$address_hash" )
     vv_output " address_hash after leading1_cnt:   $address_hash"
-  fi
+# fi
    
   # get network bytes in front ... (only for P2PKH addresses?)
-  if [ $msig_identifyer -eq 0 ] ; then 
-    if [ $T_param_flag -eq 0 ] ; then 
+# if [ $msig_identifyer -eq 0 ] ; then 
+#   if [ $T_param_flag -eq 0 ] ; then 
       address_hash_nb=$( echo "00$address_hash" )
-    else
+#   else
       # address_hash_nb=$( echo "6f$address_hash" )
-      address_hash_nb=$( echo "$address_hash" )
-    fi
+#     address_hash_nb=$( echo "$address_hash" )
+#   fi
   else
     address_hash_nb=$( echo "$address_hash" )
   fi
@@ -484,6 +487,8 @@ step3to7() {
   v_output "###  5. TX_IN[$line_items], scriptsig length"
   if [ $t_param_flag -eq 0 ] ; then
     StepCode=${#utxo_PKScript}
+    # echo $utxo_PKScript
+    # echo $StepCode
     StepCode=$(( $StepCode / 2 ))
     StepCode=$( echo "obase=16;$StepCode"|bc ) 
     if [ ${#StepCode} -eq 1 ] ; then
@@ -565,14 +570,12 @@ step10_11() {
   chk_bc_address_hash
 
   # observation:
-  # after base58 decode of a multisig address, the network byte (05) is 
-  # automatically included, need to remove it here...
-  # same for testnet addresses - what is the underlying logic?
-  # needs further investigation... 
-  #
+  # after base58 decode (chk_bc_address_hash) of a "type 1" address (mainnet),
+  # the network byte ("00") is automatically removed, whereas others keep the 
+  # network byte.  This is due to the "leading 1s check". 
+  # Other addresses need to get the network byte removed, before continuing.
   if [ $msig_identifyer -eq 1 ] || [ $T_param_flag -eq 1 ] ; then 
     address_hash=$( echo $address_hash | cut -b 3-42 )
-    # echo $address_hash
   fi
 
   # first check length of address hash. It is always 20 Bytes (40 chars), in hex 0x14, right?
@@ -622,6 +625,16 @@ step10_11() {
 #    if TX size <=  10000 bytes then use standard txfee / 4
 #    if TX size <= 100000 bytes then use standard txfee / 8
 # 
+#  
+#  compressed pubkey, tx size =   a*148 + b*34 + 10 +/- 1
+#  uncompressed pubkey, tx size = a*180 + b*34 + 10 +/- 1
+#  also SegWit:
+#  ============
+#  ... how to figure out how much transaction size is allocated to witness data? 
+#  vbytes are calculated by first dividing just the size of the witness data by 4 
+#  and then adding that to the size of the non-witness data.
+#  see also items I66 and I73 in "todos.txt".
+# 
 # calc_txfee needs to know the length of our RAW_TX
 # each input requires later on a signature (length=70 Bytes/140 chars), 
 # which replaces the existing PKSCRIPT (length 25 Bytes, 50 chars). 
@@ -758,7 +771,7 @@ proc_msig() {
     echo "    length of redeemscr would exceed limits"
     echo "    Exiting gracefully ... "
     echo "  "
-    exit 0
+    exit 1
   fi
   # echo "$msig_uncompressed_pubkeys $msig_max_uncompressed_pubkeys"
   if [ $msig_uncompressed_pubkeys -gt $msig_max_uncompressed_pubkeys ] ; then 
@@ -766,7 +779,7 @@ proc_msig() {
     echo "    length of redeemscr would exceed limits"
     echo "    Exiting gracefully ... "
     echo "  "
-    exit 0
+    exit 1
   fi
   # printf "(%s * %s / 2) + " $msig_reqsigs $sig_max_length_chars
   # printf "(%s * %s / 2) + " $msig_compressed_pubkeys $hex_pubkey_compr_len
@@ -780,7 +793,7 @@ proc_msig() {
     echo "    len_redeemscr ($len_redeemscr) will exceed max length ($msig_redeemscript_maxlen)"
     echo "    Exiting gracefully ... "
     echo "  "
-    exit 0
+    exit 1
   fi
 
   redeemscript=$redeemscript$opcode_msig_reqkeys$OP_CHECKMULTISIG
@@ -802,8 +815,10 @@ proc_msig() {
   # STEP 8a: RIPEMD160(SHA256(redeemscript))
   tmpvar=$( echo $redeemscript | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
   result=$( printf "$tmpvar" | openssl dgst -sha256 | cut -d " " -f 2 )
+  vv_output "sha256 of redeemscript=$result"
   result=$( echo $result | sed 's/[[:xdigit:]]\{2\}/\\x&/g' )
   result=$( printf "$result" | openssl dgst -rmd160 | cut -d " " -f 2 )
+  vv_output "RipeMD of redeemscript=$result"
   param=$result
 
   # STEP 8b: base58_encode("05", redeemscriptHash)
@@ -871,12 +886,12 @@ else
          if [ "$1" == "-f" ] || [ "$1" == "-m" ] || [ "$1" == "-t" ] ; then
            echo "*** you cannot use -c with -f or -m or -t at the same time."
            echo "    Exiting gracefully ... "
-           exit 0
+           exit 1
          fi
          if [ $# -lt 6 ] ; then
            echo "*** you must provide correct number of parameters"
            proc_help
-           exit 0
+           exit 1
          fi
          utxo_TX_ID=$1
          chk_tx_ID
@@ -923,7 +938,7 @@ else
          if [ $# -gt 0 ] ; then
            echo "*** already detected last parameter as return address, don't know what to do"
            echo "    with the following parameter(s). Exiting gracefully ... "
-           exit 0
+           exit 1
          fi
          ;;
       -f)
@@ -977,7 +992,7 @@ else
          if [ $# -gt 0 ] ; then
            echo "*** already detected last parameter as return address, don't know what to do"
            echo "    with the following parameter(s). Exiting gracefully ... "
-           exit 0
+           exit 1
          fi
          ;;
       -m)
@@ -1009,7 +1024,7 @@ else
          if [ "$1" == "-c" ] || [ "$1" == "-f" ] || [ "$1" == "-m" ] ; then
            echo "*** you cannot use -t with -c or -f or -m at the same time."
            echo "    Exiting gracefully ... "
-           exit 0
+           exit 1
          fi
          if [ $# -lt 4 ] ; then
            echo "*** you must provide correct number of parameters"
@@ -1018,7 +1033,7 @@ else
          fi
          if [ "$1" == ""  ] ; then
            echo "*** you must provide a Bitcoin TRANSACTION_ID to the -t parameter!"
-           exit 0
+           exit 1
          fi
          utxo_TX_ID=$1
          shift 
@@ -1178,9 +1193,6 @@ fi
 if [ $? -eq 0 ]; then
   vv_output " - yes"
   # when there was no parameter given for txfee:
-  if [ $txfee_param_flag -eq 0 ] ; then
-    BF21_txfee_per_byte=$( $http_get_cmd https://bitcoinfees.21.co/api/v1/fees/recommended | head -n1 | awk ' BEGIN {FS="[:}]"} { print $4 }' )
-  fi
   # if we create a tx, and param -t was given, then a 
   # Bitcoin TRANSACTION_ID should be in variable "utxo_TX_ID":
   if [ "$t_param_flag" -eq 1 ] ; then
@@ -1352,9 +1364,13 @@ step10_11
 calc_adjusted_amount
 if [ "$f_param_flag" -eq 1 ] ; then
   d_amount=$(( $file_utxo_amount - $TX_amount - $a_txfee ))
-fi
-if [ "$t_param_flag" -eq 1 ] ; then
+  chk_min_max $(( $file_utxo_amount - $TX_amount )) "amount for return address"
+elif [ "$t_param_flag" -eq 1 ] ; then
   d_amount=$(( $prev_tx_utxo_amount - $TX_amount - $a_txfee ))
+  chk_min_max $(( $prev_tx_utxo_amount - $TX_amount )) "amount for return address"
+else
+  d_amount=$(( $utxo_Amount - $amount - $a_txfee ))
+  chk_min_max $(( $utxo_Amount - $amount )) "$utxo_Amount-$amount -> return address amount"
 fi
 
 if [ ${#RETURN_Address} -gt 28 ] ; then
@@ -1374,7 +1390,7 @@ if [ $LockTime -gt $LockTime_max_value ] ; then
   echo "*** Error: $LockTime >= $LockTime_max_value"
   echo "           Please adjust. Exiting gracefully ... "
   echo "  "
-  exit 0
+  exit 1
 fi
 StepCode=$( printf "%08d" $LockTime )
 tx_concatenate
@@ -1415,27 +1431,35 @@ fi
 ### verifying input and output amounts ###
 ##########################################
 
-echo "###########################################################################"
-echo "### amount(utxo) - amount(requested) = TXFEE. *Double check YOUR MATH!* ###"
+echo "##############################################################################"
 if [ "$t_param_flag" -eq 1 ] ; then
-  printf "### amount of tx input(s) (in Satoshis):               %16d ###\n" $prev_tx_utxo_amount
-  printf "### requested amount to spend (in Satoshis):           %16d ###\n" $TX_amount
+  # what happens, if there are many TX_IDs or prev_outpoints ???
+  echo   "### TXID: $utxo_TX_ID ###"
+  printf "### previous Outpoint:                                    %16d ###\n" $utxo_OutPoint
+  printf "### amount of tx input(s) (in Satoshis):                  %16d ###\n" $prev_tx_utxo_amount
+  printf "### requested amount to spend (in Satoshis):              %16d ###\n" $TX_amount
   if [ $prev_tx_utxo_amount -lt $TX_amount ] ; then
     echo "*** ERROR: input insufficient, please verify amount(s)."
     echo " "
-    exit 0 
+    exit 1 
   fi
 elif [ "$f_param_flag" -eq 1 ] ; then
-  printf "### utxo amount in file (in Satoshis):                 %16d ###\n" $file_utxo_amount
-  printf "### requested amount to spend (in Satoshis):           %16d ###\n" $TX_amount
+  # what happens, if there are many TX_IDs or prev_outpoints ???
+  echo   "### TXID: $utxo_TX_ID ###"
+  printf "### previous Outpoint:                                    %16d ###\n" $utxo_OutPoint
+  printf "### utxo amount in file (in Satoshis):                    %16d ###\n" $file_utxo_amount
+  printf "### requested amount to spend (in Satoshis):              %16d ###\n" $TX_amount
   if [ $file_utxo_amount -lt $TX_amount ] ; then
     echo "*** ERROR: input insufficient, please verify amount(s)."
     echo " "
-    exit 0 
+    exit 1 
   fi
 else
-  printf "### amount in previous transacton (in Satoshis):       %16d ###\n" $utxo_Amount
-  printf "### requested amount to spend (in Satoshis):           %16d ###\n" $TX_amount
+  # what happens, if there are many TX_IDs or prev_outpoints ???
+  echo   "### TXID: $utxo_TX_ID ###"
+  printf "### previous Outpoint:                                    %16d ###\n" $utxo_OutPoint
+  printf "### amount in previous transacton (in Satoshis):          %16d ###\n" $utxo_Amount
+  printf "### requested amount to spend (in Satoshis):              %16d ###\n" $TX_amount
 fi
 
 #########################
@@ -1443,44 +1467,24 @@ fi
 #########################
 calc_adjusted_amount
 
-BF21_txfee=$(( $TX_bytes * $BF21_txfee_per_byte ))
-if [ $txfee_param_flag -eq 0 ] ; then
-  printf "### bitcoinfees.21.co (@ $BF21_txfee_per_byte Satoshi/Byte * $TX_bytes TX_bytes):"
-  line_length=$(( ${#txfee_per_byte} + ${#TX_bytes} ))
-  case $line_length in
-   3) printf "     %10d" $BF21_txfee
-      ;;
-   4) printf "    %10d" $BF21_txfee
-      ;;
-   5) printf "   %10d" $BF21_txfee
-      ;;
-   6) printf "  %10d" $BF21_txfee
-      ;;
-   7) printf " %10d" $BF21_txfee
-      ;;
-   8) printf "%10d" $BF21_txfee
-      ;;
-  esac
-  printf " ###\n" $BF21_txfee
-fi
-
 c_txfee=$(( $txfee_per_byte * $TX_bytes ))
+echo "### amount(utxo) - amount(requested) = TXFEE. *Double check YOUR MATH!*    ###"
 printf "### calculated TX-FEE (@ $txfee_per_byte Satoshi/Byte * $TX_bytes TX_bytes):"
 line_length=$(( ${#txfee_per_byte} + ${#TX_bytes} ))
 case $line_length in
- 3) printf "      %10d" $c_txfee
+ 3) printf "         %10d" $c_txfee
     ;;
- 4) printf "     %10d" $c_txfee
+ 4) printf "        %10d" $c_txfee
     ;;
- 5) printf "    %10d" $c_txfee
+ 5) printf "       %10d" $c_txfee
     ;;
- 6) printf "   %10d" $c_txfee
+ 6) printf "      %10d" $c_txfee
     ;;
- 7) printf "  %10d" $c_txfee
+ 7) printf "     %10d" $c_txfee
     ;;
- 8) printf " %10d" $c_txfee
+ 8) printf "    %10d" $c_txfee
     ;;
- 9) printf "%10d" $c_txfee
+ 9) printf "   %10d" $c_txfee
     ;;
 esac
 printf " ###\n" $c_txfee
@@ -1497,24 +1501,24 @@ else
 fi
 
 if [ $d_amount -lt 0 ] ; then
-  printf "### Achieving negative value with this txfee:          %16d ###\n" $d_amount 
+  printf "### Achieving negative value with this txfee:             %16d ###\n" $d_amount 
   if [ $a_txfee_per_byte -lt $txfee_per_byte ] ; then
     printf "### adjusted TX-FEE (@ $a_txfee_per_byte Satoshi/Byte * $TX_bytes TX_bytes):"
     line_length=$(( ${#a_txfee_per_byte} + ${#TX_bytes} ))
     case $line_length in
-       5) printf "      %10d" $a_txfee
+       5) printf "         %10d" $a_txfee
           ;;
-       6) printf "     %10d" $a_txfee
+       6) printf "        %10d" $a_txfee
           ;;
-       7) printf "    %10d" $a_txfee
+       7) printf "       %10d" $a_txfee
           ;;
-       8) printf "   %10d" $a_txfee
+       8) printf "      %10d" $a_txfee
           ;;
-       9) printf "  %10d" $a_txfee
+       9) printf "     %10d" $a_txfee
           ;;
-      10) printf " %10d" $a_txfee
+      10) printf "    %10d" $a_txfee
           ;;
-      11) printf "%10d" $a_txfee
+      11) printf "   %10d" $a_txfee
           ;;
     esac
     printf " ###\n" $a_txfee
@@ -1534,18 +1538,18 @@ if [ $d_amount -lt 0 ] ; then
   echo "*** ERROR: input insufficient, to cover amount and tx fees"
   echo "           please adjust, and retry. Exiting gracefully ..." 
   echo " "
-  exit 0
+  exit 1
 fi
 
 
 if [ ${#RETURN_Address} -gt 28 ] ; then
-  printf "### value to return address:                           %16d ###\n" $d_amount 
+  printf "### value to return address:                              %16d ###\n" $d_amount 
 else
-  printf "### *** possible value to return address:              %16d ###\n" $d_amount 
-  printf "### *** without return address, txfee will be:         %16d ###\n" $f_txfee 
+  printf "### *** possible value to return address:                 %16d ###\n" $d_amount 
+  printf "### *** without return address, txfee will be:            %16d ###\n" $f_txfee 
 fi
 
-echo "###########################################################################"
+echo "##############################################################################"
 echo " "
 echo "$RAW_TX" | tr [:upper:] [:lower:] > $c_utx_fn
 echo "*** DOUBLE CHECK YOUR MATH! *** "
@@ -1554,7 +1558,19 @@ echo "is ok, then take this file on a clean USB stick to the cold storage"
 echo "(second computer), and sign it there."
 echo " "
 echo "... before doing so, you may want to check the output with:"
-echo "./tcls_tx2txt.sh -vv -f $c_utx_fn -u"
+if [ $Verbose -eq 1 ] ; then
+  if [ $T_param_flag -eq 0 ] ; then 
+    echo "./tcls_tx2txt.sh -v -f $c_utx_fn -u"
+  else
+    echo "./tcls_tx2txt.sh -v -T -f $c_utx_fn -u"
+  fi
+else
+  if [ $T_param_flag -eq 0 ] ; then 
+    echo "./tcls_tx2txt.sh -f $c_utx_fn -u"
+  else
+    echo "./tcls_tx2txt.sh -T -f $c_utx_fn -u"
+  fi
+fi
 echo " "
 
 ################################

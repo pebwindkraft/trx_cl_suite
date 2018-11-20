@@ -56,3 +56,6 @@ yymmmdd
 18mar07 svn   tcls_key2pem.sh                make script work correctly for testnet and regtest
 18apr11 svn   tcls_s2u.sh               I81: new file, to convert from signed to unsigned tx
 18nov19 svn   tcls_tx2txt.sh            I77: preparations to work on I77 (only tcls_tx2txt.sh)
+18nov20 svn   tcls_create.sh            I77: fixed issue with test addresses and also fee calcs,
+                                             corrected double numbering in file "todos.txt"
+
