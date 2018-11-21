@@ -11,6 +11,7 @@
 # 0.2	  svn     04apr17 preparations for multisig tx
 # 0.3	  svn     12jun17 remove 'tr' and 'cut', replace by array
 # 0.4	  svn     05nov17 finalize unfinished multisig, 
+# 0.5	  svn     21mar18 fix VAR_INT when creating multisig with long redeemscript
 # 
 # Permission to use, copy, modify, and distribute this software for any 
 # purpose with or without fee is hereby granted, provided that the above 
@@ -47,31 +48,33 @@
 # 
 # echo "MDYwEAYHKo...BASE64_PART_OF_PEM...3txRPk8bqOWhIkprA=" | base64 -D - | hexdump -C
 # 
-###########################
-# Some variables ...      #
-###########################
-# Multisig=0
-# Quiet=0
-# Verbose=0
-# VVerbose=0
+######################
+# Some variables ... #
+######################
 
-# typeset -r stx_fn=tmp_stx.txt                  # signed TX after the end of this script
-# typeset -r utxhex_tmp_fn=tmp_utx.hex           # assembled, unsigned TX in hex
-# typeset -r utxtxt_tmp_fn=tmp_utx.txt           # assembled, unsigned TX as txt 
-# typeset -r utx_sha256_fn=tmp_utx_sha256.hex    # the sha256 hashed TX
-# typeset -r utx_dsha256_fn=tmp_utx_dsha256.hex  # the double sha256 hashed TX
-typeset -r tmp_vfy_fn=tmp_vfy.sh               # for all TX inputs, put sig, hash and pubkey here
+# see also file "tcls.conf" for global variables
 
-typeset -r Version=01000000
+# read-only variables
+typeset -r tmp_vfy_fn=tmp_vfysigs.sh   # for all TX inputs, put sig, hash and pubkey 
+typeset -r Version_V1=01000000
+typeset -r Version_V2=02000000
 typeset -r TX_IN_Sequence=FFFFFFFF
 typeset -r LockTime=00000000
 typeset -r SIGHASH_ALL=01000000
+
+# parameter to the command line (values 0 or 1)
+typeset -i Filename_FLAG=0
+typeset -i Multisig_FLAG=0
+typeset -i Quiet_FLAG=0
+typeset -i ScriptHash_FLAG=0
+typeset -i Testnet_FLAG=0
+typeset -i Verbose_FLAG=0
+typeset -i VVerbose_FLAG=0
 
 typeset -i i=0
 typeset -i j=0
 typeset -i loopcounter=0
 typeset -i n=0
-typeset -i F_PARAM_FLAG=0
 typeset -i from=0
 typeset -i to=0
 typeset -i TX_Array_ptr=0
@@ -92,6 +95,7 @@ TX_IN_PrevOutput_Index=''
 TX_IN_Sig_Script=''
 TX_OUT_Count_hex=''
 TX_OUT_Value=''
+TX_Version=''
 TX_OUT_PKScriptBytes_hex=''
 TX_OUT_PKScript=''
 TX_SigHashTypeValue=''
@@ -123,15 +127,17 @@ fi
 #################################
 proc_help() {
   echo " "
-  echo "sign usage:   $0 [-h|-m|-q|-v|-vv] [-f <filename>]|[<raw_tx>] -w|-x <privkey> -p <pubkey>"
+  echo "usage:   $0 [-h|-m|-q|-s|-T|-v|-vv] [-f <filename>]|[<raw_tx>] -w|-x <privkey> -p <pubkey>"
   echo " "
   echo " -f  next param is a filename with an unsigned raw transaction"
   echo " -h  show this HELP text"
   echo " -m  sign a multisig (spending) tx" 
   echo " -p  next param is a public key (UNCOMPRESSED or COMPRESSED) in hex format"
   echo " -q  real Quiet mode, don't display anything"
-  echo " -v  display Verbose output"
-  echo " -vv display VERY Verbose output"
+  echo " -s  sign a P2SH transaction"
+  echo " -T  use testnet"
+  echo " -v  display Verbose_FLAG output"
+  echo " -vv display VERY Verbose_FLAG output"
   echo " -w  next param is a WIF or WIF-C encoded private key (51 or 52 chars)"
   echo " -x  next param is a HEX encoded private key (32Bytes=64chars)"
   echo " "
@@ -151,9 +157,9 @@ get_TX_section() {
   done 
 }
 
-###########################################################################
-### procedure to indent data, to avoid ugly line breaks ...             ###
-###########################################################################
+###########################################################
+# procedure to indent data, to avoid ugly line breaks ... #
+###########################################################
 indent_data() {
   output=''
   indent_string="    "
@@ -176,7 +182,7 @@ indent_data() {
 # procedure to display verbose output #
 #######################################
 v_output() {
-  if [ $Verbose -eq 1 ] ; then
+  if [ $Verbose_FLAG -eq 1 ] ; then
     indent_data "$1"
   fi
 }
@@ -185,7 +191,7 @@ v_output() {
 # procedure to display even more verbose output #
 #################################################
 vv_output() {
-  if [ $VVerbose -eq 1 ] ; then
+  if [ $VVerbose_FLAG -eq 1 ] ; then
     indent_data "$1"
   fi
 }
@@ -197,6 +203,15 @@ tx_concatenate() {
   SIGNED_TX=$SIGNED_TX$STEPCODE
   vv_output "    $SIGNED_TX"
   vv_output " "
+}
+
+##############################################################
+# to stay with portable code, create zero padding function ###
+##############################################################
+zero_pad(){
+  # zero_pad <string> <length>
+  [ ${#1} -lt $2 ] && printf "%0$(($2-${#1}))d" ''
+  printf "%s" "$1"
 }
 
 ##########################################
@@ -251,12 +266,12 @@ proc_var_int() {
 # procedure to check for necessary tools #
 ##########################################
 check_tool() {
-  if [ $VVerbose -eq 1 ]; then
+  if [ $VVerbose_FLAG -eq 1 ]; then
     printf " %-8s" $1
   fi
   which $1 > /dev/null
   if [ $? -eq 0 ]; then
-    if [ $VVerbose -eq 1 ]; then
+    if [ $VVerbose_FLAG -eq 1 ]; then
       printf " - yes \n" 
     fi
   else
@@ -301,13 +316,6 @@ if [ "$1" == "-h" ] ; then
   exit 0
 fi  
 
-if [ "$1" == "-f" ] && [ "$2" == "help" ] ; then
-  echo " provide the following parameters:"
-  echo " -f <filename>: the filename with an unsigned, raw transaction"
-  echo " "
-  exit 0
-fi  
-
 if [ $# -lt 3 ] ; then
   echo "insufficient parameter(s) given... "
   echo " "
@@ -318,7 +326,7 @@ else
    do
     case "$1" in
       -f)
-         F_PARAM_FLAG=1
+         Filename_FLAG=1
          if [ "$2" == ""  ] ; then
            echo "*** you must provide a FILENAME to the -f parameter!"
            exit 1
@@ -328,28 +336,48 @@ else
          shift 
          ;;
       -m)
-         Multisig=1
+         if [ $ScriptHash_FLAG -eq 1 ] ; then 
+           echo "*** cannot use -m and -s at the same time, exiting gracefully ..."
+           exit 1
+         fi
+         Multisig_FLAG=1
          shift
          ;;
       -p)
+         if [ "$2" == ""  ] ; then
+           echo "*** you must provide a Public Key to the -p parameter!"
+           exit 1
+         fi
          pubkey=$2
          shift
          shift
          ;;
       -q)
-         Quiet=1
+         Quiet_FLAG=1
+         shift
+         ;;
+      -s)
+         if [ $Multisig_FLAG -eq 1 ] ; then 
+           echo "*** cannot use -m and -s at the same time, exiting gracefully ..."
+           exit 1
+         fi
+         ScriptHash_FLAG=1
+         shift
+         ;;
+      -T)
+         Testnet_FLAG=1
          shift
          ;;
       -v)
-         Verbose=1
-         echo "Verbose output turned on"
+         Verbose_FLAG=1
+         echo "Verbose_FLAG output turned on"
          echo " "
          shift
          ;;
       -vv)
-         Verbose=1
-         VVerbose=1
-         echo "VERY Verbose and Verbose output turned on"
+         Verbose_FLAG=1
+         VVerbose_FLAG=1
+         echo "VERY Verbose_FLAG and Verbose_FLAG output turned on"
          echo " "
          shift
          ;;
@@ -359,10 +387,6 @@ else
            exit 1
          fi
          wif_privkey=$2
-         if [ ${#wif_privkey} -ne 51 ] && [ ${#wif_privkey} -ne 52 ] ; then 
-           echo "*** wrong privkey length (${#wif_privkey}), must be 51 or 52 chars"
-           exit 1
-         fi
          shift
          shift
          ;;
@@ -372,10 +396,6 @@ else
            exit 1
          fi
          hex_privkey=$2
-         if [ ${#hex_privkey} -ne 64 ] ; then 
-           echo "*** wrong privkey length (${#hex_privkey}), must be 64 chars (32 Bytes)"
-           exit 1
-         fi
          shift
          shift
          ;;
@@ -419,11 +439,11 @@ fi
 ### so let's go ###
 ###################
 
-if [ $Quiet -ne 1 ] ; then
+if [ $Quiet_FLAG -ne 1 ] ; then
   echo "let's go ..."
 fi
 
-if [ $F_PARAM_FLAG -eq 1 ] ; then
+if [ $Filename_FLAG -eq 1 ] ; then
   if [ ! -r $filename ] ; then
     echo "*** Error: the file $filename could not be read"
     echo "           make sure file exists, or change filename acordingly"
@@ -434,6 +454,34 @@ if [ $F_PARAM_FLAG -eq 1 ] ; then
   UNSIGNED_TX=$( cat $filename )
 fi
 
+if [ ${#pubkey} -eq 0 ] ; then 
+  proc_help
+  echo "*** ERROR: missing pubkey, please verify"
+  echo "           Exiting gracefully"
+  exit 1
+fi
+
+if [ ${#wif_privkey} -eq 0 ] ; then 
+  if [ ${#hex_privkey} -eq 0 ] ; then 
+    proc_help
+    echo "*** ERROR: missing hex or wif private key, key length=0, please verify"
+    echo "           Exiting gracefully"
+    exit 1
+  fi
+else
+  if [ ${#wif_privkey} -ne 51 ] && [ ${#wif_privkey} -ne 52 ] ; then 
+    echo "*** wrong wif privkey length (${#wif_privkey}), must be 51 or 52 chars"
+    echo "           Exiting gracefully"
+    exit 1
+  fi
+fi
+
+if [ ${#wif_privkey} -eq 0 ] && [ ${#hex_privkey} -ne 64 ] ; then 
+  echo "*** wrong hex privkey length (${#hex_privkey}), must be 64 chars"
+  echo "           Exiting gracefully"
+  exit 1
+fi
+
 ############################################
 ### normalize tx and bring into an array ###
 ############################################
@@ -441,7 +489,7 @@ fi
 UNSIGNED_TX=$( printf "$UNSIGNED_TX" | tr [:lower:] [:upper:] )
 result=$( echo "$UNSIGNED_TX" | sed 's/[[:xdigit:]]\{2\}/& /g' )
 if [ "$shell_string" == "bash" ] ; then
-  # running this on OpenBSD creates errors, hence a for loop...
+  # running this on OpenBSD creates errors, hence a for loop for bash ...
   # tx_array=($result)
   # IFS=' ' read -a tx_array <<< "${result}"
   for TX_Char in $result; do tx_array[$n]=$TX_Char; ((n++)); done
@@ -453,27 +501,27 @@ v_output "unsigned tx is this:"
 result=$( echo ${tx_array[*]} | tr -d " " )
 v_output "$result"
 
-##############################################################################
-### STEP 1 - VERSION - this is currently set to 01000000 (4 Bytes)         ###
-##############################################################################
-v_output "1.  Version, usually set to 01000000 (some CSV/CLTV/SegWit have 02000000)"
+#################################################################
+### STEP 1 - VERSION - this is 01000000 or 02000000 (4 Bytes) ###
+#################################################################
+v_output "1.  Version, usually set to 01000000 (CSV/CLTV/SegWit have 02000000)"
 
 TX_Array_ptr=0
 TX_Array_bytes=4
-result=$( get_TX_section )
+TX_Version=$( get_TX_section )
 TX_Array_ptr=$(( $TX_Array_ptr + $TX_Array_bytes ))
 
-if [ "$result" != "$Version" ] ; then 
-  echo "*** Error: unsigned raw transaction normally begins with Version '01000000'"
-  echo "           here we have $result. Please adjust, and try again. "
+if [ "$TX_Version" != "$Version_V1" ] && [ "$TX_Version" != "$Version_V2" ] ; then 
+  echo "*** Error: signed raw transaction normally begins with Version '01' or '02'"
+  echo "           here we have $TX_Version. Please verify..."
   echo "           Exiting gracefully"
   exit 1
 fi
-v_output "     $result"
+v_output "     $TX_Version"
 
-##############################################################################
-### STEP 2 - TX_IN_Count, a var_int                                        ###
-##############################################################################
+#######################################
+### STEP 2 - TX_IN_Count, a var_int ###
+#######################################
 v_output "2.  TX_IN_COUNT, the number of input tx [var_int]"
 TX_Array_bytes=1
 proc_var_int
@@ -482,16 +530,16 @@ TX_IN_Count_hex=$( echo $var_int | tr -d " " )
 TX_IN_Count_dec=$( echo "ibase=16; $TX_IN_Count_hex"|bc) 
 v_output "     hex=$TX_IN_Count_hex, decimal=$TX_IN_Count_dec"
 
-#######################################################
-### collect all tx_in data into array variables...  ###
-#######################################################
+######################################################
+### collect all tx_in data into array variables... ###
+######################################################
 # here we know, how many TX_IN structures will follow, 
 # so we collect all TX_IN data into simple arrays
 while [ $TX_IN_Current -lt $TX_IN_Count_dec ] 
  do
-  ##############################################################################
-  ### STEP 3 - TX_IN_PrevOutput_Hash, previous transaction hash (32Bytes)    ###
-  ##############################################################################
+  ###########################################################################
+  ### STEP 3 - TX_IN_PrevOutput_Hash, previous transaction hash (32Bytes) ###
+  ###########################################################################
   v_output "3.  TX_IN[$TX_IN_Current] PrevOutput_Hash: a transaction hash"
   TX_Array_bytes=32
   TX_IN_PrevOutput_Hash[$TX_IN_Current]=$( get_TX_section )
@@ -499,9 +547,9 @@ while [ $TX_IN_Current -lt $TX_IN_Count_dec ]
   result=$( reverse_hex $result )
   v_output "     ${TX_IN_PrevOutput_Hash[$TX_IN_Current]}"
   
-  ##############################################################################
-  ### STEP 4 - TX_IN_PrevOutput_Index, the output index we want to use       ###
-  ##############################################################################
+  ########################################################################
+  ### STEP 4 - TX_IN_PrevOutput_Index, the output index we want to use ###
+  ########################################################################
   v_output "4.  TX_IN[$TX_IN_Current] PrevOutput_Index: the output index, we want to redeem from"
   TX_Array_bytes=4
   TX_IN_PrevOutput_Index[$TX_IN_Current]=$( get_TX_section )
@@ -511,11 +559,11 @@ while [ $TX_IN_Current -lt $TX_IN_Count_dec ]
   tx_value_dec=$( echo "ibase=16; $result"|bc) 
   v_output "     hex=${TX_IN_PrevOutput_Index[$TX_IN_Current]}, reversed $result, decimal=$tx_value_dec"
 
-  ##############################################################################
-  ### STEP 5 - TX_IN, script bytes: length of following uchar[] (var_int)    ###
-  ##############################################################################
+  ###########################################################################
+  ### STEP 5 - TX_IN, script bytes: length of following uchar[] (var_int) ###
+  ###########################################################################
   # The length of the following scriptsig
-  v_output "5.  TX_IN[$TX_IN_Current] ScriptBytes: length of prev tx script content"
+  v_output "5.  TX_IN[$TX_IN_Current] ScriptBytes: length of script content"
   TX_Array_bytes=1
   proc_var_int
   TX_Array_ptr=$(( $TX_Array_ptr + $TX_Array_bytes ))
@@ -523,9 +571,9 @@ while [ $TX_IN_Current -lt $TX_IN_Count_dec ]
   TX_IN_ScriptBytes_hex[$TX_IN_Current]=$var_int
   v_output "     script_len_hex[$TX_IN_Current]: hex=$var_int, decimal=$script_len_dec"
   
-  ##############################################################################
-  ### STEP 6 - TX_IN_Sig_Script, uchar[] - variable length                   ###
-  ##############################################################################
+  ############################################################
+  ### STEP 6 - TX_IN_Sig_Script, uchar[] - variable length ###
+  ############################################################
   # the actual scriptSig 
   # for unsigned raw tx, this is temporarily filled:
   #   if p2sh/p2pkh, then the PubKey script of the PREV_TX
@@ -538,9 +586,9 @@ while [ $TX_IN_Current -lt $TX_IN_Count_dec ]
   TX_Array_ptr=$(( $TX_Array_ptr + $TX_Array_bytes ))
   v_output "     ${TX_IN_Sig_Script[$TX_IN_Current]}"
 
-  ##############################################################################
-  ### STEP 7 - TX_IN_Sequence: usually 0xffffffff                            ###
-  ##############################################################################
+  ###################################################
+  ### STEP 7 - TX_IN_Sequence: usually 0xffffffff ###
+  ###################################################
   # Sequence is normally set to 0xffffffff (might differ with CSV/CLTV and SegWit tx)
   v_output "7.  TX_IN[$TX_IN_Current] Sequence, usually 0xffffffff"
   TX_Array_bytes=4
@@ -556,9 +604,9 @@ while [ $TX_IN_Current -lt $TX_IN_Count_dec ]
   TX_IN_Current=$(( TX_IN_Current + 1 ))
 done
 
-##############################################################################
-### STEP 8 - TX_OUT_COUNT (var_int): the number of output tx               ###
-##############################################################################
+################################################################
+### STEP 8 - TX_OUT_COUNT (var_int): the number of output tx ###
+################################################################
 v_output "8.  TX_OUT_COUNT, the number of output tx [var_int]"
 TX_Array_bytes=1
 proc_var_int
@@ -632,7 +680,7 @@ v_output "     $result"
 ### STEP 13 - Sig Hashtype Value; the last 8 chars (4 bytes)               ###
 ##############################################################################
 
-v_output "13. Sig Hashtype Value (8 chars, 4 Bytes"
+v_output "13. Sig Hashtype Value (8 chars, 4 Bytes)"
 # we set the hash value to default (SIGHASH_ALL), if s.th. else 
 # appears in the original tx, it is overwritten.
 TX_SigHashTypeValue=$TX_SigHash_all_Value
@@ -666,7 +714,7 @@ echo "###############################################" >> $tmp_vfy_fn
 echo "### Result for each input should be:        ###" >> $tmp_vfy_fn
 echo "### Signature Verified Successfully         ###" >> $tmp_vfy_fn
 echo "###############################################" >> $tmp_vfy_fn
-if [ $VVerbose -eq 1 ] ; then 
+if [ $VVerbose_FLAG -eq 1 ] ; then 
   echo "# For each input, need to convert to binary. The pubkey is: " >> $tmp_vfy_fn
   echo "# $pubkey " >> $tmp_vfy_fn
   echo "# The pubkey.pem file is provided from here: $script_key2pem" >> $tmp_vfy_fn
@@ -707,7 +755,7 @@ TX_OUT_Current=0
 TX_SIG_Current=1
 while [ $TX_SIG_Current -le $TX_IN_Count_dec ] 
  do
-  printf $Version > $utxtxt_tmp_fn
+  printf $TX_Version > $utxtxt_tmp_fn
   # need to do a var_int check here ...
   printf $TX_IN_Count_hex >> $utxtxt_tmp_fn
 
@@ -715,14 +763,14 @@ while [ $TX_SIG_Current -le $TX_IN_Count_dec ]
   v_output "14. TX_IN Sig[$TX_SIG_Current]: serialize unsigned tx and add 01000000 (SIGHASH_ALL)" 
   while [ $TX_IN_Current -lt $TX_IN_Count_dec ] 
    do
-    if [ $VVerbose -eq 1 ] ; then 
+    if [ $VVerbose_FLAG -eq 1 ] ; then 
       echo "    TX_IN[$TX_IN_Current] PrevOutput_Hash:    ${TX_IN_PrevOutput_Hash[$TX_IN_Current]}"
       echo "    TX_IN[$TX_IN_Current] PrevOutput_Index:   ${TX_IN_PrevOutput_Index[$TX_IN_Current]}"
     fi
     printf ${TX_IN_PrevOutput_Hash[$TX_IN_Current]} >> $utxtxt_tmp_fn
     printf ${TX_IN_PrevOutput_Index[$TX_IN_Current]} >> $utxtxt_tmp_fn
     if [ $TX_SIG_Current -eq $(( TX_IN_Current + 1 )) ] ; then
-      if [ $Multisig -eq 1 ] ; then 
+      if [ $Multisig_FLAG -eq 1 ] ; then 
         separate_sig
         if [ "$Multisig_Status" == "incomplete" ] ; then 
           TX_IN_Sig_Script[$TX_IN_Current]=$( cat $redeemscript_fn )
@@ -752,7 +800,7 @@ while [ $TX_SIG_Current -le $TX_IN_Count_dec ]
     printf ${TX_OUT_Value[$TX_OUT_Current]} >> $utxtxt_tmp_fn
     printf ${TX_OUT_PKScriptBytes_hex[$TX_OUT_Current]} >> $utxtxt_tmp_fn
     printf ${TX_OUT_PKScript[$TX_OUT_Current]} >> $utxtxt_tmp_fn
-    if [ $VVerbose -eq 1 ] ; then 
+    if [ $VVerbose_FLAG -eq 1 ] ; then 
       echo "    TX_OUT[$TX_OUT_Current] Value:             ${TX_OUT_Value[$TX_OUT_Current]}"
       echo "    TX_OUT[$TX_OUT_Current] PKScriptBytes_hex: ${TX_OUT_PKScriptBytes_hex[$TX_OUT_Current]}"
       echo "    TX_OUT[$TX_OUT_Current] PKScript:          ${TX_OUT_PKScript[$TX_OUT_Current]}"
@@ -761,21 +809,21 @@ while [ $TX_SIG_Current -le $TX_IN_Count_dec ]
   done
   printf $LockTime >> $utxtxt_tmp_fn
   printf $TX_SigHashTypeValue >> $utxtxt_tmp_fn
-  if [ $VVerbose -eq 1 ] ; then 
+  if [ $VVerbose_FLAG -eq 1 ] ; then 
     echo "    the unsigned raw tx is this:"
     cat $utxtxt_tmp_fn
     echo " "
   fi
 
   ##############################################################################
-  ### STEP 15 - double sha256 that structure from 13                         ###
+  ### STEP 15 - double sha256 that structure from 14                         ###
   ##############################################################################
   v_output "15. TX_IN Sig[$TX_SIG_Current]: double hash the raw unsigned TX"
-  if [ $VVerbose -eq 1 ] ; then 
+  if [ $VVerbose_FLAG -eq 1 ] ; then 
     echo "# Bitcoin (and so here openssl) works only on binary files. " >> $tmp_vfy_fn
     echo "# TX hash files must be double sha256'd. " >> $tmp_vfy_fn
     echo "echo \"TX_IN Sig[$TX_SIG_Current], the unsigned raw tx:\"" >> $tmp_vfy_fn
-    printf "echo \" \"" >> $tmp_vfy_fn
+    printf "echo " >> $tmp_vfy_fn
     cat $utxtxt_tmp_fn >> $tmp_vfy_fn
     echo " " >> $tmp_vfy_fn
   fi
@@ -787,11 +835,11 @@ while [ $TX_SIG_Current -le $TX_IN_Count_dec ]
   openssl dgst -binary -sha256 >$utx_dsha256_fn <$utx_sha256_fn 
 
   result=$( od -An -t x1 $utx_sha256_fn | tr -d [:blank:] | tr -d "\n" )
-  if [ $VVerbose -eq 1 ] ; then 
+  if [ $VVerbose_FLAG -eq 1 ] ; then 
     echo "    single sha256: $result"
   fi
   result=$( od -An -t x1 $utx_dsha256_fn | tr -d [:blank:] | tr -d "\n" )
-  if [ $VVerbose -eq 1 ] ; then 
+  if [ $VVerbose_FLAG -eq 1 ] ; then 
     echo "    double sha256: $result"
   fi
 
@@ -840,7 +888,7 @@ while [ $TX_SIG_Current -le $TX_IN_Count_dec ]
   printf '%s\n' "printf \$( echo $Script_Sig | sed 's/[[:xdigit:]]\{2\}/\\\\x&/g' ) > $sighex_tmp_fn" >> $tmp_vfy_fn
   printf $Script_Sig > $sigtxt_tmp_fn
 
-  if [ $VVerbose -eq 1 ] ; then
+  if [ $VVerbose_FLAG -eq 1 ] ; then
     ./$script_ssvfy -v -f $sigtxt_tmp_fn -o $sighex_tmp_fn
   else
     ./$script_ssvfy -q -f $sigtxt_tmp_fn -o $sighex_tmp_fn
@@ -878,14 +926,9 @@ while [ $TX_SIG_Current -le $TX_IN_Count_dec ]
   v_output "17. TX_IN Sig[$TX_SIG_Current]: prepare scriptSig[$TX_SIG_Current]"
   
   # Strict DER checking (in step 16) had it's output in file "$sigtxt_tmp_fn"
-  # if multisig, need to add the "00" as two chars to the length
-  # and of course we convert to hex
+  # calculate the length, add 1 bytes (2 chars) for the SIGHASH. 
   result=$( wc -c <$sigtxt_tmp_fn )
-  if [ $Multisig -eq 1 ] ; then 
-    result=$( echo "obase=16;($result + 2) / 2" | bc )
-  else
-    result=$( echo "obase=16;$result / 2" | bc )
-  fi
+  result=$( echo "obase=16;($result + 2) / 2" | bc )
   vv_output "     a:) the one byte length OPCODE: $result "
   Script_Sig[$TX_SIG_Current]=$result
   result=$( cat $sigtxt_tmp_fn ) 
@@ -893,7 +936,8 @@ while [ $TX_SIG_Current -le $TX_IN_Count_dec ]
   result=01
   Script_Sig[$TX_SIG_Current]=${Script_Sig[$TX_SIG_Current]}$result
 
-  if [ $Multisig -eq 1 ] ; then
+  # If multisig, need to add the "00" at the beginning
+  if [ $Multisig_FLAG -eq 1 ] ; then
     if [ "$Multisig_Status" == "unsigned" ] ; then 
       result=00
       Script_Sig[$TX_SIG_Current]=$result${Script_Sig[$TX_SIG_Current]}
@@ -905,7 +949,8 @@ while [ $TX_SIG_Current -le $TX_IN_Count_dec ]
       result=$( cat $sig_prev_fn )
       Script_Sig[$TX_SIG_Current]=$result${Script_Sig[$TX_SIG_Current]}
     fi
-
+  fi
+  if [ $Multisig_FLAG -eq 1 ] || [ $ScriptHash_FLAG -eq 1 ] ; then
     # TX_IN_Current was increased before, here we need to set it back
     # to the value which belongs to the redeemscript of TX_IN for current TX_SIG
     TX_IN_Current=$(( TX_SIG_Current - 1 ))
@@ -913,11 +958,17 @@ while [ $TX_SIG_Current -le $TX_IN_Count_dec ]
     vv_output "     ${Script_Sig[$TX_SIG_Current]}"
     vv_output "     c:) the redeem script of TX_IN[$TX_IN_Current]: "
     vv_output "      ${TX_IN_Sig_Script[$TX_IN_Current]}"
-    result="4C"
-    vv_output "     d:) Multisig requires a OP_PUSHDATA1: $result "
-    Script_Sig[$TX_SIG_Current]=${Script_Sig[$TX_SIG_Current]}$result
-    result=${#TX_IN_Sig_Script[$TX_IN_Current]}
-    result=$( echo "obase=16;$result / 2" | bc )
+
+    # avoid too many data in script, otherwise: 
+    # 64: non-mandatory-script-verify-flag (Data push larger than necessary)
+    # see en.bitcoin.it/wiki/scripts, if length is less than 75 (hex 0x4b), 
+    # then no PUSHDATAx is required ...
+    result=$(( ${#TX_IN_Sig_Script[$TX_IN_Current]} / 2 ))
+    if [ $result -gt 75 ] ; then
+      vv_output "     d:) P2SH requires OP_PUSHDATA1: $OP_PUSHDATA1"
+      Script_Sig[$TX_SIG_Current]=${Script_Sig[$TX_SIG_Current]}$OP_PUSHDATA1
+    fi
+    result=$( echo "obase=16;$result" | bc )
     vv_output "     e:) the length of the redeem script: $result "
     Script_Sig[$TX_SIG_Current]=${Script_Sig[$TX_SIG_Current]}$result
     Script_Sig[$TX_SIG_Current]=${Script_Sig[$TX_SIG_Current]}${TX_IN_Sig_Script[$TX_IN_Current]}
@@ -961,7 +1012,7 @@ v_output "18. concatenate the final transaction for all inputs and outputs"
 #   STEP12 = LockTime                        -->  4  Bytes -->  8 chars
 
 vv_output "    Version"
-STEPCODE=$Version
+STEPCODE=$TX_Version
 tx_concatenate
 vv_output "    TX_IN_Count"
 STEPCODE=$TX_IN_Count_hex
@@ -978,6 +1029,19 @@ while [ $TX_IN_Current -lt $TX_IN_Count_dec ]
   STEPCODE=${TX_IN_PrevOutput_Index[$TX_IN_Current]}
   tx_concatenate
 
+  vv_output "    TX_IN[$TX_IN_Current] ScriptBytes "
+  STEPCODE=${#Script_Sig[$TX_SIG_Current]}
+  script_len_dec=$(( $STEPCODE / 2 ))
+  # echo "STEPCODE=$STEPCODE, script_len_dec=$script_len_dec, max_script_size=$max_script_size"
+  if [ $script_len_dec -gt $max_script_size ] ; then 
+    printf " \n" 
+    echo "*** ERROR: script len is > $max_script_size kB"
+    echo "           currently unsupported in protocol rules"
+    echo "           exiting gracefully ..." 
+    echo " " 
+    exit 0
+  fi
+
   # TX_IN_ScriptBytes[$TX_IN_Current] 
   # take var-int into consideration!
   # Value 		dec	Storage length	Format
@@ -986,33 +1050,17 @@ while [ $TX_IN_Current -lt $TX_IN_Count_dec ]
   # <= 0xFFFF FFFF	...	5		0xFE followed by the length as uint32_t
   # -			...	9		0xFF followed by the length as uint64_t
 
-  vv_output "    TX_IN[$TX_IN_Current] ScriptBytes "
-  STEPCODE=${#Script_Sig[$TX_SIG_Current]}
-  script_len_dec=$(( $STEPCODE / 2 ))
-  # echo $script_len_dec
-  if [ $script_len_dec -gt $max_script_size ] ; then 
-    printf " \n" 
-    echo "*** ERROR: script len is > 10kB, currently unsupported in protocol rules"
-    echo "           exiting gracefully ..." 
-    echo " " 
-    exit 0
-  elif [ $script_len_dec -gt 253 ] ; then 
-    vv_output "    (VAR_INT 0xFD + reverse length)"
-    STEPCODE=$( echo "obase=16;$script_len_dec" | bc )
-    if [ $script_len_dec -gt 253 ] ; then 
-      result=0$STEPCODE
-    else
-      result=00$STEPCODE
-    fi
-    # echo $result 
+  STEPCODE=$( echo "obase=16;$script_len_dec" | bc )
+  # echo "script_len_dec=$script_len_dec, hex STEPCODE=$STEPCODE"
+  if [ $script_len_dec -lt 253 ] ; then 
+    result=$STEPCODE
+  else
+    vv_output "    (VAR_INT 0xFD + 2 bytes as reverse length)"
+    result=$( zero_pad $STEPCODE 4 )
     STEPCODE=$( reverse_hex $result )
     STEPCODE=FD$STEPCODE
-    # echo $STEPCODE
-    tx_concatenate
-  else
-    STEPCODE=$( echo "obase=16;$script_len_dec" | bc )
-    tx_concatenate
   fi
+  tx_concatenate
   vv_output "    TX_IN[$TX_IN_Current] Script_Sig"
   STEPCODE=${Script_Sig[$TX_SIG_Current]}
   tx_concatenate
@@ -1048,13 +1096,36 @@ echo $SIGNED_TX > $stx_fn
 vv_output "    the signed tx:"
 vv_output "    $SIGNED_TX"
 vv_output " "
-if [ $Quiet -ne 1 ] ; then
-  echo "the signed tx is in file $stx_fn, check with: ./tcls_tx2txt.sh -vv -f $stx_fn"
-  echo "a script to check the signatures is here:         ./tmp_vfy.sh" 
+if [ $Quiet_FLAG -ne 1 ] ; then
+  if [ $Verbose_FLAG -eq 0 ] ; then
+    if [ $Testnet_FLAG -eq 1 ] ; then
+      echo "the signed tx is in file $stx_fn, check with: ./tcls_tx2txt.sh -T -f $stx_fn"
+    else
+      echo "the signed tx is in file $stx_fn, check with: ./tcls_tx2txt.sh -f $stx_fn"
+    fi
+  else
+    if [ $Testnet_FLAG -eq 1 ] ; then
+      echo "the signed tx is in file $stx_fn, check with: ./tcls_tx2txt.sh -v -T -f $stx_fn"
+    else
+      echo "the signed tx is in file $stx_fn, check with: ./tcls_tx2txt.sh -v -f $stx_fn"
+    fi
+  fi
+  echo "a script to check the signatures is here:         ./$tmp_vfy_fn"
 fi
+
+######################
+### doing cleanups ### 
+######################
+
+# we delete unnecessary files, but keep the tmp_* files for review...
+for file in pubkey*; do
+  if [ -f "$file" ]; then rm $file ; fi
+done
+for file in privkey*; do
+  if [ -f "$file" ]; then rm $file ; fi
+done
 
 ################################
 ### and here we are done :-) ### 
 ################################
-
 

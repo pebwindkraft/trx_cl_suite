@@ -19,6 +19,7 @@
 #
 # Version	by	date	comment
 # 0.1		svn	21jul16	initial release
+# 0.2		svn	19mar18	make script ready for testnet/regtest 
 # 
 # 
 # Permission to use, copy, modify, and distribute this software for any 
@@ -427,6 +428,28 @@ if [ ! "$hex_privkey" ] ; then
       else
         v_output "  length($wif_privkey) = ${#wif_privkey}" 
         echo "  *** invalid length. WIF privkeys = 51. Exiting gracefully..."
+        exit 1
+      fi
+      ;;
+   9)
+      if [ "${#wif_privkey}" -eq 51 ] ; then
+        v_output "  valid wif privkey for testnet/regtest found"
+        vv_output "  length($wif_privkey) = ${#wif_privkey}, hex = " 
+        wif2hex 
+      else
+        v_output "  length($wif_privkey) = ${#wif_privkey}" 
+        echo "  *** invalid length. WIF privkeys = 51. Exiting gracefully..."
+        exit 1
+      fi
+      ;;
+   c)
+      if [ "${#wif_privkey}" -eq 52 ] ; then
+        v_output "  valid compressed wif privkey for testnet/regtest found"
+        vv_output "  length($wif_privkey) = ${#wif_privkey}, hex = " 
+        wif2hex 
+      else
+        v_output "  length($wif_privkey) = ${#wif_privkey}" 
+        echo "  *** invalid length. Compressed WIF privkeys are 52 chars long. Exiting gracefully..."
         exit 1
       fi
       ;;
