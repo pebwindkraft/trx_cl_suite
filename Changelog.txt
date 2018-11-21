@@ -58,4 +58,6 @@ yymmmdd
 18nov19 svn   tcls_tx2txt.sh            I77: preparations to work on I77 (only tcls_tx2txt.sh)
 18nov20 svn   tcls_create.sh            I77: fixed issue with test addresses and also fee calcs,
                                              corrected double numbering in file "todos.txt"
+18nov20 svn   tcls_tx2txt.sh            I61: integrated testcases for OP_Return tx
+                                             corrected checksums in all testcase files
 

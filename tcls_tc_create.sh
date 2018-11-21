@@ -78,17 +78,17 @@ echo "================================================================" | tee -a
 
 echo "=== TESTCASE 1a: $chksum_cmd tcls_create.sh" | tee -a $logfile
 cp tcls_create.sh tmp_cfile
-chksum_ref="52d654f9ad121b0e6ef77b8a43fa64c3d6ac4e13dcd5fa762f4dcb27697d8f6a" 
+chksum_ref="8ae088215253862af376778c68636896e0a1fbd02ae8f219b1e29db8d9f63e77"
 chksum_prep
 
 echo "=== TESTCASE 1b: $chksum_cmd tcls_key2pem.sh" | tee -a $logfile
 cp tcls_key2pem.sh tmp_cfile
-chksum_ref="aab5ccc4d4d9329039ea08ef13e6cbc63642e1af19c3111d95f4ac708b7040e3" 
+chksum_ref="0d576b68fb56e9cb65af51b31aa84d18cd7de896618f505afeedf05974ce20eb"
 chksum_prep
 
 echo "=== TESTCASE 1c: $chksum_cmd tcls_base58check_enc.sh" | tee -a $logfile
 cp tcls_base58check_enc.sh tmp_cfile
-chksum_ref="9edf43a7e7aad6ae511c2dd9bc311a9b63792d0b669c7e72d7d1321887213179" 
+chksum_ref="00d856c36550f413f24965cbed3cec16c21f472849c7a40864c9932e50cd9222"
 chksum_prep " " | tee -a $logfile
 
 echo "=== TESTCASE 1d: $chksum_cmd tcls_verify_bc_address.awk" | tee -a $logfile
